@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/connectjob/static/css/main.e6c13ad2.css",
-    "main.js": "/connectjob/static/js/main.6092a625.js",
+    "main.js": "/connectjob/static/js/main.301d47b0.js",
     "static/js/453.31111501.chunk.js": "/connectjob/static/js/453.31111501.chunk.js",
     "index.html": "/connectjob/index.html",
     "main.e6c13ad2.css.map": "/connectjob/static/css/main.e6c13ad2.css.map",
-    "main.6092a625.js.map": "/connectjob/static/js/main.6092a625.js.map",
+    "main.301d47b0.js.map": "/connectjob/static/js/main.301d47b0.js.map",
     "453.31111501.chunk.js.map": "/connectjob/static/js/453.31111501.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.6092a625.js"
+    "static/js/main.301d47b0.js"
   ]
 }
