@@ -1,4 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import api from "./services/api";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import MapPage from "./pages/MapPage";
+import ChatPage from "./pages/ChatPage";
 
 /* ═══════════════════════════════════════════════════════════════
    JOOBCONNECT — Aplicație Completă Unificată
@@ -1272,21 +1279,45 @@ function PageAnalytics({ gs }) {
 
 
 // ══════════════════════════════════════════════════════════════
-//  MAIN APP — Navigation + Lazy loading
+//  MAIN APP — Navigation + React Router
 // ══════════════════════════════════════════════════════════════
 export default function JoobConnectApp() {
-  const [gs, update]    = useGlobalState();
+  const { user, loading: authLoading, logout } = useAuth();
+  const [gs, updateGs] = useGlobalState();
   const [page, setPage] = useState("home");
-  const [loading, setLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
   const [pwaShow, setPwaShow] = useState(true);
   const prevPage = useRef("home");
 
+  // Sincronizeaza userul din AuthContext cu globalState
+  useEffect(() => {
+    if (user) {
+      updateGs({
+        user: {
+          name: user.name,
+          initials: user.initials || user.name?.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2),
+          verified: !!user.verified,
+          rating: user.rating || 0,
+          role: user.role,
+        }
+      });
+    }
+  }, [user]);
+
+  // Incarca joburi reale din backend si le pune in globalState
+  useEffect(() => {
+    if (!user) return;
+    api.get("/jobs").then(r => updateGs({ jobs: r.data })).catch(()=>{});
+  }, [user]);
+
   const navigate = useCallback((to) => {
     if(to===page) return;
-    setLoading(true);
+    setLoadingPage(true);
     prevPage.current = page;
-    setTimeout(()=>{ setPage(to); setLoading(false); }, 200);
+    setTimeout(()=>{ setPage(to); setLoadingPage(false); }, 200);
   }, [page]);
+
+  const update = useCallback((patch) => updateGs(patch), [updateGs]);
 
   const NAV = [
     { key:"home",      icon:"🏠", label:"Acasă" },
@@ -1307,11 +1338,11 @@ export default function JoobConnectApp() {
 
   const renderPage = () => {
     const props = { gs, update, navigate };
-    if(loading) return <Loader text="Se încarcă..."/>;
+    if(loadingPage) return <Loader text="Se încarcă..."/>;
     switch(page) {
       case "home":      return <PageHome      {...props}/>;
-      case "map":       return <PageMap       {...props}/>;
-      case "chat":      return <PageChat      {...props}/>;
+      case "map":       return <MapPage       gs={gs} update={update} navigate={navigate}/>;
+      case "chat":      return <ChatPage/>;
       case "escrow":    return <PageEscrow    {...props}/>;
       case "contract":  return <PageContract  {...props}/>;
       case "reviews":   return <PageReviews   {...props}/>;
@@ -1320,6 +1351,24 @@ export default function JoobConnectApp() {
       default:          return <PageHome      {...props}/>;
     }
   };
+
+  // Afiseaza spinner cat timp se verifica autentificarea
+  if (authLoading) return (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <Loader text="Se incarca..."/>
+    </div>
+  );
+
+  // Daca nu e autentificat, arata paginile de login/register
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login/>}/>
+        <Route path="/register" element={<Register/>}/>
+        <Route path="*" element={<Navigate to="/login" replace/>}/>
+      </Routes>
+    );
+  }
 
   return (
     <div style={{ fontFamily:"DM Sans,sans-serif", background:T.bg, minHeight:"100vh" }}>
@@ -1393,6 +1442,8 @@ export default function JoobConnectApp() {
               {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>✓ Verificat</span>}
             </div>
           </div>
+          {/* Logout */}
+          <button onClick={logout} title="Deconectare" style={{width:32,height:32,borderRadius:9,background:"#fef2f2",border:"1.5px solid #fecaca",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>🚪</button>
         </div>
       </nav>
 
@@ -1467,6 +1518,19 @@ export default function JoobConnectApp() {
     </div>
   );
 }
+
+// Wrapper cu Routes — necesar pentru React Router
+// Exportat ca default pentru a fi folosit in index.js
+function App() {
+  return (
+    <Routes>
+      <Route path="/login"    element={<Login/>}/>
+      <Route path="/register" element={<Register/>}/>
+      <Route path="*"         element={<JoobConnectApp/>}/>
+    </Routes>
+  );
+}
+export { App as default };
 
 // ══════════════════════════════════════════════════════════════
 //  FUEL CALCULATOR MODULE
@@ -1663,7 +1727,7 @@ export function FuelCalculator({ defaultFrom="", defaultTo="", onClose }) {
           background:`linear-gradient(135deg,${T.dark},${T.dark2})`,
           padding:"18px 22px", display:"flex", alignItems:"center", gap:12, flexShrink:0,
         }}>
-          <div style={{ width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${T.green},${T.greenL})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,boxShadow:`0 4px 12px ${T.green}55`,flexShrink:0 }}>🗺️</div>
+          <div style={{ width:44,height:44,borderRadius:13,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,boxShadow:`0 4px 12px ${T.green}55`,flexShrink:0 }}>🗺️</div>
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:18,color:"#f1f5f9" }}>Calculator Rută & Carburant</div>
             <div style={{ fontSize:12,color:"#64748b",marginTop:2 }}>Tur-retur · Cost real · Comparație transport</div>
@@ -1828,7 +1892,7 @@ export function FuelCalculator({ defaultFrom="", defaultTo="", onClose }) {
                 <div style={{ marginTop:12,display:"flex",gap:12,flexWrap:"wrap" }}>
                   {[
                     {l:"Dus",v:`${result.distOne.toFixed(0)} km`},
-                    {l:"Tur-retur",v:`${result.distRT.toFixed(0)} km`,bold:true,color:T.greenL},
+                    {l:"Tur-retur",v:`${result.distRT.toFixed(0)} km`,bold:true,color:T.greenLight},
                     {l:"Timp dus",v:formatTime(result.timeOne)},
                     {l:"Timp T-R",v:formatTime(result.timeRT)},
                   ].map(s=>(
@@ -1848,7 +1912,7 @@ export function FuelCalculator({ defaultFrom="", defaultTo="", onClose }) {
                   {icon:"👤",label:`Per persoană (${result.perPerson===result.fuelRT?"1":"÷"+passengers})`,value:`${result.perPerson.toFixed(2)} €`,color:T.blue},
                 ].map(c=>(
                   <div key={c.label} style={{
-                    background:c.big?`linear-gradient(135deg,${T.green}15,${T.greenL}10)`:T.bg,
+                    background:c.big?`linear-gradient(135deg,${T.green}15,${T.greenLight}10)`:T.bg,
                     borderRadius:12,padding:"14px 12px",textAlign:"center",
                     border:c.big?`2px solid ${T.green}44`:`1px solid ${T.border}`,
                   }}>
@@ -2310,7 +2374,7 @@ export function TransportSchedule({ from = "", to = "", onClose }) {
               </div>
             </div>
             <div style={{ textAlign:"right" }}>
-              <div style={{ fontFamily:"monospace",fontSize:22,fontWeight:800,color:T.greenL }}>{timeStr}</div>
+              <div style={{ fontFamily:"monospace",fontSize:22,fontWeight:800,color:T.greenLight }}>{timeStr}</div>
               <div style={{ fontSize:10,color:"#64748b",textTransform:"uppercase" }}>Ora curentă</div>
             </div>
             <button onClick={onClose} style={{ width:34,height:34,borderRadius:9,background:"#1e293b",border:"1px solid #334155",color:"#64748b",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",marginLeft:4 }}>✕</button>
