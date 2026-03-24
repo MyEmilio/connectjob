@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
+import './i18n/index';          // initializeaza i18n inainte de App
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import reportWebVitals from './reportWebVitals';

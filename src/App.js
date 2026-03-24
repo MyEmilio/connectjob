@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "./context/AuthContext";
 import api from "./services/api";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MapPage from "./pages/MapPage";
 import ChatPage from "./pages/ChatPage";
+import LanguageSwitcher from "./components/LanguageSwitcher";
+import PostJobPage from "./pages/PostJobPage";
 
 /* ═══════════════════════════════════════════════════════════════
    JOOBCONNECT — Aplicație Completă Unificată
@@ -724,6 +727,8 @@ function PageEscrow({ gs, update, navigate }) {
   const [loading, setLoading] = useState(false);
   const [timer, setTimer]   = useState(0);
   const [disputed, setDisputed] = useState(false);
+  const [paymentId, setPaymentId] = useState(null);
+  const [apiMsg, setApiMsg] = useState("");
   const fee=Math.round(job.salary*0.05), total=job.salary+fee;
   const fmt=s=>`${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
   useEffect(()=>{if(step===2){const iv=setInterval(()=>setTimer(t=>t+1),1000);return()=>clearInterval(iv);}},[step]);
@@ -817,9 +822,21 @@ function PageEscrow({ gs, update, navigate }) {
           <div style={{background:"#fef3c7",borderRadius:9,padding:"9px 13px",marginBottom:14,border:"1px solid #fde68a",display:"flex",gap:8}}>
             <span>🔒</span><span style={{fontSize:12,color:"#92400e"}}>Banii sunt blocați în escrow și <strong>nu pot fi accesați</strong> până la confirmare.</span>
           </div>
-          <Btn onClick={()=>{setLoading(true);setTimeout(()=>{setLoading(false);setStep(2);},2000);}} disabled={loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
+          <Btn onClick={async()=>{
+            setLoading(true); setApiMsg("");
+            try {
+              const res = await (await import("./services/api")).default.post("/payments/create-intent",{
+                job_id: job.id, payee_id: job.employer_id || 1, amount: job.salary, method
+              });
+              setPaymentId(res.data.payment_id);
+              if (res.data.message) setApiMsg(res.data.message);
+              setStep(2);
+            } catch(e){ setApiMsg(e.response?.data?.error||"Eroare la procesare"); }
+            finally { setLoading(false); }
+          }} disabled={loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
             {loading?"⏳ Se procesează...":`🔒 Blochează ${total} RON în Escrow`}
           </Btn>
+          {apiMsg && <div style={{marginTop:8,fontSize:12,color:"#92400e",background:"#fef3c7",borderRadius:8,padding:"6px 10px"}}>{apiMsg}</div>}
         </Card>
       )}
 
@@ -846,10 +863,20 @@ function PageEscrow({ gs, update, navigate }) {
             </div>
           ))}
           <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:16}}>
-            <Btn onClick={()=>{setLoading(true);setTimeout(()=>{setLoading(false);setStep(3);update({escrowActive:null});},1500);}} disabled={loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
+            <Btn onClick={async()=>{
+              setLoading(true);
+              try {
+                if (paymentId) await (await import("./services/api")).default.post(`/payments/${paymentId}/release`);
+                setStep(3); update({escrowActive:null});
+              } catch(e){ setApiMsg(e.response?.data?.error||"Eroare"); }
+              finally { setLoading(false); }
+            }} disabled={loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
               {loading?"⏳ Se procesează...":"✅ Confirmă și eliberează banii"}
             </Btn>
-            <Btn onClick={()=>setDisputed(true)} variant="outline" style={{width:"100%",justifyContent:"center",borderColor:"#fecaca",color:T.red,background:"#fef2f2"}} size="md">⚠️ Deschide dispută</Btn>
+            <Btn onClick={async()=>{
+              if (paymentId) await (await import("./services/api")).default.post(`/payments/${paymentId}/dispute`).catch(()=>{});
+              setDisputed(true);
+            }} variant="outline" style={{width:"100%",justifyContent:"center",borderColor:"#fecaca",color:T.red,background:"#fef2f2"}} size="md">⚠️ Deschide dispută</Btn>
           </div>
           {disputed&&<div style={{marginTop:10,background:"#fef2f2",borderRadius:9,padding:"10px 13px",border:"1px solid #fecaca",fontSize:12,color:T.red}}><strong>⚠️ Dispută deschisă</strong> — Echipa noastră va analiza în 24h. Banii rămân blocați.</div>}
         </Card>
@@ -879,6 +906,8 @@ function PageContract({ gs, update, navigate }) {
   const [name,setName]=useState("");
   const [agree,setAgree]=useState(false);
   const [loading,setLoading]=useState(false);
+  const [contractDbId, setContractDbId]=useState(null);
+  const [apiError, setApiError]=useState("");
   const date=new Date().toLocaleDateString("ro",{year:"numeric",month:"long",day:"numeric"});
   const contractId=`JC-${Date.now().toString().slice(-6)}`;
 
@@ -934,9 +963,27 @@ function PageContract({ gs, update, navigate }) {
             <div style={{width:19,height:19,borderRadius:5,flexShrink:0,marginTop:1,background:agree?T.green:T.white,border:agree?"none":`2px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff"}}>{agree?"✓":""}</div>
             <span style={{fontSize:12,color:T.text2,lineHeight:1.6}}>Confirm că am citit și accept toate clauzele. Semnătura mea are valoare juridică.</span>
           </div>
-          <Btn onClick={()=>{if(!name.trim()||!agree)return;setLoading(true);setTimeout(()=>{setLoading(false);setStep(2);update({signedContracts:[...(gs.signedContracts||[]),contractId]});},1800);}} disabled={!name.trim()||!agree||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
+          <Btn onClick={async()=>{
+            if(!name.trim()||!agree) return;
+            setLoading(true); setApiError("");
+            try {
+              const apiModule = await import("./services/api");
+              const api = apiModule.default;
+              // Creeaza contractul daca nu exista
+              let cid = contractDbId;
+              if (!cid) {
+                const res = await api.post("/contracts",{ job_id: job.id||1, worker_id: gs.user.id||1, content: contractId });
+                cid = res.data.id; setContractDbId(cid);
+              }
+              // Semneaza
+              await api.post(`/contracts/${cid}/sign`,{ signature: name });
+              setStep(2); update({signedContracts:[...(gs.signedContracts||[]),contractId]});
+            } catch(e){ setApiError(e.response?.data?.error||"Eroare la semnare"); }
+            finally{ setLoading(false); }
+          }} disabled={!name.trim()||!agree||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
             {loading?"⏳ Se semnează...":"✅ Semnează contractul"}
           </Btn>
+          {apiError && <div style={{marginTop:8,fontSize:12,color:"#dc2626",background:"#fef2f2",borderRadius:8,padding:"6px 10px"}}>{apiError}</div>}
         </Card>
       )}
 
@@ -1033,7 +1080,16 @@ function PageVerify({ gs, update, navigate }) {
                   <input value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,""))} placeholder="722 123 456" maxLength={9} style={{flex:1,height:44,borderRadius:9,border:`1.5px solid ${T.border}`,padding:"0 12px",fontSize:15,fontFamily:"DM Sans,sans-serif",outline:"none",letterSpacing:"0.1em"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
                 </div>
               </div>
-              <Btn onClick={()=>{if(phone.length<9)return;setLoading(true);setTimeout(()=>{setLoading(false);setOtpSent(true);setOtpTimer(60);},1200);}} disabled={phone.length<9||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{loading?"Se trimite...":"📨 Trimite codul SMS"}</Btn>
+              <Btn onClick={async()=>{
+                if(phone.length<9)return; setLoading(true);
+                try {
+                  const apiMod = await import("./services/api");
+                  const res = await apiMod.default.post("/kyc/send-otp",{ phone:`+40${phone}` });
+                  if(res.data.demo_code) alert(`📱 Cod demo (doar dezvoltare): ${res.data.demo_code}`);
+                  setOtpSent(true); setOtpTimer(60);
+                } catch(e){ alert(e.response?.data?.error||"Eroare la trimitere SMS"); }
+                finally{ setLoading(false); }
+              }} disabled={phone.length<9||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{loading?"Se trimite...":"📨 Trimite codul SMS"}</Btn>
             </>
           ):(
             <>
@@ -1047,7 +1103,16 @@ function PageVerify({ gs, update, navigate }) {
                 </div>
                 {otpTimer>0&&<p style={{fontSize:12,color:T.text3,textAlign:"center",marginTop:7}}>Retrimite în {otpTimer}s</p>}
               </div>
-              <Btn onClick={()=>{if(otp.join("").length<6)return;setLoading(true);setTimeout(()=>{setLoading(false);setStep(2);},1000);}} disabled={otp.join("").length<6||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{loading?"Se verifică...":"✓ Verifică codul"}</Btn>
+              <Btn onClick={async()=>{
+                const code = otp.join("");
+                if(code.length<6)return; setLoading(true);
+                try {
+                  const apiMod = await import("./services/api");
+                  await apiMod.default.post("/kyc/verify-otp",{ phone:`+40${phone}`, code });
+                  setStep(2);
+                } catch(e){ alert(e.response?.data?.error||"Cod invalid sau expirat"); }
+                finally{ setLoading(false); }
+              }} disabled={otp.join("").length<6||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{loading?"Se verifică...":"✓ Verifică codul"}</Btn>
             </>
           )}
         </Card>
@@ -1061,7 +1126,17 @@ function PageVerify({ gs, update, navigate }) {
               <button key={d.k} onClick={()=>setDocType(d.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,cursor:"pointer",border:docType===d.k?`2px solid ${T.green}`:`1.5px solid ${T.border}`,background:docType===d.k?"#f0fdf4":"#fafaf9",fontSize:12,fontWeight:700,color:docType===d.k?T.green:T.text2,transition:"all 0.2s"}}>{d.l}</button>
             ))}
           </div>
-          <input type="file" ref={fileRef} accept="image/*,.pdf" style={{display:"none"}} onChange={()=>{setLoading(true);setTimeout(()=>{setLoading(false);setDocOk(true);},1500);}}/>
+          <input type="file" ref={fileRef} accept="image/*,.pdf" style={{display:"none"}} onChange={async(e)=>{
+            const file=e.target.files[0]; if(!file)return;
+            setLoading(true);
+            try {
+              const fd=new FormData(); fd.append("document",file);
+              const apiMod = await import("./services/api");
+              await apiMod.default.post("/kyc/upload-document",fd,{headers:{"Content-Type":"multipart/form-data"}});
+              setDocOk(true);
+            } catch(err){ alert("Eroare la incarcare document"); }
+            finally{ setLoading(false); }
+          }}/>
           <div onClick={()=>!docOk&&fileRef.current?.click()} style={{border:docOk?`2px solid ${T.green}`:`2px dashed ${T.border}`,borderRadius:12,padding:"26px 18px",textAlign:"center",cursor:docOk?"default":"pointer",background:docOk?"#f0fdf4":"#fafaf9",marginBottom:18,transition:"all 0.2s"}}
             onMouseEnter={e=>{if(!docOk)e.currentTarget.style.borderColor=T.green;}}
             onMouseLeave={e=>{if(!docOk)e.currentTarget.style.borderColor=T.border;}}
@@ -1085,10 +1160,15 @@ function PageVerify({ gs, update, navigate }) {
           <div style={{display:"flex",gap:6,marginBottom:12}}>
             {["💡 Lumină bună","👀 Privești camera","😐 Expresie neutră"].map(t=><div key={t} style={{flex:1,fontSize:10,color:"#057a55",background:"#f0fdf4",borderRadius:7,padding:"5px 3px",textAlign:"center",border:"1px solid #bbf7d0"}}>{t}</div>)}
           </div>
-          <Btn onClick={()=>{
+          <Btn onClick={async()=>{
             if(videoRef.current?.srcObject){videoRef.current.srcObject.getTracks().forEach(t=>t.stop());}
             setLoading(true);
-            setTimeout(()=>{setLoading(false);let s=0;const iv=setInterval(()=>{s+=3;setScore(s);if(s>=96){clearInterval(iv);setStep(4);update({user:{...gs.user,verified:true}});}},30);},1800);
+            try {
+              const apiMod = await import("./services/api");
+              await apiMod.default.post("/kyc/complete");
+              let s=0;
+              const iv=setInterval(()=>{s+=3;setScore(s);if(s>=96){clearInterval(iv);setStep(4);update({user:{...gs.user,verified:true}});}},30);
+            } catch(e){ alert(e.response?.data?.error||"Eroare la verificare"); setLoading(false); }
           }} disabled={loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
             {loading?"🔍 Se verifică...":"📸 Fă selfie"}
           </Btn>
@@ -1283,6 +1363,7 @@ function PageAnalytics({ gs }) {
 // ══════════════════════════════════════════════════════════════
 export default function JoobConnectApp() {
   const { user, loading: authLoading, logout } = useAuth();
+  const { t, i18n } = useTranslation("t");
   const [gs, updateGs] = useGlobalState();
   const [page, setPage] = useState("home");
   const [loadingPage, setLoadingPage] = useState(false);
@@ -1320,20 +1401,27 @@ export default function JoobConnectApp() {
   const update = useCallback((patch) => updateGs(patch), [updateGs]);
 
   const NAV = [
-    { key:"home",      icon:"🏠", label:"Acasă" },
-    { key:"map",       icon:"🗺️", label:"Hartă",     badge: null },
-    { key:"chat",      icon:"💬", label:"Mesaje",    badge: gs.unreadMessages },
-    { key:"escrow",    icon:"🔒", label:"Escrow" },
-    { key:"contract",  icon:"📝", label:"Contract" },
-    { key:"reviews",   icon:"⭐", label:"Recenzii" },
-    { key:"analytics", icon:"📊", label:"Dashboard" },
-    { key:"verify",    icon: gs.user.verified?"✅":"🛡️", label: gs.user.verified?"Verificat":"Verificare", badge: gs.user.verified?null:"!" },
-  ];
+    { key:"home",      icon:"🏠", label:t("nav_home") },
+    { key:"map",       icon:"🗺️", label:t("nav_map"),      badge: null },
+    { key:"chat",      icon:"💬", label:t("nav_chat"),     badge: gs.unreadMessages },
+    { key:"escrow",    icon:"🔒", label:t("nav_escrow") },
+    { key:"contract",  icon:"📝", label:t("nav_contract") },
+    { key:"reviews",   icon:"⭐", label:t("nav_reviews") },
+    { key:"analytics", icon:"📊", label:t("nav_analytics") },
+    { key:"post_job",  icon:"➕", label:t("nav_post_job"),  hidden: gs.user.role !== "employer" },
+    { key:"verify",    icon: gs.user.verified?"✅":"🛡️", label: gs.user.verified?t("nav_verified"):t("nav_verify"), badge: gs.user.verified?null:"!" },
+  ].filter(item => !item.hidden);
 
   const PAGE_TITLES = {
-    home:"Acasă", map:"Hartă Joburi", chat:"Mesaje", escrow:"Plată Escrow",
-    contract:"Contract Digital", reviews:"Recenzii", analytics:"Dashboard Angajator",
-    verify:"Verificare Identitate",
+    home:      t("nav_home"),
+    map:       t("nav_map"),
+    chat:      t("nav_chat"),
+    escrow:    t("nav_escrow"),
+    contract:  t("nav_contract"),
+    reviews:   t("nav_reviews"),
+    analytics: t("nav_analytics"),
+    post_job:  t("nav_post_job"),
+    verify:    t("nav_verify"),
   };
 
   const renderPage = () => {
@@ -1342,6 +1430,7 @@ export default function JoobConnectApp() {
     switch(page) {
       case "home":      return <PageHome      {...props}/>;
       case "map":       return <MapPage       gs={gs} update={update} navigate={navigate}/>;
+      case "post_job":  return <PostJobPage navigate={navigate}/>;
       case "chat":      return <ChatPage/>;
       case "escrow":    return <PageEscrow    {...props}/>;
       case "contract":  return <PageContract  {...props}/>;
@@ -1442,8 +1531,10 @@ export default function JoobConnectApp() {
               {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>✓ Verificat</span>}
             </div>
           </div>
+          {/* Selector de limba */}
+          <LanguageSwitcher/>
           {/* Logout */}
-          <button onClick={logout} title="Deconectare" style={{width:32,height:32,borderRadius:9,background:"#fef2f2",border:"1.5px solid #fecaca",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>🚪</button>
+          <button onClick={logout} title={t("btn_logout")} style={{width:32,height:32,borderRadius:9,background:"#fef2f2",border:"1.5px solid #fecaca",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>🚪</button>
         </div>
       </nav>
 
