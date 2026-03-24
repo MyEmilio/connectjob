@@ -7,14 +7,19 @@ const { Server } = require("socket.io");
 const jwt       = require("jsonwebtoken");
 const db        = require("./db/database");
 
+const ALLOWED_ORIGINS = [
+  process.env.CLIENT_URL || "http://localhost:3000",
+  "http://localhost:3000",
+];
+
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL || "http://localhost:3000", credentials: true }
+  cors: { origin: ALLOWED_ORIGINS, credentials: true }
 });
 
 // ── Middleware ─────────────────────────────────────────────────
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
