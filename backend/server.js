@@ -1,11 +1,12 @@
 require("dotenv").config();
-const express   = require("express");
-const http      = require("http");
-const cors      = require("cors");
-const path      = require("path");
-const { Server } = require("socket.io");
-const jwt       = require("jsonwebtoken");
-const db        = require("./db/database");
+const express      = require("express");
+const http         = require("http");
+const cors         = require("cors");
+const path         = require("path");
+const { Server }   = require("socket.io");
+const jwt          = require("jsonwebtoken");
+const rateLimit    = require("express-rate-limit");
+const db           = require("./db/database");
 
 const ALLOWED_ORIGINS = [
   process.env.CLIENT_URL || "http://localhost:3000",
@@ -18,13 +19,27 @@ const io     = new Server(server, {
   cors: { origin: ALLOWED_ORIGINS, credentials: true }
 });
 
+// ── Rate limiters ──────────────────────────────────────────────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minute
+  max: 20,
+  message: { error: "Prea multe incercari. Incearca din nou dupa 15 minute." },
+  standardHeaders: true, legacyHeaders: false,
+});
+const otpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 ora
+  max: 5,
+  message: { error: "Limita de SMS depasita. Incearca din nou dupa o ora." },
+  standardHeaders: true, legacyHeaders: false,
+});
+
 // ── Middleware ─────────────────────────────────────────────────
 app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ── Routes ─────────────────────────────────────────────────────
-app.use("/api/auth",      require("./routes/auth"));
+app.use("/api/auth",      authLimiter, require("./routes/auth"));
 app.use("/api/jobs",      require("./routes/jobs"));
 app.use("/api/messages",  require("./routes/messages"));
 app.use("/api/payments",  require("./routes/payments"));

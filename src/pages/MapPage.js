@@ -59,7 +59,7 @@ export default function MapPage({ navigate, update }) {
     const params = {};
     if (userPos) { params.lat = userPos[0]; params.lng = userPos[1]; params.radius = 50; }
     api.get("/jobs", { params })
-      .then(r => setJobs(r.data))
+      .then(r => setJobs(r.data.jobs || r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [userPos]);

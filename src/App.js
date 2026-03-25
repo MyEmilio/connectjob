@@ -30,7 +30,8 @@ const T = {
 // ── Global state (shared between all modules) ─────────────────
 const useGlobalState = () => {
   const [state, setState] = useState({
-    user: { name:"Alexandru Ionescu", initials:"AI", verified:false, rating:4.9 },
+    user: { name:"", initials:"", verified:false, rating:0 },
+    jobs: [],
     selectedJob: null,
     escrowActive: null,
     signedContracts: [],
@@ -179,7 +180,7 @@ function PageHome({ gs, update, navigate }) {
     { icon:"⭐", label:"Rating mediu",       value:"4.9",      trend:"+0.1", color:T.amber,  spark:[4.5,4.6,4.6,4.7,4.7,4.8,4.8,4.9,4.9,4.9,4.9,4.9] },
   ];
 
-  const recommendedJobs = JOBS.filter(j=>j.distance<3).slice(0,4);
+  const recommendedJobs = (gs.jobs||[]).filter(j=>j.distance<3).slice(0,4);
 
   return (
     <div style={{ animation:"fadeIn 0.3s ease" }}>
@@ -315,8 +316,8 @@ function PageMap({ gs, update, navigate }) {
   const [selected, setSelected] = useState(gs.selectedJob);
   const [filter, setFilter]     = useState("Toate");
   const [dark, setDark]         = useState(false);
-  const cats = ["Toate", ...new Set(JOBS.map(j=>j.category))];
-  const filtered = filter==="Toate" ? JOBS : JOBS.filter(j=>j.category===filter);
+  const cats = ["Toate", ...new Set((gs.jobs||[]).map(j=>j.category))];
+  const filtered = filter==="Toate" ? (gs.jobs||[]) : (gs.jobs||[]).filter(j=>j.category===filter);
   const cLat=46.7700, cLng=23.6050;
 
   const pos = (job) => ({
@@ -720,7 +721,7 @@ function PageChat({ gs, update, navigate }) {
 //  PAGE: ESCROW
 // ══════════════════════════════════════════════════════════════
 function PageEscrow({ gs, update, navigate }) {
-  const job = gs.selectedJob || JOBS[0];
+  const job = gs.selectedJob || (gs.jobs||[])[0];
   const [step, setStep]     = useState(0);
   const [method, setMethod] = useState("card");
   const [card, setCard]     = useState({num:"",exp:"",cvv:""});
@@ -901,7 +902,7 @@ function PageEscrow({ gs, update, navigate }) {
 //  PAGE: CONTRACT
 // ══════════════════════════════════════════════════════════════
 function PageContract({ gs, update, navigate }) {
-  const job=gs.selectedJob||JOBS[0];
+  const job=gs.selectedJob||(gs.jobs||[])[0];
   const [step,setStep]=useState(0);
   const [name,setName]=useState("");
   const [agree,setAgree]=useState(false);
@@ -1330,7 +1331,7 @@ function PageAnalytics({ gs }) {
           <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:0}}>💼 Performanță joburi</h3>
           <Btn color={T.green} size="sm">+ Job nou</Btn>
         </div>
-        {JOBS.slice(0,4).map((job,i)=>(
+        {(gs.jobs||[]).slice(0,4).map((job,i)=>(
           <div key={job.id} style={{padding:"14px 20px",borderBottom:i<3?`1px solid ${T.border}`:"none",cursor:"pointer",transition:"background 0.12s"}}
             onMouseEnter={e=>e.currentTarget.style.background="#fafffe"}
             onMouseLeave={e=>e.currentTarget.style.background="transparent"}
@@ -1388,7 +1389,7 @@ export default function JoobConnectApp() {
   // Incarca joburi reale din backend si le pune in globalState
   useEffect(() => {
     if (!user) return;
-    api.get("/jobs").then(r => updateGs({ jobs: r.data })).catch(()=>{});
+    api.get("/jobs").then(r => updateGs({ jobs: r.data.jobs || r.data })).catch(()=>{});
   }, [user]);
 
   const navigate = useCallback((to) => {
@@ -1430,7 +1431,7 @@ export default function JoobConnectApp() {
     switch(page) {
       case "home":      return <PageHome      {...props}/>;
       case "map":       return <MapPage       gs={gs} update={update} navigate={navigate}/>;
-      case "post_job":  return <PostJobPage navigate={navigate}/>;
+      case "post_job":  return <PostJobPage navigate={navigate} onSuccess={()=>api.get("/jobs").then(r=>update({jobs:r.data.jobs||r.data})).catch(()=>{})}/>;
       case "chat":      return <ChatPage/>;
       case "escrow":    return <PageEscrow    {...props}/>;
       case "contract":  return <PageContract  {...props}/>;

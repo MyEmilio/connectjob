@@ -1,15 +1,27 @@
-const express = require("express");
-const multer  = require("multer");
-const path    = require("path");
-const db      = require("../db/database");
-const auth    = require("../middleware/auth");
+const express    = require("express");
+const multer     = require("multer");
+const path       = require("path");
+const rateLimit  = require("express-rate-limit");
+const db         = require("../db/database");
+const auth       = require("../middleware/auth");
+
+const otpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: "Limita de SMS depasita. Incearca din nou dupa o ora." },
+  standardHeaders: true, legacyHeaders: false,
+});
 
 const router  = express.Router();
 const storage = multer.diskStorage({
   destination: path.join(__dirname, "../uploads"),
   filename: (req, file, cb) => cb(null, `${req.user.id}_${Date.now()}${path.extname(file.originalname)}`),
 });
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const ALLOWED_MIME = ["image/jpeg","image/png","image/webp","application/pdf"];
+const fileFilter = (req, file, cb) => {
+  ALLOWED_MIME.includes(file.mimetype) ? cb(null, true) : cb(new Error("Tip fisier nepermis. Acceptat: JPG, PNG, WEBP, PDF"));
+};
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 }, fileFilter });
 
 let twilio;
 try {
@@ -18,7 +30,7 @@ try {
   }
 } catch {}
 
-router.post("/send-otp", auth, async (req, res) => {
+router.post("/send-otp", otpLimiter, auth, async (req, res) => {
   const { phone } = req.body;
   if (!phone) return res.status(400).json({ error: "Telefon lipsa" });
 
@@ -44,9 +56,12 @@ router.post("/verify-otp", auth, (req, res) => {
   res.json({ success: true });
 });
 
-router.post("/upload-document", auth, upload.single("document"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "Fisier lipsa" });
-  res.json({ success: true, filename: req.file.filename });
+router.post("/upload-document", auth, (req, res, next) => {
+  upload.single("document")(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: "Fisier lipsa" });
+    res.json({ success: true, filename: req.file.filename });
+  });
 });
 
 router.post("/complete", auth, (req, res) => {

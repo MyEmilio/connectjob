@@ -6,7 +6,7 @@ const router = express.Router();
 
 // GET /api/jobs
 router.get("/", (req, res) => {
-  const { category, type, urgent, lat, lng, radius = 50 } = req.query;
+  const { category, type, urgent, lat, lng, radius = 50, limit = 100, offset = 0 } = req.query;
   let jobs = db.getJobs({ category, type, urgent });
 
   if (lat && lng) {
@@ -18,7 +18,10 @@ router.get("/", (req, res) => {
       return { ...j, distance: parseFloat((R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(1)) };
     }).filter(j => j.distance === null || j.distance <= parseFloat(radius));
   }
-  res.json(jobs);
+
+  const total = jobs.length;
+  const page  = jobs.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+  res.json({ jobs: page, total, limit: parseInt(limit), offset: parseInt(offset) });
 });
 
 // GET /api/jobs/:id

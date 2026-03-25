@@ -14,7 +14,7 @@ const CATEGORIES = [
 ];
 const ICONS = ["💼","🔧","🏗️","🌿","🚗","📦","💻","🎓","🎪","🍽️","🏊","🐕","⚡","🖌️","👶","📱","🔑","🌍"];
 
-export default function PostJobPage({ navigate }) {
+export default function PostJobPage({ navigate, onSuccess }) {
   const { t } = useTranslation("t");
   const [form, setForm] = useState({
     title:"", description:"", category:"", salary:"",
@@ -61,6 +61,7 @@ export default function PostJobPage({ navigate }) {
         skills,
       });
       setSuccess(true);
+      if (onSuccess) onSuccess();
       setTimeout(() => { setSuccess(false); navigate("map"); }, 2000);
     } catch (err) {
       setError(err.response?.data?.error || t("error_generic"));

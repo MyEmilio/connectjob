@@ -30,7 +30,7 @@ router.post("/:id/sign", auth, (req, res) => {
     db.updateContract(contract.id, { worker_sig: signature, status: newStatus, ...(newStatus==="signed_both"?{signed_at: new Date().toISOString()}:{}) });
   }
   if (isEmployer) {
-    const newStatus = contract.worker_sig ? "signed_both" : "pending";
+    const newStatus = contract.worker_sig ? "signed_both" : "signed_employer";
     db.updateContract(contract.id, { employer_sig: signature, status: newStatus, ...(newStatus==="signed_both"?{signed_at: new Date().toISOString()}:{}) });
   }
   res.json({ success: true });
