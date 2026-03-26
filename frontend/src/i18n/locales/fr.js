@@ -9,7 +9,7 @@ const fr = {
   login_btn:"Se connecter", login_loading:"Connexion en cours...",
   login_no_account:"Pas encore de compte?", login_register:"S'inscrire",
 
-  register_title:"Créer un compte", register_subtitle:"Inscrivez-vous sur JoobConnect",
+  register_title:"Créer un compte", register_subtitle:"Inscrivez-vous sur ConnectJob",
   register_name:"Nom complet", register_email:"Adresse e-mail",
   register_password:"Mot de passe", register_pass_hint:"minimum 6 caractères",
   register_role:"Type de compte", register_worker:"👷 Travailleur",

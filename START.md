@@ -1,4 +1,4 @@
-# 🚀 Cum pornesti JoobConnect
+# 🚀 Cum pornesti ConnectJob
 
 ## Terminal 1 — Backend (API + WebSocket)
 ```bash

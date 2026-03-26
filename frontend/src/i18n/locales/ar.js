@@ -7,7 +7,7 @@ const ar = {
   login_email:"البريد الإلكتروني", login_password:"كلمة المرور",
   login_btn:"تسجيل الدخول", login_loading:"جارٍ تسجيل الدخول...",
   login_no_account:"ليس لديك حساب؟", login_register:"سجّل الآن",
-  register_title:"إنشاء حساب", register_subtitle:"سجّل في JoobConnect",
+  register_title:"إنشاء حساب", register_subtitle:"سجّل في ConnectJob",
   register_name:"الاسم الكامل", register_email:"البريد الإلكتروني", register_password:"كلمة المرور",
   register_pass_hint:"6 أحرف على الأقل", register_role:"نوع الحساب",
   register_worker:"👷 موظف", register_employer:"🏢 صاحب عمل",

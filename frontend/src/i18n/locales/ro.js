@@ -7,7 +7,7 @@ const ro = {
   login_email:"Adresă de email", login_password:"Parolă",
   login_btn:"Conectare", login_loading:"Se autentifică...",
   login_no_account:"Nu ai cont?", login_register:"Înregistrează-te",
-  register_title:"Creare cont", register_subtitle:"Înregistrează-te pe JoobConnect",
+  register_title:"Creare cont", register_subtitle:"Înregistrează-te pe ConnectJob",
   register_name:"Nume complet", register_email:"Email", register_password:"Parolă",
   register_pass_hint:"minim 6 caractere", register_role:"Tip cont",
   register_worker:"👷 Lucrător", register_employer:"🏢 Angajator",

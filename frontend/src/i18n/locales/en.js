@@ -9,7 +9,7 @@ const en = {
   login_btn:"Sign in", login_loading:"Signing in...",
   login_no_account:"Don't have an account?", login_register:"Register",
 
-  register_title:"Create account", register_subtitle:"Sign up for JoobConnect",
+  register_title:"Create account", register_subtitle:"Sign up for ConnectJob",
   register_name:"Full name", register_email:"Email address",
   register_password:"Password", register_pass_hint:"at least 6 characters",
   register_role:"Account type", register_worker:"👷 Worker",

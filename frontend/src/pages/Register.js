@@ -44,7 +44,7 @@ export default function Register() {
       <div style={{ width:"100%", maxWidth:420, padding:"0 16px" }}>
         <div style={{ textAlign:"center", marginBottom:32 }}>
           <div style={{ fontSize:40 }}>💼</div>
-          <h1 style={{ fontFamily:"Outfit,sans-serif", fontSize:28, fontWeight:800, color:T.dark, margin:"8px 0 4px" }}>JoobConnect</h1>
+          <h1 style={{ fontFamily:"Outfit,sans-serif", fontSize:28, fontWeight:800, color:T.dark, margin:"8px 0 4px" }}>ConnectJob</h1>
           <p style={{ color:T.text2, fontSize:14 }}>Creeaza un cont nou</p>
         </div>
 

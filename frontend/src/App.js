@@ -850,7 +850,7 @@ function PageEscrow({ gs, update, navigate }) {
           )}
           {method==="bank"&&(
             <div style={{background:"#fafaf9",borderRadius:12,padding:"14px",marginBottom:18,border:`1px solid ${T.border}`}}>
-              {[{l:"IBAN",v:"RO49 AAAA 1B31 0075 9384 0000"},{l:"Beneficiar",v:"JoobConnect SRL"},{l:"Referință",v:"ESC-2025-001234"},{l:"Sumă",v:`${total} RON`}].map(r=>(
+              {[{l:"IBAN",v:"RO49 AAAA 1B31 0075 9384 0000"},{l:"Beneficiar",v:"ConnectJob SRL"},{l:"Referință",v:"ESC-2025-001234"},{l:"Sumă",v:`${total} RON`}].map(r=>(
                 <div key={r.l} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:`1px solid ${T.border}`,fontSize:13}}>
                   <span style={{color:T.text3}}>{r.l}</span><span style={{fontWeight:600,color:T.text}}>{r.v}</span>
                 </div>
@@ -957,7 +957,7 @@ function PageContract({ gs, update, navigate }) {
           <div style={{background:`linear-gradient(135deg,${T.dark},${T.dark2})`,padding:"22px 26px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div>
               <div style={{fontSize:10,color:"#64748b",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:3}}>Contract de prestări servicii</div>
-              <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:"#f1f5f9"}}>JoobConnect</div>
+              <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:"#f1f5f9"}}>ConnectJob</div>
               <div style={{fontSize:11,color:"#64748b",marginTop:2}}>Nr. {contractId}</div>
             </div>
             <div style={{textAlign:"right"}}>
@@ -967,14 +967,14 @@ function PageContract({ gs, update, navigate }) {
           </div>
           <div style={{padding:"22px 26px",maxHeight:380,overflowY:"auto"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
-              {[{l:"Angajator",v:job.employer},{l:"Prestator",v:"Alexandru Ionescu"},{l:"Serviciu",v:job.title},{l:"Categorie",v:job.category},{l:"Remunerație",v:`${job.salary} RON`},{l:"Plată",v:"Escrow JoobConnect"}].map(r=>(
+              {[{l:"Angajator",v:job.employer},{l:"Prestator",v:"Alexandru Ionescu"},{l:"Serviciu",v:job.title},{l:"Categorie",v:job.category},{l:"Remunerație",v:`${job.salary} RON`},{l:"Plată",v:"Escrow ConnectJob"}].map(r=>(
                 <div key={r.l} style={{background:"#fafaf9",borderRadius:9,padding:"9px 11px",border:`1px solid ${T.border}`}}>
                   <div style={{fontSize:9,color:T.text3,fontWeight:700,textTransform:"uppercase",marginBottom:2}}>{r.l}</div>
                   <div style={{fontSize:13,fontWeight:600,color:T.text}}>{r.v}</div>
                 </div>
               ))}
             </div>
-            {[{n:"1.",t:"Obiectul contractului",tx:`Prestatorul se obligă să execute serviciul de ${job.title} conform cerințelor angajatorului.`},{n:"2.",t:"Remunerație",tx:`Suma de ${job.salary} RON va fi plătită prin Escrow JoobConnect după confirmare.`},{n:"3.",t:"Responsabilități",tx:"Prestatorul garantează calitatea. Daunele din neglijență îi revin."},{n:"4.",t:"Confidențialitate",tx:"Ambele părți respectă GDPR."},{n:"5.",t:"Litigii",tx:"Disputele se rezolvă prin medierea JoobConnect."}].map(c=>(
+            {[{n:"1.",t:"Obiectul contractului",tx:`Prestatorul se obligă să execute serviciul de ${job.title} conform cerințelor angajatorului.`},{n:"2.",t:"Remunerație",tx:`Suma de ${job.salary} RON va fi plătită prin Escrow ConnectJob după confirmare.`},{n:"3.",t:"Responsabilități",tx:"Prestatorul garantează calitatea. Daunele din neglijență îi revin."},{n:"4.",t:"Confidențialitate",tx:"Ambele părți respectă GDPR."},{n:"5.",t:"Litigii",tx:"Disputele se rezolvă prin medierea ConnectJob."}].map(c=>(
               <div key={c.n} style={{marginBottom:10,padding:"11px",background:"#fafaf9",borderRadius:9,border:`1px solid ${T.border}`}}>
                 <div style={{fontSize:13,fontWeight:700,color:T.text,marginBottom:3}}>{c.n} {c.t}</div>
                 <div style={{fontSize:12,color:T.text2,lineHeight:1.7}}>{c.tx}</div>
@@ -1408,7 +1408,7 @@ function PageAnalytics({ gs }) {
 // ══════════════════════════════════════════════════════════════
 //  MAIN APP — Navigation + React Router
 // ══════════════════════════════════════════════════════════════
-function JoobConnectApp() {
+function ConnectJobApp() {
   const { user, loading: authLoading, logout } = useAuth();
   const { t, i18n } = useTranslation("t");
   const [gs, updateGs] = useGlobalState();
@@ -1536,7 +1536,7 @@ function JoobConnectApp() {
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <div style={{width:48,height:48,borderRadius:13,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0,boxShadow:`0 4px 12px ${T.green}44`,animation:"pwaBounce 2s ease-in-out infinite"}}>⚡</div>
             <div style={{flex:1}}>
-              <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:14,color:"#f1f5f9",marginBottom:2}}>Instalează JoobConnect ca App!</div>
+              <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:14,color:"#f1f5f9",marginBottom:2}}>Instalează ConnectJob ca App!</div>
               <div style={{fontSize:11,color:"#94a3b8"}}>Acces rapid · Offline · Notificări push</div>
             </div>
             <button onClick={()=>setPwaShow(false)} style={{background:"transparent",border:"none",color:"#64748b",fontSize:16,cursor:"pointer",padding:4}}>✕</button>
@@ -1664,7 +1664,7 @@ function App() {
     <Routes>
       <Route path="/login"    element={<Login/>}/>
       <Route path="/register" element={<Register/>}/>
-      <Route path="*"         element={<JoobConnectApp/>}/>
+      <Route path="*"         element={<ConnectJobApp/>}/>
     </Routes>
   );
 }

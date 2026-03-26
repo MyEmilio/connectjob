@@ -7,7 +7,7 @@ const nl = {
   login_email:"E-mailadres", login_password:"Wachtwoord",
   login_btn:"Inloggen", login_loading:"Inloggen...",
   login_no_account:"Nog geen account?", login_register:"Registreren",
-  register_title:"Account aanmaken", register_subtitle:"Registreer bij JoobConnect",
+  register_title:"Account aanmaken", register_subtitle:"Registreer bij ConnectJob",
   register_name:"Volledige naam", register_email:"E-mail", register_password:"Wachtwoord",
   register_pass_hint:"minimaal 6 tekens", register_role:"Accounttype",
   register_worker:"👷 Werknemer", register_employer:"🏢 Werkgever",

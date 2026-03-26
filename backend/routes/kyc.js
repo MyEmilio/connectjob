@@ -42,7 +42,7 @@ router.post("/send-otp", otpLimiter, auth, async (req, res) => {
 
     if (twilio) {
       await twilio.messages.create({
-        body: `Codul tau JoobConnect: ${code} (valid 10 minute)`,
+        body: `Codul tau ConnectJob: ${code} (valid 10 minute)`,
         from: process.env.TWILIO_PHONE_NUMBER,
         to: phone,
       });

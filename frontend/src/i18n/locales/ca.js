@@ -9,7 +9,7 @@ const ca = {
   login_btn:"Iniciar sessió", login_loading:"Iniciant sessió...",
   login_no_account:"No tens compte?", login_register:"Registra't",
 
-  register_title:"Crear compte", register_subtitle:"Registra't a JoobConnect",
+  register_title:"Crear compte", register_subtitle:"Registra't a ConnectJob",
   register_name:"Nom complet", register_email:"Correu electrònic",
   register_password:"Contrasenya", register_pass_hint:"mínim 6 caràcters",
   register_role:"Tipus de compte", register_worker:"👷 Treballador",

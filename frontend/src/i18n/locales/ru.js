@@ -7,7 +7,7 @@ const ru = {
   login_email:"Адрес электронной почты", login_password:"Пароль",
   login_btn:"Войти", login_loading:"Вход...",
   login_no_account:"Нет аккаунта?", login_register:"Зарегистрироваться",
-  register_title:"Создать аккаунт", register_subtitle:"Зарегистрируйтесь в JoobConnect",
+  register_title:"Создать аккаунт", register_subtitle:"Зарегистрируйтесь в ConnectJob",
   register_name:"Полное имя", register_email:"Электронная почта", register_password:"Пароль",
   register_pass_hint:"минимум 6 символов", register_role:"Тип аккаунта",
   register_worker:"👷 Работник", register_employer:"🏢 Работодатель",

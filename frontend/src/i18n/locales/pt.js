@@ -7,7 +7,7 @@ const pt = {
   login_email:"Endereço de e-mail", login_password:"Palavra-passe",
   login_btn:"Entrar", login_loading:"A entrar...",
   login_no_account:"Não tem conta?", login_register:"Registar-se",
-  register_title:"Criar conta", register_subtitle:"Registe-se no JoobConnect",
+  register_title:"Criar conta", register_subtitle:"Registe-se no ConnectJob",
   register_name:"Nome completo", register_email:"E-mail", register_password:"Palavra-passe",
   register_pass_hint:"mínimo 6 caracteres", register_role:"Tipo de conta",
   register_worker:"👷 Trabalhador", register_employer:"🏢 Empregador",

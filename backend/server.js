@@ -114,7 +114,7 @@ io.on("connection", (socket) => {
 // ── Start ──────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`\n🚀 JoobConnect Backend pornit pe portul ${PORT}`);
+  console.log(`\n🚀 ConnectJob Backend pornit pe portul ${PORT}`);
   console.log(`   API:    http://localhost:${PORT}/api`);
   console.log(`   Health: http://localhost:${PORT}/api/health\n`);
 });

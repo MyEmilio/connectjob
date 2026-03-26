@@ -23,7 +23,7 @@ const es = {
   login_register:  "Regístrate",
 
   register_title:     "Crear cuenta",
-  register_subtitle:  "Regístrate en JoobConnect",
+  register_subtitle:  "Regístrate en ConnectJob",
   register_name:      "Nombre completo",
   register_email:     "Correo electrónico",
   register_password:  "Contraseña",
