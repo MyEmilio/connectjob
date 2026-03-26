@@ -1,5 +1,5 @@
 // 🇳🇱 Nederlands
-export default {
+const nl = {
   nav_home:"Home", nav_map:"Kaart", nav_chat:"Berichten", nav_escrow:"Escrow",
   nav_contract:"Contract", nav_reviews:"Beoordelingen", nav_analytics:"Dashboard",
   nav_verify:"Verificatie", nav_verified:"Geverifieerd", nav_post_job:"Vacature plaatsen",
@@ -65,3 +65,5 @@ export default {
   btn_next:"Volgende", btn_logout:"Uitloggen", loading:"Laden...",
   error_generic:"Er is een fout opgetreden. Probeer het opnieuw.", ron:"€", km:"km",
 };
+
+export default nl;

@@ -1,5 +1,5 @@
 // 🇩🇪 Deutsch
-export default {
+const de = {
   nav_home:"Startseite", nav_map:"Karte", nav_chat:"Nachrichten", nav_escrow:"Treuhand",
   nav_contract:"Vertrag", nav_reviews:"Bewertungen", nav_analytics:"Dashboard",
   nav_verify:"Verifizierung", nav_verified:"Verifiziert", nav_post_job:"Job veröffentlichen",
@@ -79,3 +79,5 @@ export default {
   btn_next:"Weiter", btn_logout:"Abmelden", loading:"Laden...",
   error_generic:"Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.", ron:"€", km:"km",
 };
+
+export default de;

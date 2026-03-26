@@ -1,5 +1,5 @@
 // 🇸🇦 العربية (RTL)
-export default {
+const ar = {
   nav_home:"الرئيسية", nav_map:"الخريطة", nav_chat:"الرسائل", nav_escrow:"الضمان",
   nav_contract:"العقد", nav_reviews:"التقييمات", nav_analytics:"لوحة التحكم",
   nav_verify:"التحقق", nav_verified:"موثق", nav_post_job:"نشر وظيفة",
@@ -65,3 +65,5 @@ export default {
   btn_next:"التالي", btn_logout:"تسجيل الخروج", loading:"جارٍ التحميل...",
   error_generic:"حدث خطأ. يرجى المحاولة مرة أخرى.", ron:"€", km:"كم",
 };
+
+export default ar;

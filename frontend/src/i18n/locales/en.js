@@ -1,5 +1,5 @@
 // 🇬🇧 English
-export default {
+const en = {
   nav_home:"Home", nav_map:"Map", nav_chat:"Messages", nav_escrow:"Escrow",
   nav_contract:"Contract", nav_reviews:"Reviews", nav_analytics:"Dashboard",
   nav_verify:"Verification", nav_verified:"Verified", nav_post_job:"Post a job",
@@ -79,3 +79,5 @@ export default {
   btn_next:"Next", btn_logout:"Sign out", loading:"Loading...",
   error_generic:"An error occurred. Please try again.", ron:"€", km:"km",
 };
+
+export default en;

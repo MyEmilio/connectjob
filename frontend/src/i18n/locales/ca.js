@@ -1,5 +1,5 @@
 // 🏴󠁥󠁳󠁣󠁴󠁿 Català
-export default {
+const ca = {
   nav_home:"Inici", nav_map:"Mapa", nav_chat:"Missatges", nav_escrow:"Escrow",
   nav_contract:"Contracte", nav_reviews:"Ressenyes", nav_analytics:"Tauler",
   nav_verify:"Verificació", nav_verified:"Verificat", nav_post_job:"Publicar feina",
@@ -79,3 +79,5 @@ export default {
   btn_next:"Següent", btn_logout:"Tancar sessió", loading:"Carregant...",
   error_generic:"S'ha produït un error. Torna-ho a intentar.", ron:"€", km:"km",
 };
+
+export default ca;

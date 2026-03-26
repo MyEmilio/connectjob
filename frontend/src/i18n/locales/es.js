@@ -1,5 +1,5 @@
 // 🇪🇸 Español — Lingua principal
-export default {
+const es = {
   // Nav
   nav_home:        "Inicio",
   nav_map:         "Mapa",
@@ -180,3 +180,5 @@ export default {
   ron:             "€",
   km:              "km",
 };
+
+export default es;

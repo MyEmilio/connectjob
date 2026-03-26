@@ -1,5 +1,5 @@
 // 🇷🇴 Română
-export default {
+const ro = {
   nav_home:"Acasă", nav_map:"Hartă", nav_chat:"Mesaje", nav_escrow:"Escrow",
   nav_contract:"Contract", nav_reviews:"Recenzii", nav_analytics:"Dashboard",
   nav_verify:"Verificare", nav_verified:"Verificat", nav_post_job:"Postează job",
@@ -65,3 +65,5 @@ export default {
   btn_next:"Următor", btn_logout:"Deconectare", loading:"Se încarcă...",
   error_generic:"A apărut o eroare. Încearcă din nou.", ron:"€", km:"km",
 };
+
+export default ro;

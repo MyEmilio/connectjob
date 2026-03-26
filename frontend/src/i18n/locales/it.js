@@ -1,5 +1,5 @@
 // 🇮🇹 Italiano
-export default {
+const it = {
   nav_home:"Home", nav_map:"Mappa", nav_chat:"Messaggi", nav_escrow:"Escrow",
   nav_contract:"Contratto", nav_reviews:"Recensioni", nav_analytics:"Dashboard",
   nav_verify:"Verifica", nav_verified:"Verificato", nav_post_job:"Pubblica lavoro",
@@ -65,3 +65,5 @@ export default {
   btn_next:"Avanti", btn_logout:"Esci", loading:"Caricamento...",
   error_generic:"Si è verificato un errore. Riprova.", ron:"€", km:"km",
 };
+
+export default it;

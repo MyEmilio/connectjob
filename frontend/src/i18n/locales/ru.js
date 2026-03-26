@@ -1,5 +1,5 @@
 // 🇷🇺 Русский
-export default {
+const ru = {
   nav_home:"Главная", nav_map:"Карта", nav_chat:"Сообщения", nav_escrow:"Эскроу",
   nav_contract:"Договор", nav_reviews:"Отзывы", nav_analytics:"Панель",
   nav_verify:"Верификация", nav_verified:"Верифицирован", nav_post_job:"Опубликовать вакансию",
@@ -65,3 +65,5 @@ export default {
   btn_next:"Далее", btn_logout:"Выйти", loading:"Загрузка...",
   error_generic:"Произошла ошибка. Попробуйте снова.", ron:"€", km:"км",
 };
+
+export default ru;

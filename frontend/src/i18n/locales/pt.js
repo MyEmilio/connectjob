@@ -1,5 +1,5 @@
 // 🇵🇹 Português
-export default {
+const pt = {
   nav_home:"Início", nav_map:"Mapa", nav_chat:"Mensagens", nav_escrow:"Depósito",
   nav_contract:"Contrato", nav_reviews:"Avaliações", nav_analytics:"Painel",
   nav_verify:"Verificação", nav_verified:"Verificado", nav_post_job:"Publicar emprego",
@@ -65,3 +65,5 @@ export default {
   btn_next:"Seguinte", btn_logout:"Sair", loading:"A carregar...",
   error_generic:"Ocorreu um erro. Tente novamente.", ron:"€", km:"km",
 };
+
+export default pt;

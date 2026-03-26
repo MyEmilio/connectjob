@@ -1,5 +1,5 @@
 // 🇫🇷 Français
-export default {
+const fr = {
   nav_home:"Accueil", nav_map:"Carte", nav_chat:"Messages", nav_escrow:"Séquestre",
   nav_contract:"Contrat", nav_reviews:"Avis", nav_analytics:"Tableau de bord",
   nav_verify:"Vérification", nav_verified:"Vérifié", nav_post_job:"Publier un emploi",
@@ -79,3 +79,5 @@ export default {
   btn_next:"Suivant", btn_logout:"Se déconnecter", loading:"Chargement...",
   error_generic:"Une erreur s'est produite. Veuillez réessayer.", ron:"€", km:"km",
 };
+
+export default fr;
