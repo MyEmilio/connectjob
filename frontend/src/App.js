@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./context/AuthContext";
 import api from "./services/api";
+import { getSocket } from "./services/socket";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MapPage from "./pages/MapPage";
@@ -488,8 +489,9 @@ function PageMap({ gs, update, navigate }) {
 //  PAGE: CHAT
 // ══════════════════════════════════════════════════════════════
 function PageChat({ gs, update, navigate }) {
-  const [convs, setConvs]       = useState(CONVERSATIONS);
-  const [activeId, setActiveId] = useState(1);
+  const [convs, setConvs]       = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [activeId, setActiveId] = useState(null);
   const [input, setInput]       = useState("");
   const [typing, setTyping]     = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -502,11 +504,44 @@ function PageChat({ gs, update, navigate }) {
   const bottomRef = useRef(null);
 
   const active = convs.find(c=>c.id===activeId);
-  const job = JOBS.find(j=>j.id===active?.jobId);
   const fmt = s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
 
-  useEffect(()=>{ bottomRef.current?.scrollIntoView({behavior:"smooth"}); },[active?.messages,typing]);
-  useEffect(()=>{ setConvs(p=>p.map(c=>c.id===activeId?{...c,unread:0}:c)); },[activeId]);
+  // Incarca conversatii din API
+  useEffect(()=>{
+    api.get("/messages/conversations").then(r=>{
+      setConvs(r.data);
+      if(r.data.length>0) setActiveId(r.data[0].id);
+    }).catch(()=>{});
+  },[]);
+
+  // Incarca mesajele conversatiei active
+  useEffect(()=>{
+    if(!activeId) return;
+    api.get(`/messages/conversations/${activeId}`).then(r=>setMessages(r.data)).catch(()=>{});
+    setConvs(p=>p.map(c=>c.id===activeId?{...c,unread:0}:c));
+    const socket = getSocket();
+    if(socket) socket.emit("join_conversation", activeId);
+  },[activeId]);
+
+  // Asculta mesaje noi via socket
+  useEffect(()=>{
+    const socket = getSocket();
+    if(!socket) return;
+    const onMsg = (msg) => {
+      if(String(msg.conversation_id) === String(activeId)) {
+        setMessages(p=>[...p, msg]);
+      }
+      setConvs(p=>p.map(c=>String(c.id)===String(msg.conversation_id)?{...c,last_msg:msg.text,last_time:msg.created_at}:c));
+    };
+    const onTyping = ({conversation_id, is_typing}) => {
+      if(String(conversation_id)===String(activeId)) setTyping(is_typing);
+    };
+    socket.on("new_message", onMsg);
+    socket.on("typing", onTyping);
+    return()=>{ socket.off("new_message", onMsg); socket.off("typing", onTyping); };
+  },[activeId]);
+
+  useEffect(()=>{ bottomRef.current?.scrollIntoView({behavior:"smooth"}); },[messages,typing]);
   useEffect(()=>{
     if(isListening){ setRecTime(0); timerRef.current=setInterval(()=>setRecTime(t=>t+1),1000); }
     else clearInterval(timerRef.current);
@@ -535,18 +570,18 @@ function PageChat({ gs, update, navigate }) {
   const send = ()=>{
     const base=input.trim(), extra=interim.trim();
     const txt=base&&extra&&!base.endsWith(extra)?`${base} ${extra}`.trim():(base||extra);
-    if(!txt) return;
+    if(!txt||!activeId) return;
     if(isListening) stopVoice();
     setInput(""); setInterim("");
-    const msg={id:Date.now(),from:"me",text:txt,time:new Date().toLocaleTimeString("ro",{hour:"2-digit",minute:"2-digit"}),read:true};
-    setConvs(p=>p.map(c=>c.id===activeId?{...c,lastMsg:txt,time:"Acum",messages:[...c.messages,msg]}:c));
-    setTyping(true);
-    setTimeout(()=>{
-      setTyping(false);
-      const rep=["Mulțumesc! Revin curând.","Perfect!","Înțeles, vorbim mâine.","Excelent! Te sun."][Math.floor(Math.random()*4)];
-      const repMsg={id:Date.now()+1,from:"them",text:rep,time:new Date().toLocaleTimeString("ro",{hour:"2-digit",minute:"2-digit"}),read:true};
-      setConvs(p=>p.map(c=>c.id===activeId?{...c,lastMsg:rep,time:"Acum",messages:[...c.messages,repMsg]}:c));
-    },1000+Math.random()*800);
+    const socket = getSocket();
+    if(socket) {
+      socket.emit("send_message", { conversation_id: activeId, text: txt });
+    } else {
+      // fallback HTTP daca socket-ul nu e conectat
+      api.post(`/messages/conversations/${activeId}/send`, { text: txt })
+        .then(r=>setMessages(p=>[...p, r.data]))
+        .catch(()=>{});
+    }
   };
 
   const LANGS=[{code:"ro-RO",flag:"🇷🇴",name:"Română"},{code:"en-GB",flag:"🇬🇧",name:"English"},{code:"fr-FR",flag:"🇫🇷",name:"Français"},{code:"de-DE",flag:"🇩🇪",name:"Deutsch"}];
@@ -555,7 +590,7 @@ function PageChat({ gs, update, navigate }) {
     <div style={{ display:"flex", gap:0, height:"calc(100vh - 130px)", minHeight:500, borderRadius:18, overflow:"hidden", border:`1.5px solid ${T.border}`, animation:"fadeIn 0.3s ease" }}>
 
       {/* Call modals */}
-      {modal==="whatsapp" && job && (
+      {modal==="whatsapp" && (
         <div style={{ position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(6px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16 }}>
           <div style={{ background:T.white,borderRadius:20,padding:"28px 24px",maxWidth:400,width:"100%" }}>
             <div style={{ textAlign:"center",marginBottom:20 }}>
@@ -564,9 +599,9 @@ function PageChat({ gs, update, navigate }) {
             </div>
             <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:16 }}>
               {[
-                {icon:"📞",label:"Apel vocal",href:`https://wa.me/${job.phone.replace(/\D/g,"")}`},
-                {icon:"📹",label:"Video Call",href:`https://wa.me/${job.phone.replace(/\D/g,"")}`},
-                {icon:"💬",label:"Mesaj cu subiect job",href:`https://wa.me/${job.phone.replace(/\D/g,"")}?text=Bună! Vă contact pentru: ${job.title}`},
+                {icon:"📞",label:"Apel vocal",href:`https://wa.me/`},
+                {icon:"📹",label:"Video Call",href:`https://wa.me/`},
+                {icon:"💬",label:"Mesaj",href:`https://wa.me/`},
               ].map(opt=>(
                 <a key={opt.label} href={opt.href} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}>
                   <Btn color="#25d366" style={{width:"100%",justifyContent:"center"}}>{opt.icon} {opt.label}</Btn>
@@ -609,20 +644,22 @@ function PageChat({ gs, update, navigate }) {
         </div>
         <div style={{ flex:1,overflowY:"auto",padding:"0 8px 8px" }}>
           {convs.map(conv=>{
-            const j=JOBS.find(x=>x.id===conv.jobId);
+            const otherName = String(conv.user1_id)===String(gs.user?.id) ? conv.user2_name : conv.user1_name;
+            const otherInitials = String(conv.user1_id)===String(gs.user?.id) ? conv.user2_initials : conv.user1_initials;
+            const timeStr = conv.last_time ? new Date(conv.last_time).toLocaleTimeString("ro",{hour:"2-digit",minute:"2-digit"}) : "";
             return (
               <div key={conv.id} onClick={()=>setActiveId(conv.id)}
                 style={{ display:"flex",alignItems:"center",gap:9,padding:"9px",borderRadius:10,cursor:"pointer",marginBottom:2,background:conv.id===activeId?"#1e293b":"transparent",transition:"background 0.12s" }}
                 onMouseEnter={e=>{if(conv.id!==activeId)e.currentTarget.style.background="#172035";}}
                 onMouseLeave={e=>{if(conv.id!==activeId)e.currentTarget.style.background="transparent";}}
               >
-                <Avatar initials={j?.employerInitials||"??"} color={j?.color||T.green} size={34} online={conv.online}/>
+                <Avatar initials={otherInitials||"??"} color={T.green} size={34}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{display:"flex",justifyContent:"space-between"}}>
-                    <span style={{color:"#f1f5f9",fontWeight:600,fontSize:12}}>{j?.employer||"?"}</span>
-                    <span style={{color:"#475569",fontSize:10}}>{conv.time}</span>
+                    <span style={{color:"#f1f5f9",fontWeight:600,fontSize:12}}>{otherName||"?"}</span>
+                    <span style={{color:"#475569",fontSize:10}}>{timeStr}</span>
                   </div>
-                  <div style={{fontSize:11,color:"#94a3b8",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginTop:1}}>{conv.lastMsg}</div>
+                  <div style={{fontSize:11,color:"#94a3b8",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginTop:1}}>{conv.last_msg}</div>
                 </div>
                 {conv.unread>0&&<div style={{background:T.green,color:"#fff",borderRadius:999,minWidth:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700}}>{conv.unread}</div>}
               </div>
@@ -644,10 +681,10 @@ function PageChat({ gs, update, navigate }) {
       <div style={{ flex:1,display:"flex",flexDirection:"column",background:T.bg,minWidth:0 }}>
         {/* Header */}
         <div style={{ padding:"10px 16px",background:T.white,borderBottom:`1.5px solid ${T.border}`,display:"flex",alignItems:"center",gap:12 }}>
-          <Avatar initials={job?.employerInitials||"??"} color={job?.color||T.green} size={38} online={active?.online}/>
+          <Avatar initials={active?(String(active.user1_id)===String(gs.user?.id)?active.user2_initials:active.user1_initials):"??"} color={T.green} size={38}/>
           <div style={{flex:1}}>
-            <div style={{fontWeight:700,fontSize:14,color:T.text,fontFamily:"Outfit,sans-serif"}}>{job?.employer||"?"}</div>
-            <div style={{fontSize:11,color:active?.online?T.green:T.text3}}>{active?.online?"● Online acum":"○ Offline"} · 📋 {job?.title}</div>
+            <div style={{fontWeight:700,fontSize:14,color:T.text,fontFamily:"Outfit,sans-serif"}}>{active?(String(active.user1_id)===String(gs.user?.id)?active.user2_name:active.user1_name):"?"}</div>
+            <div style={{fontSize:11,color:T.text3}}>📋 {active?.job_title||"Conversatie"}</div>
           </div>
           <div style={{ display:"flex",gap:6 }}>
             <button onClick={()=>setModal("whatsapp")} style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:18,background:"linear-gradient(135deg,#25d366,#128c7e)",display:"flex",alignItems:"center",justifyContent:"center" }}>💬</button>
@@ -659,21 +696,22 @@ function PageChat({ gs, update, navigate }) {
         <div style={{ margin:"8px 12px 0",background:"linear-gradient(135deg,#f0fdf4,#dcfce7)",borderRadius:10,padding:"7px 14px",display:"flex",alignItems:"center",gap:8,border:"1px solid #bbf7d0" }}>
           <span style={{fontSize:16}}>🎯</span>
           <span style={{fontSize:12,fontWeight:700,color:"#065f46"}}>Match Score: 92%</span>
-          <span style={{fontSize:11,color:"#057a55"}}>· Disponibil în zonă ✓ · Verificat ✓ · Rating {job?.rating} ✓</span>
+          <span style={{fontSize:11,color:"#057a55"}}>· Disponibil în zonă ✓ · Verificat ✓</span>
           <Btn size="sm" color={T.green} style={{marginLeft:"auto"}} onClick={()=>navigate("map")}>Profil</Btn>
         </div>
 
         {/* Messages */}
         <div style={{ flex:1,overflowY:"auto",padding:"10px 12px 6px",display:"flex",flexDirection:"column",gap:5 }}>
-          {active?.messages.map((msg,i)=>{
-            const isMe=msg.from==="me";
+          {messages.map((msg)=>{
+            const isMe=String(msg.sender_id)===String(gs.user?.id);
+            const timeStr=msg.created_at?new Date(msg.created_at).toLocaleTimeString("ro",{hour:"2-digit",minute:"2-digit"}):"";
             return (
               <div key={msg.id} style={{ display:"flex",flexDirection:isMe?"row-reverse":"row",alignItems:"flex-end",gap:6,animation:"fadeIn 0.2s ease" }}>
-                {!isMe&&<Avatar initials={job?.employerInitials||"??"} color={job?.color||T.green} size={24}/>}
+                {!isMe&&<Avatar initials={msg.sender_initials||"??"} color={T.green} size={24}/>}
                 <div style={{ maxWidth:"65%" }}>
                   <div style={{ background:isMe?`linear-gradient(135deg,${T.green},${T.greenDark})`:T.white,color:isMe?"#fff":T.text,borderRadius:isMe?"16px 16px 4px 16px":"16px 16px 16px 4px",padding:"8px 12px",fontSize:13,lineHeight:1.5,boxShadow:isMe?`0 2px 8px ${T.green}33`:"0 1px 4px rgba(0,0,0,0.06)",border:isMe?"none":`1.5px solid ${T.border}` }}>{msg.text}</div>
                   <div style={{ fontSize:10,marginTop:2,textAlign:isMe?"right":"left",color:T.text3,paddingLeft:isMe?0:4,paddingRight:isMe?4:0 }}>
-                    {msg.time}{isMe&&<span style={{color:T.green}}> ✓✓</span>}
+                    {timeStr}{isMe&&<span style={{color:T.green}}> ✓✓</span>}
                   </div>
                 </div>
               </div>
@@ -681,7 +719,7 @@ function PageChat({ gs, update, navigate }) {
           })}
           {typing&&(
             <div style={{display:"flex",alignItems:"flex-end",gap:6}}>
-              <Avatar initials={job?.employerInitials||"??"} color={job?.color||T.green} size={24}/>
+              <Avatar initials={active?(String(active.user1_id)===String(gs.user?.id)?active.user2_initials:active.user1_initials):"??"} color={T.green} size={24}/>
               <div style={{background:T.white,border:`1.5px solid ${T.border}`,borderRadius:"16px 16px 16px 4px",padding:"10px 14px"}}>
                 <div style={{display:"flex",gap:4}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:T.text3,animation:`bounce 1.2s ease-in-out ${i*0.2}s infinite`}}/>)}</div>
               </div>
@@ -1187,17 +1225,25 @@ function PageReviews({ gs, update }) {
   const [myRating,setMyRating]=useState(0);
   const [myText,setMyText]=useState("");
   const [submitted,setSubmitted]=useState(false);
-  const [reviews,setReviews]=useState(REVIEWS);
+  const [reviews,setReviews]=useState([]);
   const [filter,setFilter]=useState("Toate");
 
-  const submit=()=>{
+  useEffect(()=>{
+    if(!gs.user?.id) return;
+    api.get(`/reviews/${gs.user.id}`).then(r=>setReviews(r.data.reviews||[])).catch(()=>{});
+  },[gs.user?.id]);
+
+  const submit=async()=>{
     if(!myRating||!myText.trim())return;
-    const r={id:Date.now(),jobId:1,author:gs.user.name,rating:myRating,text:myText,date:"Acum",verified:gs.user.verified};
-    setReviews(p=>[r,...p]);
-    setSubmitted(true);
+    try {
+      await api.post("/reviews",{ target_id: gs.user.id, rating: myRating, text: myText });
+      const r={id:Date.now(),reviewer_name:gs.user.name,reviewer_initials:gs.user.initials,rating:myRating,text:myText,created_at:new Date().toISOString(),reviewer_verified:gs.user.verified};
+      setReviews(p=>[r,...p]);
+      setSubmitted(true);
+    } catch{}
   };
 
-  const avg=(reviews.reduce((a,r)=>a+r.rating,0)/reviews.length).toFixed(1);
+  const avg=reviews.length?(reviews.reduce((a,r)=>a+r.rating,0)/reviews.length).toFixed(1):"0.0";
 
   return (
     <div style={{animation:"fadeIn 0.3s ease"}}>
@@ -1254,7 +1300,7 @@ function PageReviews({ gs, update }) {
           {/* Review list */}
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             {reviews.filter(r=>{
-              if(filter==="Verificate")return r.verified;
+              if(filter==="Verificate")return r.reviewer_verified;
               if(filter==="5 stele")return r.rating===5;
               if(filter==="4 stele")return r.rating===4;
               return true;
@@ -1262,16 +1308,16 @@ function PageReviews({ gs, update }) {
               <Card key={r.id} style={{padding:"14px 16px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <Avatar initials={r.author.slice(0,2).toUpperCase()} color={T.green} size={32}/>
+                    <Avatar initials={r.reviewer_initials||r.reviewer_name?.slice(0,2)||"??"} color={T.green} size={32}/>
                     <div>
-                      <div style={{fontSize:13,fontWeight:700,color:T.text}}>{r.author}</div>
+                      <div style={{fontSize:13,fontWeight:700,color:T.text}}>{r.reviewer_name||"Anonim"}</div>
                       <div style={{display:"flex",alignItems:"center",gap:6,marginTop:1}}>
                         <Stars rating={r.rating} size={11}/>
-                        {r.verified&&<span style={{background:"#f0fdf4",color:T.green,borderRadius:999,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ Verificat</span>}
+                        {r.reviewer_verified&&<span style={{background:"#f0fdf4",color:T.green,borderRadius:999,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ Verificat</span>}
                       </div>
                     </div>
                   </div>
-                  <span style={{fontSize:11,color:T.text3}}>{r.date}</span>
+                  <span style={{fontSize:11,color:T.text3}}>{r.created_at?new Date(r.created_at).toLocaleDateString("ro"):""}</span>
                 </div>
                 <p style={{fontSize:13,color:T.text2,lineHeight:1.6,margin:0}}>{r.text}</p>
               </Card>

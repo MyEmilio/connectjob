@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
   destination: path.join(__dirname, "../uploads"),
   filename: (req, file, cb) => cb(null, `${req.user.id}_${Date.now()}${path.extname(file.originalname)}`),
 });
-const ALLOWED_MIME = ["image/jpeg","image/png","image/webp","application/pdf"];
+const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 const fileFilter = (req, file, cb) => {
   ALLOWED_MIME.includes(file.mimetype) ? cb(null, true) : cb(new Error("Tip fisier nepermis. Acceptat: JPG, PNG, WEBP, PDF"));
 };
@@ -30,33 +30,45 @@ try {
   }
 } catch {}
 
+// POST /api/kyc/send-otp
 router.post("/send-otp", otpLimiter, auth, async (req, res) => {
-  const { phone } = req.body;
-  if (!phone) return res.status(400).json({ error: "Telefon lipsa" });
+  try {
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ error: "Telefon lipsa" });
 
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  db.saveOtp(phone, code);
-  db.updateUser(req.user.id, { phone });
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    await db.saveOtp(phone, code);
+    await db.updateUser(req.user.id, { phone });
 
-  if (twilio) {
-    try {
-      await twilio.messages.create({ body: `Codul tau JoobConnect: ${code} (valid 10 minute)`, from: process.env.TWILIO_PHONE_NUMBER, to: phone });
+    if (twilio) {
+      await twilio.messages.create({
+        body: `Codul tau JoobConnect: ${code} (valid 10 minute)`,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: phone,
+      });
       res.json({ success: true });
-    } catch (err) {
-      res.status(500).json({ error: "Eroare Twilio: " + err.message });
+    } else {
+      res.json({ success: true, demo_code: code, message: "Mod demo — configureaza Twilio pentru SMS real" });
     }
-  } else {
-    res.json({ success: true, demo_code: code, message: "Mod demo — configureaza Twilio pentru SMS real" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
-router.post("/verify-otp", auth, (req, res) => {
-  const { phone, code } = req.body;
-  if (!db.verifyOtp(phone, code)) return res.status(400).json({ error: "Cod invalid sau expirat" });
-  res.json({ success: true });
+// POST /api/kyc/verify-otp
+router.post("/verify-otp", auth, async (req, res) => {
+  try {
+    const { phone, code } = req.body;
+    const ok = await db.verifyOtp(phone, code);
+    if (!ok) return res.status(400).json({ error: "Cod invalid sau expirat" });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post("/upload-document", auth, (req, res, next) => {
+// POST /api/kyc/upload-document
+router.post("/upload-document", auth, (req, res) => {
   upload.single("document")(req, res, (err) => {
     if (err) return res.status(400).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: "Fisier lipsa" });
@@ -64,9 +76,14 @@ router.post("/upload-document", auth, (req, res, next) => {
   });
 });
 
-router.post("/complete", auth, (req, res) => {
-  db.updateUser(req.user.id, { verified: 1 });
-  res.json({ success: true, message: "Identitate verificata!" });
+// POST /api/kyc/complete
+router.post("/complete", auth, async (req, res) => {
+  try {
+    await db.updateUser(req.user.id, { verified: true });
+    res.json({ success: true, message: "Identitate verificata!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

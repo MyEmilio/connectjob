@@ -6,7 +6,13 @@ const path         = require("path");
 const { Server }   = require("socket.io");
 const jwt          = require("jsonwebtoken");
 const rateLimit    = require("express-rate-limit");
+const mongoose     = require("mongoose");
 const db           = require("./db/database");
+
+// ── Conexiune MongoDB ──────────────────────────────────────
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB conectat"))
+  .catch(err => { console.error("❌ MongoDB eroare:", err.message); process.exit(1); });
 
 const ALLOWED_ORIGINS = [
   process.env.CLIENT_URL || "http://localhost:3000",
@@ -72,25 +78,25 @@ io.on("connection", (socket) => {
   console.log(`✅ User ${userId} conectat (${socket.id})`);
 
   // Trimite mesaj
-  socket.on("send_message", ({ conversation_id, text }) => {
+  socket.on("send_message", async ({ conversation_id, text }) => {
     if (!text?.trim()) return;
-    const conv = db.findConversationById(parseInt(conversation_id));
-    if (!conv || (conv.user1_id !== userId && conv.user2_id !== userId)) return;
+    const conv = await db.findConversationById(conversation_id);
+    if (!conv || (String(conv.user1_id) !== String(userId) && String(conv.user2_id) !== String(userId))) return;
 
-    const msg = db.createMessage({ conversation_id: parseInt(conversation_id), sender_id: userId, text: text.trim() });
-    const otherId = conv.user1_id === userId ? conv.user2_id : conv.user1_id;
+    const msg = await db.createMessage({ conversation_id, sender_id: userId, text: text.trim() });
+    const otherId = String(conv.user1_id) === String(userId) ? String(conv.user2_id) : String(conv.user1_id);
     socket.emit("new_message", msg);
     const otherSocket = onlineUsers.get(otherId);
     if (otherSocket) io.to(otherSocket).emit("new_message", msg);
   });
 
   // Indicator "scrie..."
-  socket.on("typing", ({ conversation_id, is_typing }) => {
-    const conv = db.findConversationById(parseInt(conversation_id));
+  socket.on("typing", async ({ conversation_id, is_typing }) => {
+    const conv = await db.findConversationById(conversation_id);
     if (!conv) return;
-    const otherId = conv.user1_id === userId ? conv.user2_id : conv.user1_id;
+    const otherId = String(conv.user1_id) === String(userId) ? String(conv.user2_id) : String(conv.user1_id);
     const otherSocket = onlineUsers.get(otherId);
-    if (otherSocket) io.to(otherSocket).emit("typing", { conversation_id: parseInt(conversation_id), user_id: userId, is_typing });
+    if (otherSocket) io.to(otherSocket).emit("typing", { conversation_id, user_id: userId, is_typing });
   });
 
   // Intra in camera unei conversatii
