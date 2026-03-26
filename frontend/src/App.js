@@ -679,6 +679,14 @@ function PageChat({ gs, update, navigate }) {
 
       {/* Chat main */}
       <div style={{ flex:1,display:"flex",flexDirection:"column",background:T.bg,minWidth:0 }}>
+        {!active && (
+          <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:12,color:T.text3}}>
+            <div style={{fontSize:48}}>💬</div>
+            <div style={{fontSize:15,fontWeight:600}}>Nicio conversatie activa</div>
+            <div style={{fontSize:13}}>Aplica la un job pentru a incepe o conversatie</div>
+          </div>
+        )}
+        {active && (<>
         {/* Header */}
         <div style={{ padding:"10px 16px",background:T.white,borderBottom:`1.5px solid ${T.border}`,display:"flex",alignItems:"center",gap:12 }}>
           <Avatar initials={active?(String(active.user1_id)===String(gs.user?.id)?active.user2_initials:active.user1_initials):"??"} color={T.green} size={38}/>
@@ -749,6 +757,7 @@ function PageChat({ gs, update, navigate }) {
             <button onClick={send} disabled={!input.trim()&&!interim.trim()} style={{ width:38,height:38,borderRadius:10,border:"none",cursor:(input.trim()||interim.trim())?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",background:(input.trim()||interim.trim())?`linear-gradient(135deg,${T.green},${T.greenDark})`:"#e7e5e4",boxShadow:(input.trim()||interim.trim())?`0 4px 12px ${T.green}44`:"none",transition:"all 0.2s" }}>➤</button>
           </div>
         </div>
+        </>)}
       </div>
     </div>
   );
@@ -1555,7 +1564,7 @@ function ConnectJobApp() {
       <nav style={{ background:"rgba(255,255,255,0.97)",backdropFilter:"blur(14px)",borderBottom:`1.5px solid ${T.border}`,height:58,padding:"0 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:80,boxShadow:"0 1px 20px rgba(0,0,0,0.05)" }}>
         <div style={{display:"flex",alignItems:"center",gap:9}}>
           <div style={{width:32,height:32,borderRadius:10,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:`0 3px 10px ${T.green}44`}}>⚡</div>
-          <span style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:18,color:T.text,letterSpacing:"-0.02em"}}>Joob<span style={{color:T.green}}>Connect</span></span>
+          <span style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:18,color:T.text,letterSpacing:"-0.02em"}}>Connect<span style={{color:T.green}}>Job</span></span>
         </div>
 
         {/* Page title */}
