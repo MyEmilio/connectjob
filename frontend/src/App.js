@@ -1362,7 +1362,7 @@ function PageAnalytics({ gs }) {
 // ══════════════════════════════════════════════════════════════
 //  MAIN APP — Navigation + React Router
 // ══════════════════════════════════════════════════════════════
-export default function JoobConnectApp() {
+function JoobConnectApp() {
   const { user, loading: authLoading, logout } = useAuth();
   const { t, i18n } = useTranslation("t");
   const [gs, updateGs] = useGlobalState();
