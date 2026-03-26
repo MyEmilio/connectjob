@@ -1622,7 +1622,7 @@ function App() {
     </Routes>
   );
 }
-export { App as default };
+export default App;
 
 // ══════════════════════════════════════════════════════════════
 //  FUEL CALCULATOR MODULE
