@@ -850,7 +850,7 @@ function PageChat({ gs, update, navigate }) {
         {/* Messages */}
         <div style={{ flex:1,overflowY:"auto",padding:"10px 12px 6px",display:"flex",flexDirection:"column",gap:5 }}>
           {messages.map((msg)=>{
-            const isMe=String(msg.sender_id)===String(gs.user?.id);
+            const isMe = isDemo ? msg.sender_id==="me" : String(msg.sender_id)===String(gs.user?.id);
             const timeStr=msg.created_at?new Date(msg.created_at).toLocaleTimeString("ro",{hour:"2-digit",minute:"2-digit"}):"";
             return (
               <div key={msg.id} style={{ display:"flex",flexDirection:isMe?"row-reverse":"row",alignItems:"flex-end",gap:6,animation:"fadeIn 0.2s ease" }}>
@@ -2460,11 +2460,11 @@ export function FuelButton({ defaultFrom="", defaultTo="" }) {
   return (
     <>
       {/* Floating button */}
-      <div style={{ position:"fixed", bottom:28, right:28, zIndex:990 }}>
+      <div style={{ position:"fixed", bottom:28, left:28, zIndex:990 }}>
         {/* Tooltip */}
         {pulse && (
           <div style={{
-            position:"absolute",bottom:"calc(100% + 10px)",right:0,
+            position:"absolute",bottom:"calc(100% + 10px)",left:0,
             background:T.dark,color:"#f1f5f9",
             borderRadius:9,padding:"7px 12px",
             fontSize:12,fontWeight:600,whiteSpace:"nowrap",
@@ -3155,16 +3155,16 @@ export function TransportButton({ from = "", to = "" }) {
 
   return (
     <>
-      <div style={{ position:"fixed", bottom:28, right:100, zIndex:990 }}>
+      <div style={{ position:"fixed", bottom:28, left:100, zIndex:990 }}>
         {pulse && (
           <div style={{
-            position:"absolute", bottom:"calc(100% + 10px)", right:0,
+            position:"absolute", bottom:"calc(100% + 10px)", left:0,
             background:T.dark, color:"#f1f5f9", borderRadius:9, padding:"7px 12px",
             fontSize:12, fontWeight:600, whiteSpace:"nowrap",
             boxShadow:"0 4px 12px rgba(0,0,0,0.3)", animation:"fadeIn 0.3s ease",
           }}>
             🚇 Program transport public
-            <div style={{ position:"absolute",bottom:-5,right:20,width:10,height:10,background:T.dark,transform:"rotate(45deg)" }}/>
+            <div style={{ position:"absolute",bottom:-5,left:20,width:10,height:10,background:T.dark,transform:"rotate(45deg)" }}/>
           </div>
         )}
 
