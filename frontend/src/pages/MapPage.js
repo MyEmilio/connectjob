@@ -115,19 +115,54 @@ export default function MapPage({ navigate, update }) {
 
         {/* Detalii job selectat */}
         {selected && (
-          <div style={{ borderTop:`2px solid ${T.border}`, padding:16, background:"#fafaf9" }}>
-            <div style={{ fontWeight:800, fontSize:15, color:T.text, marginBottom:4 }}>{selected.title}</div>
-            <div style={{ fontSize:12, color:T.text3, marginBottom:8 }}>{selected.employer} · {selected.category}</div>
-            <div style={{ fontSize:13, color:T.text2, marginBottom:12, lineHeight:1.5 }}>{selected.description}</div>
-            <div style={{ display:"flex", gap:8 }}>
+          <div style={{ borderTop:`2px solid ${T.border}`, padding:16, background:"#fafaf9", overflowY:"auto" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
+              <div style={{ fontWeight:800, fontSize:15, color:T.text }}>{selected.title}</div>
+              {selected.urgent && <span style={{ fontSize:10, background:"#fef3c7", color:"#d97706", fontWeight:700, borderRadius:4, padding:"2px 6px" }}>🔥 Urgent</span>}
+            </div>
+            <div style={{ fontSize:12, color:T.text3, marginBottom:4 }}>{selected.employer} · {selected.category}</div>
+            <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:8 }}>{selected.salary} RON/zi</div>
+            {selected.description && <div style={{ fontSize:12, color:T.text2, marginBottom:10, lineHeight:1.5 }}>{selected.description}</div>}
+            {selected.skills?.length > 0 && (
+              <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:10 }}>
+                {selected.skills.map(s=><span key={s} style={{ background:`${selected.color||T.green}18`, color:selected.color||T.green, borderRadius:999, padding:"2px 8px", fontSize:10, fontWeight:700 }}>{s}</span>)}
+              </div>
+            )}
+
+            {/* Rute */}
+            <div style={{ marginBottom:10 }}>
+              <div style={{ fontSize:10, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:5 }}>Trasee</div>
+              {[
+                {mode:"🚶", label:"Pietonal",   time:"23 min", color:"#059669"},
+                {mode:"🚲", label:"Bicicletă",  time:"8 min",  color:"#3b82f6"},
+                {mode:"🚗", label:"Mașină",     time:"5 min",  color:"#f59e0b"},
+                {mode:"🚌", label:"Transport",  time:"18 min", color:"#8b5cf6"},
+              ].map(r=>(
+                <div key={r.mode} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"5px 8px", borderRadius:7, marginBottom:3, background:"#fff", border:`1px solid ${T.border}`, cursor:"pointer", fontSize:12 }}
+                  onMouseEnter={e=>e.currentTarget.style.background="#f0fdf4"}
+                  onMouseLeave={e=>e.currentTarget.style.background="#fff"}
+                >
+                  <span>{r.mode} {r.label}</span>
+                  <span style={{ fontWeight:700, color:r.color }}>{r.time}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
               <button onClick={() => { update({ selectedJob: selected }); navigate("escrow"); }} style={{
-                flex:1, padding:"8px", borderRadius:8, border:"none", cursor:"pointer",
+                padding:"8px", borderRadius:8, border:"none", cursor:"pointer",
                 background:T.green, color:"#fff", fontWeight:700, fontSize:12,
-              }}>💰 Escrow</button>
-              <button onClick={() => { update({ selectedJob: selected }); navigate("contract"); }} style={{
-                flex:1, padding:"8px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
-                background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
-              }}>📄 Contract</button>
+              }}>🔒 Aplică + Escrow</button>
+              <div style={{ display:"flex", gap:6 }}>
+                <button onClick={() => { update({ selectedJob: selected }); navigate("contract"); }} style={{
+                  flex:1, padding:"7px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
+                  background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
+                }}>📝 Contract</button>
+                <button onClick={() => navigate("chat")} style={{
+                  flex:1, padding:"7px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
+                  background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
+                }}>💬 Mesaj</button>
+              </div>
             </div>
           </div>
         )}

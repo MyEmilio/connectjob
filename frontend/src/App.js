@@ -7,7 +7,6 @@ import { getSocket } from "./services/socket";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MapPage from "./pages/MapPage";
-import ChatPage from "./pages/ChatPage";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import PostJobPage from "./pages/PostJobPage";
 
@@ -1487,7 +1486,7 @@ function ConnectJobApp() {
       case "home":      return <PageHome      {...props}/>;
       case "map":       return <MapPage       gs={gs} update={update} navigate={navigate}/>;
       case "post_job":  return <PostJobPage navigate={navigate} onSuccess={()=>api.get("/jobs").then(r=>update({jobs:r.data.jobs||r.data})).catch(()=>{})}/>;
-      case "chat":      return <ChatPage/>;
+      case "chat":      return <PageChat     {...props}/>;
       case "escrow":    return <PageEscrow    {...props}/>;
       case "contract":  return <PageContract  {...props}/>;
       case "reviews":   return <PageReviews   {...props}/>;
