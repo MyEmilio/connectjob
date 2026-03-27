@@ -497,7 +497,11 @@ function PageChat({ gs, update, navigate }) {
   const [interim, setInterim]   = useState("");
   const [recTime, setRecTime]   = useState(0);
   const [voiceLang, setVoiceLang] = useState("ro-RO");
-  const [modal, setModal]       = useState(null);
+  const [modal, setModal]       = useState(null); // "whatsapp" | "video" | "report" | "block_confirm"
+  const [reportMsg, setReportMsg] = useState(null); // mesajul raportat (sau null pt user)
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportStatus, setReportStatus] = useState(""); // mesaj feedback
   const recRef = useRef(null);
   const timerRef = useRef(null);
   const bottomRef = useRef(null);
@@ -633,6 +637,71 @@ function PageChat({ gs, update, navigate }) {
         </div>
       )}
 
+      {/* Modal raportare */}
+      {modal==="report" && (
+        <div style={{ position:"fixed",inset:0,zIndex:999,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(6px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16 }}>
+          <div style={{ background:T.white,borderRadius:20,padding:"28px 24px",maxWidth:440,width:"100%",animation:"slideUpModal 0.3s ease" }}>
+            {reportStatus ? (
+              <div style={{ textAlign:"center" }}>
+                <div style={{ fontSize:52,marginBottom:12 }}>✅</div>
+                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:"0 0 8px" }}>Raport trimis!</h3>
+                <p style={{ fontSize:13,color:T.text2,marginBottom:20 }}>{reportStatus}</p>
+                <Btn onClick={()=>setModal(null)} color={T.green} style={{width:"100%",justifyContent:"center"}}>Închide</Btn>
+              </div>
+            ) : (
+              <>
+                <div style={{ textAlign:"center",marginBottom:20 }}>
+                  <div style={{ fontSize:40,marginBottom:8 }}>⚠️</div>
+                  <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:"0 0 4px" }}>Raportează utilizatorul</h3>
+                  <p style={{ fontSize:12,color:T.text3 }}>
+                    {active ? (String(active.user1_id)===String(gs.user?.id)?active.user2_name:active.user1_name) : ""}
+                  </p>
+                </div>
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",marginBottom:8 }}>Motiv</div>
+                  <div style={{ display:"flex",flexDirection:"column",gap:6 }}>
+                    {[
+                      {k:"limbaj_ofensiv", l:"🤬 Limbaj ofensiv / injurii"},
+                      {k:"rasism",         l:"🚫 Rasism / discriminare"},
+                      {k:"hartuire",       l:"😨 Hărțuire / amenințări"},
+                      {k:"spam",           l:"📢 Spam / reclame"},
+                      {k:"frauda",         l:"💸 Tentativă de fraudă"},
+                      {k:"altele",         l:"❓ Altele"},
+                    ].map(r=>(
+                      <div key={r.k} onClick={()=>setReportReason(r.k)} style={{ display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:9,cursor:"pointer",border:reportReason===r.k?`2px solid ${T.red}`:`1.5px solid ${T.border}`,background:reportReason===r.k?"#fef2f2":"#fafaf9",transition:"all 0.15s" }}>
+                        <div style={{ width:16,height:16,borderRadius:"50%",border:reportReason===r.k?"none":`2px solid ${T.border}`,background:reportReason===r.k?T.red:"transparent",flexShrink:0 }}/>
+                        <span style={{ fontSize:13,color:reportReason===r.k?T.red:T.text2,fontWeight:reportReason===r.k?700:400 }}>{r.l}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <textarea value={reportDetails} onChange={e=>setReportDetails(e.target.value)} placeholder="Detalii suplimentare (opțional)..." rows={2} style={{ width:"100%",borderRadius:9,border:`1.5px solid ${T.border}`,padding:"8px 12px",fontSize:13,resize:"none",outline:"none",marginBottom:14,boxSizing:"border-box",fontFamily:"DM Sans,sans-serif" }} onFocus={e=>e.target.style.border=`1.5px solid ${T.red}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
+                <div style={{ display:"flex",gap:8,marginBottom:10 }}>
+                  <Btn onClick={async()=>{
+                    if(!reportReason) return;
+                    const otherId = active ? (String(active.user1_id)===String(gs.user?.id)?active.user2_id:active.user1_id) : null;
+                    if(!otherId) return;
+                    try {
+                      const res = await api.post("/reports",{ reported_user_id:otherId, message_id: reportMsg?.id||null, reason:reportReason, details:reportDetails });
+                      setReportStatus(res.data.message||"Raport trimis. Echipa va analiza în 24h.");
+                    } catch(e){ setReportStatus(e.response?.data?.error||"Raport trimis."); }
+                  }} disabled={!reportReason} color={T.red} style={{flex:1,justifyContent:"center"}}>⚠️ Trimite raport</Btn>
+                  <Btn onClick={async()=>{
+                    const otherId = active ? (String(active.user1_id)===String(gs.user?.id)?active.user2_id:active.user1_id) : null;
+                    if(!otherId) return;
+                    try {
+                      await api.post(`/reports/block/${otherId}`);
+                      setReportStatus("Utilizator blocat. Nu vei mai primi mesaje de la acesta.");
+                    } catch(e){ setReportStatus(e.response?.data?.error||"Blocat."); }
+                  }} variant="outline" style={{flex:1,justifyContent:"center",borderColor:"#fecaca",color:T.red}}>🚫 Blochează</Btn>
+                </div>
+                <Btn variant="ghost" onClick={()=>setModal(null)} style={{width:"100%",justifyContent:"center"}}>Anulează</Btn>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <div style={{ width:270,background:T.dark,display:"flex",flexDirection:"column",flexShrink:0 }}>
         <div style={{ padding:"14px 12px 10px" }}>
@@ -696,6 +765,7 @@ function PageChat({ gs, update, navigate }) {
           <div style={{ display:"flex",gap:6 }}>
             <button onClick={()=>setModal("whatsapp")} style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:18,background:"linear-gradient(135deg,#25d366,#128c7e)",display:"flex",alignItems:"center",justifyContent:"center" }}>💬</button>
             <button onClick={()=>setModal("video")} style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:18,background:`linear-gradient(135deg,${T.blue},${T.blueDark})`,display:"flex",alignItems:"center",justifyContent:"center" }}>📹</button>
+            <button onClick={()=>{ setReportMsg(null); setReportReason(""); setReportDetails(""); setReportStatus(""); setModal("report"); }} title="Raportează utilizatorul" style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:16,background:"#fef2f2",border:"1px solid #fecaca",display:"flex",alignItems:"center",justifyContent:"center" }}>⚠️</button>
           </div>
         </div>
 
@@ -1414,6 +1484,153 @@ function PageAnalytics({ gs }) {
 
 
 // ══════════════════════════════════════════════════════════════
+//  PAGE: ADMIN — Moderare rapoarte
+// ══════════════════════════════════════════════════════════════
+function PageAdmin({ gs }) {
+  const [reports, setReports]   = useState([]);
+  const [stats, setStats]       = useState(null);
+  const [filter, setFilter]     = useState("pending");
+  const [loading, setLoading]   = useState(true);
+  const [actioning, setActioning] = useState(null);
+
+  const REASONS = {
+    limbaj_ofensiv:"🤬 Limbaj ofensiv", rasism:"🚫 Rasism",
+    hartuire:"😨 Hărțuire", spam:"📢 Spam",
+    frauda:"💸 Fraudă", altele:"❓ Altele",
+  };
+
+  useEffect(()=>{
+    setLoading(true);
+    Promise.all([
+      api.get(`/reports?status=${filter}`),
+      api.get("/reports/stats"),
+    ]).then(([r, s])=>{ setReports(r.data); setStats(s.data); })
+      .catch(()=>{})
+      .finally(()=>setLoading(false));
+  },[filter]);
+
+  const takeAction = async (reportId, action) => {
+    setActioning(reportId);
+    const labels = { warn:"Avertisment trimis", suspend:"Cont suspendat", ban:"Cont banat", dismiss:"Raport respins" };
+    try {
+      await api.post(`/reports/${reportId}/action`,{ action, note: labels[action] });
+      setReports(p=>p.filter(r=>r.id!==reportId));
+    } catch(e){ alert(e.response?.data?.error||"Eroare"); }
+    finally { setActioning(null); }
+  };
+
+  if (gs.user.role !== "admin") return (
+    <div style={{ textAlign:"center", padding:"60px 20px" }}>
+      <div style={{ fontSize:48, marginBottom:16 }}>🔒</div>
+      <h3 style={{ fontFamily:"Outfit,sans-serif", color:T.text }}>Acces rezervat administratorilor</h3>
+    </div>
+  );
+
+  return (
+    <div style={{ animation:"fadeIn 0.3s ease" }}>
+      <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text, margin:"0 0 20px" }}>🛡️ Panou Moderare</h2>
+
+      {/* Stats */}
+      {stats && (
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))", gap:12, marginBottom:22 }}>
+          {[
+            {l:"Total rapoarte", v:stats.total, c:T.blue},
+            {l:"În așteptare",   v:stats.pending, c:T.amber},
+            {l:"Acționate",      v:stats.actioned, c:T.green},
+            {l:"Suspendate",     v:stats.suspended, c:T.orange},
+            {l:"Banate",         v:stats.banned, c:T.red},
+          ].map(s=>(
+            <Card key={s.l} style={{ padding:"14px 16px", textAlign:"center" }}>
+              <div style={{ fontFamily:"Outfit,sans-serif", fontSize:28, fontWeight:800, color:s.c }}>{s.v}</div>
+              <div style={{ fontSize:11, color:T.text3 }}>{s.l}</div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Filter tabs */}
+      <div style={{ display:"flex", gap:6, marginBottom:16 }}>
+        {["pending","reviewed","actioned","dismissed"].map(f=>(
+          <button key={f} onClick={()=>setFilter(f)} style={{ padding:"6px 14px", borderRadius:999, border:"none", cursor:"pointer", fontSize:12, fontWeight:700, background:filter===f?T.green:"#f5f5f4", color:filter===f?"#fff":T.text2 }}>
+            {f==="pending"?"⏳ În așteptare":f==="actioned"?"✅ Acționate":f==="dismissed"?"❌ Respinse":"👀 Revizuite"}
+          </button>
+        ))}
+      </div>
+
+      {loading && <Loader text="Se incarca rapoartele..."/>}
+
+      {!loading && reports.length === 0 && (
+        <Card style={{ padding:40, textAlign:"center" }}>
+          <div style={{ fontSize:36, marginBottom:8 }}>✅</div>
+          <div style={{ color:T.text3 }}>Niciun raport în această categorie</div>
+        </Card>
+      )}
+
+      <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+        {reports.map(r=>(
+          <Card key={r.id} style={{ padding:"16px 20px" }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ width:36, height:36, borderRadius:"50%", background:`${T.red}15`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>⚠️</div>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:14, color:T.text }}>{REASONS[r.reason]||r.reason}</div>
+                  <div style={{ fontSize:11, color:T.text3 }}>{new Date(r.created_at).toLocaleDateString("ro",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>
+                </div>
+              </div>
+              <Badge color={r.status==="pending"?T.amber:r.status==="actioned"?T.green:T.text3}>
+                {r.status==="pending"?"⏳ Pending":r.status==="actioned"?"✅ Acționat":"❌ Respins"}
+              </Badge>
+            </div>
+
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:12 }}>
+              <div style={{ background:"#fafaf9", borderRadius:8, padding:"10px 12px" }}>
+                <div style={{ fontSize:10, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:3 }}>Raportat de</div>
+                <div style={{ fontSize:13, fontWeight:600, color:T.text }}>{r.reporter_id?.name||"?"}</div>
+                <div style={{ fontSize:11, color:T.text3 }}>{r.reporter_id?.email}</div>
+              </div>
+              <div style={{ background:"#fef2f2", borderRadius:8, padding:"10px 12px", border:"1px solid #fecaca" }}>
+                <div style={{ fontSize:10, fontWeight:700, color:T.red, textTransform:"uppercase", marginBottom:3 }}>Utilizator raportat</div>
+                <div style={{ fontSize:13, fontWeight:600, color:T.text }}>{r.reported_user_id?.name||"?"}</div>
+                <div style={{ fontSize:11, color:T.text3 }}>{r.reported_user_id?.email}</div>
+                <div style={{ display:"flex", gap:6, marginTop:4 }}>
+                  <Badge color={r.reported_user_id?.status==="active"?T.green:T.red}>{r.reported_user_id?.status||"active"}</Badge>
+                  {r.reported_user_id?.warnings_count > 0 && <Badge color={T.amber}>⚠️ {r.reported_user_id.warnings_count} avert.</Badge>}
+                </div>
+              </div>
+            </div>
+
+            {r.details && (
+              <div style={{ background:"#f8fafc", borderRadius:8, padding:"8px 12px", marginBottom:12, fontSize:12, color:T.text2, borderLeft:`3px solid ${T.amber}` }}>
+                "{r.details}"
+              </div>
+            )}
+
+            {r.status === "pending" && (
+              <div style={{ display:"flex", gap:7, flexWrap:"wrap" }}>
+                <button onClick={()=>takeAction(r.id,"warn")} disabled={actioning===r.id} style={{ padding:"6px 12px", borderRadius:8, border:`1px solid ${T.amber}`, cursor:"pointer", background:"#fef3c7", color:"#92400e", fontSize:12, fontWeight:700 }}>
+                  ⚠️ Avertisment
+                </button>
+                <button onClick={()=>takeAction(r.id,"suspend")} disabled={actioning===r.id} style={{ padding:"6px 12px", borderRadius:8, border:`1px solid ${T.orange}`, cursor:"pointer", background:"#fff7ed", color:T.orange, fontSize:12, fontWeight:700 }}>
+                  ⏸️ Suspendare
+                </button>
+                <button onClick={()=>takeAction(r.id,"ban")} disabled={actioning===r.id} style={{ padding:"6px 12px", borderRadius:8, border:`1px solid ${T.red}`, cursor:"pointer", background:"#fef2f2", color:T.red, fontSize:12, fontWeight:700 }}>
+                  🚫 Ban permanent
+                </button>
+                <button onClick={()=>takeAction(r.id,"dismiss")} disabled={actioning===r.id} style={{ padding:"6px 12px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer", background:"#fafaf9", color:T.text3, fontSize:12, fontWeight:600 }}>
+                  ✕ Respinge
+                </button>
+              </div>
+            )}
+            {r.action_taken && <div style={{ marginTop:8, fontSize:11, color:T.green, fontWeight:600 }}>✓ {r.action_taken}</div>}
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════
 //  MAIN APP — Navigation + React Router
 // ══════════════════════════════════════════════════════════════
 function ConnectJobApp() {
@@ -1465,6 +1682,7 @@ function ConnectJobApp() {
     { key:"analytics", icon:"📊", label:t("nav_analytics") },
     { key:"post_job",  icon:"➕", label:t("nav_post_job"),  hidden: gs.user.role !== "employer" },
     { key:"verify",    icon: gs.user.verified?"✅":"🛡️", label: gs.user.verified?t("nav_verified"):t("nav_verify"), badge: gs.user.verified?null:"!" },
+    { key:"admin",     icon:"🛡️", label:"Moderare",          hidden: gs.user.role !== "admin" },
   ].filter(item => !item.hidden);
 
   const PAGE_TITLES = {
@@ -1477,6 +1695,7 @@ function ConnectJobApp() {
     analytics: t("nav_analytics"),
     post_job:  t("nav_post_job"),
     verify:    t("nav_verify"),
+    admin:     "🛡️ Moderare",
   };
 
   const renderPage = () => {
@@ -1492,6 +1711,7 @@ function ConnectJobApp() {
       case "reviews":   return <PageReviews   {...props}/>;
       case "analytics": return <PageAnalytics {...props}/>;
       case "verify":    return <PageVerify    {...props}/>;
+      case "admin":     return <PageAdmin     {...props}/>;
       default:          return <PageHome      {...props}/>;
     }
   };
