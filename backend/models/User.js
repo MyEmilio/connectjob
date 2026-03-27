@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema({
   reviews_count: { type: Number, default: 0 },
   verified:      { type: Boolean, default: false },
   avatar:        { type: String, default: "" },
+  status:        { type: String, enum: ["active", "suspended", "banned"], default: "active" },
+  warnings_count: { type: Number, default: 0 },
+  blocked_users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 }, { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } });
 
 userSchema.set("toJSON", {
