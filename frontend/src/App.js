@@ -506,20 +506,67 @@ function PageChat({ gs, update, navigate }) {
   const timerRef = useRef(null);
   const bottomRef = useRef(null);
 
+  const [isDemo, setIsDemo] = useState(false);
   const active = convs.find(c=>c.id===activeId);
   const fmt = s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+
+  // Date demo pentru cand nu exista conversatii reale
+  const DEMO_CONVS = [
+    { id:"demo1", user1_id:"me", user2_id:"other1", user2_name:"SC CleanPro SRL", user2_initials:"CP", job_title:"Curățare piscinã", last_msg:"Ești disponibil mâine?", unread:2 },
+    { id:"demo2", user1_id:"me", user2_id:"other2", user2_name:"Maria Constantin", user2_initials:"MC", job_title:"Plimbare câini", last_msg:"Câinii sunt doi labradors 🐕", unread:0 },
+    { id:"demo3", user1_id:"me", user2_id:"other3", user2_name:"Andrei Electricul", user2_initials:"AE", job_title:"Reparații electrice", last_msg:"Pot începe luni.", unread:1 },
+  ];
+  const DEMO_MESSAGES = {
+    demo1:[
+      {id:1,sender_id:"other1",sender_initials:"CP",text:"Bună ziua! Am văzut că ai aplicat pentru curățare piscinã.",created_at:new Date().toISOString()},
+      {id:2,sender_id:"me",sender_initials:"AI",text:"Da! Sunt interesat. Am 3 ani experiență.",created_at:new Date().toISOString()},
+      {id:3,sender_id:"other1",sender_initials:"CP",text:"Excelent! Ce program preferi?",created_at:new Date().toISOString()},
+      {id:4,sender_id:"me",sender_initials:"AI",text:"Prefer dimineața, 8-12.",created_at:new Date().toISOString()},
+      {id:5,sender_id:"other1",sender_initials:"CP",text:"Ești disponibil mâine?",created_at:new Date().toISOString()},
+    ],
+    demo2:[
+      {id:1,sender_id:"other2",sender_initials:"MC",text:"Salut! Ai experiență cu câini mari?",created_at:new Date().toISOString()},
+      {id:2,sender_id:"me",sender_initials:"AI",text:"Da, am crescut cu câini mari!",created_at:new Date().toISOString()},
+      {id:3,sender_id:"other2",sender_initials:"MC",text:"Câinii mei sunt doi labradors 🐕",created_at:new Date().toISOString()},
+    ],
+    demo3:[
+      {id:1,sender_id:"me",sender_initials:"AI",text:"Bună ziua! Ai autorizație ANRE?",created_at:new Date().toISOString()},
+      {id:2,sender_id:"other3",sender_initials:"AE",text:"Da, 5 ani experiență. Am autorizație.",created_at:new Date().toISOString()},
+      {id:3,sender_id:"other3",sender_initials:"AE",text:"Pot începe luni, am toate sculele.",created_at:new Date().toISOString()},
+    ],
+  };
 
   // Incarca conversatii din API
   useEffect(()=>{
     api.get("/messages/conversations").then(r=>{
-      setConvs(r.data);
-      if(r.data.length>0) setActiveId(r.data[0].id);
-    }).catch(()=>{});
+      if(r.data && r.data.length>0){
+        setConvs(r.data);
+        setActiveId(r.data[0].id);
+        setIsDemo(false);
+      } else {
+        // Fallback demo cand nu exista conversatii reale
+        setConvs(DEMO_CONVS);
+        setActiveId("demo1");
+        setMessages(DEMO_MESSAGES["demo1"]);
+        setIsDemo(true);
+      }
+    }).catch(()=>{
+      setConvs(DEMO_CONVS);
+      setActiveId("demo1");
+      setMessages(DEMO_MESSAGES["demo1"]);
+      setIsDemo(true);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
   // Incarca mesajele conversatiei active
   useEffect(()=>{
     if(!activeId) return;
+    if(isDemo){
+      setMessages(DEMO_MESSAGES[activeId]||[]);
+      setConvs(p=>p.map(c=>c.id===activeId?{...c,unread:0}:c));
+      return;
+    }
     api.get(`/messages/conversations/${activeId}`).then(r=>setMessages(r.data)).catch(()=>{});
     setConvs(p=>p.map(c=>c.id===activeId?{...c,unread:0}:c));
     const socket = getSocket();
@@ -576,11 +623,26 @@ function PageChat({ gs, update, navigate }) {
     if(!txt||!activeId) return;
     if(isListening) stopVoice();
     setInput(""); setInterim("");
+
+    if(isDemo){
+      // Mod demo: adauga mesajul local si simuleaza raspuns
+      const myMsg={id:Date.now(),sender_id:"me",sender_initials:gs.user?.initials||"EU",text:txt,created_at:new Date().toISOString()};
+      setMessages(p=>[...p, myMsg]);
+      setConvs(p=>p.map(c=>c.id===activeId?{...c,last_msg:txt}:c));
+      setTyping(true);
+      setTimeout(()=>{
+        setTyping(false);
+        const rep=["Mulțumesc! Revin curând.","Perfect, vorbim mâine!","Înțeles, te sun.","Excelent!"][Math.floor(Math.random()*4)];
+        const repMsg={id:Date.now()+1,sender_id:"other",sender_initials:"??",text:rep,created_at:new Date().toISOString()};
+        setMessages(p=>[...p, repMsg]);
+      },1000+Math.random()*800);
+      return;
+    }
+
     const socket = getSocket();
     if(socket) {
       socket.emit("send_message", { conversation_id: activeId, text: txt });
     } else {
-      // fallback HTTP daca socket-ul nu e conectat
       api.post(`/messages/conversations/${activeId}/send`, { text: txt })
         .then(r=>setMessages(p=>[...p, r.data]))
         .catch(()=>{});
@@ -768,6 +830,14 @@ function PageChat({ gs, update, navigate }) {
             <button onClick={()=>{ setReportMsg(null); setReportReason(""); setReportDetails(""); setReportStatus(""); setModal("report"); }} title="Raportează utilizatorul" style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:16,background:"#fef2f2",border:"1px solid #fecaca",display:"flex",alignItems:"center",justifyContent:"center" }}>⚠️</button>
           </div>
         </div>
+
+        {/* Banner demo */}
+        {isDemo && (
+          <div style={{ margin:"6px 12px 0",background:"#fef3c7",borderRadius:8,padding:"5px 12px",display:"flex",alignItems:"center",gap:8,border:"1px solid #fde68a",fontSize:11,color:"#92400e" }}>
+            <span>⚡</span>
+            <span><strong>Mod demonstratie</strong> — Aplică la un job pentru a porni o conversație reală.</span>
+          </div>
+        )}
 
         {/* Match banner */}
         <div style={{ margin:"8px 12px 0",background:"linear-gradient(135deg,#f0fdf4,#dcfce7)",borderRadius:10,padding:"7px 14px",display:"flex",alignItems:"center",gap:8,border:"1px solid #bbf7d0" }}>
