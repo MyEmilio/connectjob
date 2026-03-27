@@ -7,8 +7,8 @@ const router = express.Router();
 // GET /api/jobs
 router.get("/", async (req, res) => {
   try {
-    const { category, type, urgent, lat, lng, radius = 50, limit = 100, offset = 0 } = req.query;
-    let jobs = await db.getJobs({ category, type, urgent });
+    const { category, type, urgent, second_job, work_duration, lat, lng, radius = 50, limit = 100, offset = 0 } = req.query;
+    let jobs = await db.getJobs({ category, type, urgent, second_job, work_duration });
 
     if (lat && lng) {
       const toLat = parseFloat(lat), toLng = parseFloat(lng);
@@ -82,6 +82,20 @@ router.delete("/:id", auth, async (req, res) => {
     if (String(job.employer_id) !== String(req.user.id)) return res.status(403).json({ error: "Nu esti proprietarul" });
     await db.updateJob(req.params.id, { active: false });
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/jobs/:id/promote — Admin promovează / demovează un anunț
+router.post("/:id/promote", auth, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") return res.status(403).json({ error: "Acces rezervat administratorilor" });
+    const job = await db.findJobById(req.params.id);
+    if (!job) return res.status(404).json({ error: "Job negasit" });
+    const newState = req.body.promoted !== undefined ? !!req.body.promoted : !job.promoted;
+    await db.updateJob(req.params.id, { promoted: newState });
+    res.json({ success: true, promoted: newState });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

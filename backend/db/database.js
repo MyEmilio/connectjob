@@ -32,12 +32,14 @@ const db = {
   async getJobs(filter = {}) {
     const query = { active: true };
     if (filter.category && filter.category !== "Toate") query.category = filter.category;
-    if (filter.type)   query.type = filter.type;
-    if (filter.urgent) query.urgent = true;
+    if (filter.type)          query.type = filter.type;
+    if (filter.urgent)        query.urgent = true;
+    if (filter.second_job)    query.second_job = true;
+    if (filter.work_duration) query.work_duration = filter.work_duration;
 
     const jobs = await Job.find(query)
       .populate("employer_id", "name initials rating phone")
-      .sort({ created_at: -1 })
+      .sort({ promoted: -1, created_at: -1 })
       .lean({ virtuals: true });
 
     return jobs.map(j => ({
@@ -46,6 +48,9 @@ const db = {
       employer_initials: j.employer_id?.initials,
       employer_rating:   j.employer_id?.rating,
       employer_phone:    j.employer_id?.phone,
+      promoted:          j.promoted || false,
+      second_job:        j.second_job || false,
+      work_duration:     j.work_duration || "zile",
     }));
   },
   async findJobById(id) {

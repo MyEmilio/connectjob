@@ -37,6 +37,7 @@ const useGlobalState = () => {
     signedContracts: [],
     notifications: 3,
     unreadMessages: 2,
+    jobsCategory: "",
   });
   const update = (patch) => setState(s => ({...s, ...patch}));
   return [state, update];
@@ -51,6 +52,22 @@ const JOBS = [
   { id:5, title:"Livrare colete",      lat:46.7820, lng:23.6300, salary:90,  category:"Transport",  employer:"SpeedCourier SRL",  employerInitials:"SC", rating:4.5, reviews:87, distance:4.2, color:T.blue,   icon:"📦", type:"full-time", urgent:true,  phone:"+40766333444", description:"Livrare colete în zona Cluj. Necesar permis categoria B.", skills:["Șofer","GPS"] },
   { id:6, title:"Baby-sitting",        lat:46.7490, lng:23.5800, salary:60,  category:"Îngrijire",  employer:"Elena Popescu",     employerInitials:"EP", rating:5.0, reviews:12, distance:0.9, color:T.pink,   icon:"👶", type:"part-time", urgent:false, phone:"+40777555666", description:"Îngrijire copil 3 ani, weekenduri.", skills:["Îngrijire","Răbdare"] },
   { id:7, title:"Zugrăvit / Vopsit",  lat:46.7700, lng:23.6400, salary:200, category:"Construcții", employer:"PictorPro SRL",     employerInitials:"PP", rating:4.8, reviews:41, distance:3.1, color:T.orange, icon:"🖌️", type:"full-time",urgent:true,  phone:"+40788777888", description:"Zugrăvit interior/exterior. Materiale asigurate.", skills:["Zugrăvit","Atenție"] },
+];
+
+// ── Categorii OLX-style ───────────────────────────────────────
+const CATEGORIES = [
+  { key:"constructii",  icon:"🏗️",  label:"Construcții & Renovări",    color:"#ea580c", sub:["Zidărie","Zugrăvit","Instalații","Tâmplărie","Electricitate","Sanitare","Gresie"] },
+  { key:"curatenie",    icon:"🧹",  label:"Curățenie",                 color:"#059669", sub:["Casnic","Birouri","Piscine","Geamuri","Post-construcție","Mochete"] },
+  { key:"ingrijire",    icon:"🤱",  label:"Îngrijire Persoane",        color:"#ec4899", sub:["Baby-sitting","Vârstnici","Persoane cu dizabilități","Au pair"] },
+  { key:"animale",      icon:"🐾",  label:"Animale de companie",       color:"#7c3aed", sub:["Plimbare","Îngrijire","Dresaj","Pet-sitting","Veterinar"] },
+  { key:"gradina",      icon:"🌿",  label:"Grădini & Exterior",        color:"#16a34a", sub:["Tuns gazon","Plantat","Irigații","Tăiat arbori","Design grădină"] },
+  { key:"transport",    icon:"🚗",  label:"Transport & Livrări",       color:"#3b82f6", sub:["Livrări colete","Taxi","Șofer personal","Mutări","Curierat"] },
+  { key:"it",           icon:"💻",  label:"IT & Digital",              color:"#6366f1", sub:["Web & App","Reparații PC","Rețele","SEO","Social Media","Design"] },
+  { key:"educatie",     icon:"📚",  label:"Educație & Cursuri",        color:"#f59e0b", sub:["Meditații","Limbi străine","Muzică","Sport & Fitness","Arte"] },
+  { key:"gastronomie",  icon:"👨‍🍳", label:"Gastronomie",               color:"#ef4444", sub:["Bucătar","Ospătar","Catering","Barman","Patiserie"] },
+  { key:"frumusete",    icon:"💅",  label:"Frumusețe & Wellness",      color:"#db2777", sub:["Coafor","Estetică","Manichiură","Masaj","Make-up"] },
+  { key:"reparatii",    icon:"🔧",  label:"Reparații & Service",       color:"#92400e", sub:["Auto","Electrocasnice","Mobilier","Calculatoare","Ceasuri"] },
+  { key:"evenimente",   icon:"🎉",  label:"Evenimente & Divertisment", color:"#0891b2", sub:["Fotograf","Videograf","Muzician","Animator","Organizator"] },
 ];
 
 const CONVERSATIONS = [
@@ -166,105 +183,162 @@ function Sparkline({ data, color=T.green, height=36 }) {
 }
 
 
+function JobCardRow({ job, promoted=false, navigate, update }) {
+  return (
+    <div onClick={()=>{ update({selectedJob:job}); navigate("map"); }}
+      style={{ background:T.white, borderRadius:12, border:promoted?`2px solid ${T.amber}`:`1.5px solid ${T.border}`, padding:"12px 14px", cursor:"pointer", display:"flex", alignItems:"center", gap:12, transition:"all 0.15s", boxShadow:promoted?`0 4px 16px ${T.amber}22`:"none", position:"relative" }}
+      onMouseEnter={e=>{ e.currentTarget.style.borderColor=promoted?T.amber:job.color+"66"; e.currentTarget.style.background="#fafffe"; e.currentTarget.style.boxShadow=`0 4px 16px ${job.color}22`; }}
+      onMouseLeave={e=>{ e.currentTarget.style.borderColor=promoted?T.amber:T.border; e.currentTarget.style.background=T.white; e.currentTarget.style.boxShadow=promoted?`0 4px 16px ${T.amber}22`:"none"; }}
+    >
+      {promoted && <div style={{ position:"absolute",top:-7,left:12,background:`linear-gradient(135deg,${T.amber},${T.amberDark})`,color:"#fff",borderRadius:999,padding:"2px 9px",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.08em" }}>⭐ PROMOVAT</div>}
+      <div style={{ width:46,height:46,borderRadius:12,background:`${job.color||T.green}15`,border:`1.5px solid ${job.color||T.green}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0 }}>{job.icon||"💼"}</div>
+      <div style={{ flex:1,minWidth:0 }}>
+        <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:2 }}>
+          <div style={{ fontWeight:700,fontSize:14,color:T.text }}>{job.title}</div>
+          {job.urgent&&<Badge color={T.red}>🔥 Urgent</Badge>}
+          {job.second_job&&<Badge color={T.blue}>💼 2nd job</Badge>}
+        </div>
+        <div style={{ fontSize:11,color:T.text3 }}>👤 {job.employer||"—"} · 📂 {job.category||"Diverse"} · {job.type==="full-time"?"Full-time":"Part-time"}{job.work_duration?` · ${job.work_duration}`:""}</div>
+        <div style={{ display:"flex",gap:4,marginTop:4,flexWrap:"wrap" }}>
+          {(job.skills||[]).slice(0,3).map(s=><Badge key={s} color={job.color||T.green}>{s}</Badge>)}
+        </div>
+      </div>
+      <div style={{ textAlign:"right",flexShrink:0 }}>
+        <div style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:job.color||T.green }}>{job.salary}</div>
+        <div style={{ fontSize:10,color:T.text3 }}>RON/zi</div>
+        {job.distance&&<div style={{ fontSize:11,color:T.text3,marginTop:2 }}>📍 {job.distance}km</div>}
+      </div>
+    </div>
+  );
+}
+
 // ══════════════════════════════════════════════════════════════
 //  PAGE: HOME / DASHBOARD
 // ══════════════════════════════════════════════════════════════
 function PageHome({ gs, update, navigate }) {
-  const [gs_state] = [gs];
-  const totalApps=54, totalViews=746, matchJobs=3;
+  const allJobs = gs.jobs || [];
+  const promotedJobs = allJobs.filter(j => j.promoted);
+  const recentJobs = allJobs.slice(0, 6);
 
-  const quickStats = [
-    { icon:"👁️", label:"Vizualizări profil", value:totalViews, trend:"+23%", color:T.blue,   spark:[45,52,48,61,55,70,68,75,80,72,88,95] },
-    { icon:"📨", label:"Aplicări trimise",   value:totalApps,  trend:"+12%", color:T.green,  spark:[3,5,4,7,6,9,8,10,12,11,14,15] },
-    { icon:"🎯", label:"Match-uri noi",      value:matchJobs,  trend:"+2",   color:T.purple, spark:[1,1,2,1,2,2,3,2,3,3,4,3] },
-    { icon:"⭐", label:"Rating mediu",       value:"4.9",      trend:"+0.1", color:T.amber,  spark:[4.5,4.6,4.6,4.7,4.7,4.8,4.8,4.9,4.9,4.9,4.9,4.9] },
-  ];
-
-  const recommendedJobs = (gs.jobs||[]).filter(j=>j.distance<3).slice(0,4);
+  const getCatCount = (cat) => allJobs.filter(j => {
+    const jc = (j.category||"").toLowerCase();
+    return jc === cat.key || jc === cat.label.toLowerCase() || cat.label.toLowerCase().includes(jc) || jc.includes(cat.key);
+  }).length;
 
   return (
     <div style={{ animation:"fadeIn 0.3s ease" }}>
-      {/* Hero greeting */}
-      <div style={{
-        background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`,
-        borderRadius:20, padding:"28px 28px 24px", marginBottom:24,
-        position:"relative", overflow:"hidden",
-      }}>
-        <div style={{ position:"absolute",top:-40,right:-40,width:200,height:200,borderRadius:"50%",background:"rgba(5,150,105,0.08)" }}/>
-        <div style={{ position:"absolute",bottom:-60,left:-20,width:160,height:160,borderRadius:"50%",background:"rgba(5,150,105,0.05)" }}/>
-        <div style={{ position:"relative" }}>
-          <div style={{ fontSize:13, color:"#64748b", marginBottom:6 }}>
-            {new Date().toLocaleDateString("ro",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}
+      {/* Compact hero */}
+      <div style={{ background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`, borderRadius:18, padding:"22px 26px", marginBottom:24, position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute",top:-40,right:-40,width:180,height:180,borderRadius:"50%",background:"rgba(5,150,105,0.08)" }}/>
+        <div style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
+          <div>
+            <div style={{ fontSize:12,color:"#64748b",marginBottom:4 }}>{new Date().toLocaleDateString("ro",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
+            <h1 style={{ fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:"#f1f5f9",margin:"0 0 6px" }}>Bună, {gs.user.name.split(" ")[0]}! 👋</h1>
+            <p style={{ color:"#94a3b8",fontSize:13,margin:0 }}>
+              {allJobs.length > 0 ? <><strong style={{color:T.greenLight}}>{allJobs.length} anunțuri</strong> disponibile în zona ta</> : "Găsește servicii și joburi în zona ta"}
+            </p>
           </div>
-          <h1 style={{ fontFamily:"Outfit,sans-serif", fontSize:26, fontWeight:800, color:"#f1f5f9", margin:"0 0 8px" }}>
-            Bună ziua, {gs.user.name.split(" ")[0]}! 👋
-          </h1>
-          <p style={{ color:"#94a3b8", fontSize:14, margin:"0 0 20px" }}>
-            Ai <strong style={{color:T.greenLight}}>{matchJobs} joburi noi</strong> care se potrivesc profilului tău în Cluj-Napoca.
-          </p>
-          <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-            <Btn onClick={()=>navigate("map")} color={T.green} size="md">🗺️ Vezi joburi pe hartă</Btn>
-            {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="md" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>🛡️ Verifică-ți identitatea</Btn>}
+          <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+            <Btn onClick={()=>navigate("map")} color={T.green} size="sm">🗺️ Pe hartă</Btn>
+            <Btn onClick={()=>{ update({jobsCategory:""}); navigate("jobs"); }} color={T.blue} size="sm">🔍 Caută joburi</Btn>
+            {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>🛡️ Verifică-te</Btn>}
           </div>
-          {!gs.user.verified && (
-            <div style={{ marginTop:16, display:"flex", alignItems:"center", gap:8, background:"rgba(245,158,11,0.1)", borderRadius:10, padding:"8px 14px", border:"1px solid rgba(245,158,11,0.2)" }}>
-              <span style={{fontSize:16}}>⚠️</span>
-              <span style={{ fontSize:12, color:"#fbbf24" }}>Profil neverificat — angajatorii preferă profilele verificate de <strong>3x</strong> mai mult!</span>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Quick stats */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:14, marginBottom:24 }}>
-        {quickStats.map(s=>(
-          <Card key={s.label} style={{ padding:"18px 18px 12px" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
-              <div style={{ width:38,height:38,borderRadius:10,background:`${s.color}15`,border:`1px solid ${s.color}25`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18 }}>{s.icon}</div>
-              <Badge color={s.color}>↑ {s.trend}</Badge>
+      {/* CATEGORY GRID — main feature */}
+      <div style={{ marginBottom:28 }}>
+        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14 }}>
+          <div>
+            <h2 style={{ fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 2px" }}>Categorii de servicii</h2>
+            <p style={{ fontSize:12,color:T.text3,margin:0 }}>Selectează o categorie pentru a vedea toate anunțurile disponibile</p>
+          </div>
+          <Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>Vezi toate →</Btn>
+        </div>
+        <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:10 }}>
+          {CATEGORIES.map(cat => {
+            const cnt = getCatCount(cat);
+            return (
+              <div key={cat.key}
+                onClick={()=>{ update({jobsCategory:cat.key}); navigate("jobs"); }}
+                style={{ background:T.white,borderRadius:14,border:`1.5px solid ${T.border}`,padding:"14px 16px",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:12,position:"relative",overflow:"hidden" }}
+                onMouseEnter={e=>{ e.currentTarget.style.borderColor=cat.color+"88"; e.currentTarget.style.background=cat.color+"08"; e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow=`0 6px 20px ${cat.color}22`; }}
+                onMouseLeave={e=>{ e.currentTarget.style.borderColor=T.border; e.currentTarget.style.background=T.white; e.currentTarget.style.transform=""; e.currentTarget.style.boxShadow=""; }}
+              >
+                <div style={{ width:44,height:44,borderRadius:12,background:`${cat.color}15`,border:`1.5px solid ${cat.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>{cat.icon}</div>
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontWeight:700,fontSize:12,color:T.text,lineHeight:1.3 }}>{cat.label}</div>
+                  {cnt > 0 && <div style={{ fontSize:11,color:cat.color,fontWeight:600,marginTop:2 }}>{cnt} anunț{cnt===1?"":"uri"}</div>}
+                </div>
+              </div>
+            );
+          })}
+          <div
+            onClick={()=>{ update({jobsCategory:"diverse"}); navigate("jobs"); }}
+            style={{ background:"#f8fafc",borderRadius:14,border:`1.5px dashed ${T.border}`,padding:"14px 16px",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:12 }}
+            onMouseEnter={e=>{ e.currentTarget.style.borderColor="#94a3b8"; e.currentTarget.style.background="#f1f5f9"; e.currentTarget.style.transform="translateY(-2px)"; }}
+            onMouseLeave={e=>{ e.currentTarget.style.borderColor=T.border; e.currentTarget.style.background="#f8fafc"; e.currentTarget.style.transform=""; }}
+          >
+            <div style={{ width:44,height:44,borderRadius:12,background:"#e2e8f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>✨</div>
+            <div>
+              <div style={{ fontWeight:700,fontSize:12,color:T.text,lineHeight:1.3 }}>Diverse</div>
+              <div style={{ fontSize:11,color:T.text3,marginTop:2 }}>Alte servicii</div>
             </div>
-            <div style={{ fontFamily:"Outfit,sans-serif", fontSize:26, fontWeight:800, color:T.text, marginBottom:2 }}>{s.value}</div>
-            <div style={{ fontSize:12, color:T.text3, marginBottom:10 }}>{s.label}</div>
-            <Sparkline data={s.spark} color={s.color}/>
-          </Card>
-        ))}
+          </div>
+        </div>
       </div>
 
       {/* Two columns */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 340px", gap:16 }}>
-        {/* Recommended jobs */}
-        <Card>
-          <div style={{ padding:"16px 20px 12px", borderBottom:`1px solid ${T.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-            <h3 style={{ fontFamily:"Outfit,sans-serif", fontSize:16, fontWeight:700, color:T.text, margin:0 }}>🎯 Joburi recomandate pentru tine</h3>
-            <Btn variant="ghost" onClick={()=>navigate("map")} size="sm">Vezi toate →</Btn>
-          </div>
+      <div style={{ display:"grid",gridTemplateColumns:"1fr 320px",gap:16 }}>
+        <div>
+          {promotedJobs.length > 0 && (
+            <div style={{ marginBottom:20 }}>
+              <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
+                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.amber,margin:0 }}>⭐ Anunțuri Promovate</h3>
+                <div style={{ flex:1,height:1,background:`${T.amber}44` }}/>
+              </div>
+              <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                {promotedJobs.slice(0,3).map(job=><JobCardRow key={job.id||job._id} job={job} promoted navigate={navigate} update={update}/>)}
+              </div>
+            </div>
+          )}
           <div>
-            {recommendedJobs.map((job,i)=>(
-              <div key={job.id} onClick={()=>{ update({selectedJob:job}); navigate("map"); }}
-                style={{ display:"flex",alignItems:"center",gap:12,padding:"12px 20px",borderBottom:i<recommendedJobs.length-1?`1px solid ${T.border}`:"none",cursor:"pointer",transition:"background 0.12s" }}
-                onMouseEnter={e=>e.currentTarget.style.background="#fafffe"}
-                onMouseLeave={e=>e.currentTarget.style.background="transparent"}
-              >
-                <div style={{ width:42,height:42,borderRadius:12,background:`${job.color}15`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>{job.icon}</div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontWeight:700, fontSize:14, color:T.text }}>{job.title}</div>
-                  <div style={{ fontSize:11, color:T.text3, marginTop:2 }}>👤 {job.employer} · 📍 {job.distance} km · ⭐ {job.rating}</div>
-                </div>
-                <div style={{ textAlign:"right", flexShrink:0 }}>
-                  <div style={{ fontFamily:"Outfit,sans-serif", fontSize:16, fontWeight:800, color:job.color }}>{job.salary}</div>
-                  <div style={{ fontSize:10, color:T.text3 }}>RON/zi</div>
-                </div>
-                {job.urgent && <Badge color={T.red}>🔥</Badge>}
+            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10 }}>
+              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>🆕 Anunțuri Recente</h3>
+              <Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>Toate anunțurile →</Btn>
+            </div>
+            {recentJobs.length > 0 ? (
+              <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+                {recentJobs.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update}/>)}
+              </div>
+            ) : (
+              <Card style={{ padding:"32px",textAlign:"center" }}>
+                <div style={{ fontSize:40,marginBottom:10 }}>📋</div>
+                <div style={{ fontSize:14,fontWeight:600,color:T.text,marginBottom:8 }}>Niciun anunț momentan</div>
+                <div style={{ fontSize:12,color:T.text3,marginBottom:16 }}>Fii primul care postează un serviciu sau job!</div>
+                {gs.user.role === "employer" && <Btn onClick={()=>navigate("post_job")} color={T.green}>+ Postează anunț</Btn>}
+              </Card>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
+          <Card style={{ padding:"16px 18px" }}>
+            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:"0 0 12px" }}>📊 Pe ConnectJob azi</h3>
+            {[
+              { icon:"📋", label:"Anunțuri active",  value:allJobs.length,                        color:T.green  },
+              { icon:"🔥", label:"Urgente",           value:allJobs.filter(j=>j.urgent).length,    color:T.red    },
+              { icon:"⭐", label:"Promovate",         value:promotedJobs.length,                   color:T.amber  },
+              { icon:"📂", label:"Categorii active",  value:new Set(allJobs.map(j=>j.category||"Diverse").filter(Boolean)).size, color:T.blue },
+            ].map(s=>(
+              <div key={s.label} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:`1px solid ${T.border}` }}>
+                <span style={{ fontSize:12,color:T.text2 }}>{s.icon} {s.label}</span>
+                <span style={{ fontWeight:800,color:s.color,fontSize:15,fontFamily:"Outfit,sans-serif" }}>{s.value||"—"}</span>
               </div>
             ))}
-          </div>
-        </Card>
-
-        {/* Right panel */}
-        <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          {/* Recent activity */}
+          </Card>
           <Card style={{ padding:"16px 18px" }}>
-            <h3 style={{ fontFamily:"Outfit,sans-serif", fontSize:15, fontWeight:700, color:T.text, margin:"0 0 14px" }}>🔔 Activitate recentă</h3>
+            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:"0 0 14px" }}>🔔 Activitate recentă</h3>
             {[
               { icon:"💬", text:"SC CleanPro ți-a trimis un mesaj", time:"2 min", color:T.green },
               { icon:"👁️", text:"Profilul tău a fost văzut de 12 ori azi", time:"1 oră", color:T.blue },
@@ -273,32 +347,28 @@ function PageHome({ gs, update, navigate }) {
               <div key={i} style={{ display:"flex",gap:10,padding:"8px 0",borderBottom:i<2?`1px solid ${T.border}`:"none" }}>
                 <div style={{ width:30,height:30,borderRadius:8,background:`${a.color}15`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0 }}>{a.icon}</div>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontSize:12, color:T.text, fontWeight:500 }}>{a.text}</div>
-                  <div style={{ fontSize:10, color:T.text3, marginTop:2 }}>{a.time}</div>
+                  <div style={{ fontSize:12,color:T.text,fontWeight:500 }}>{a.text}</div>
+                  <div style={{ fontSize:10,color:T.text3,marginTop:2 }}>{a.time}</div>
                 </div>
               </div>
             ))}
           </Card>
-
-          {/* Profile completeness */}
           <Card style={{ padding:"16px 18px" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
-              <h3 style={{ fontFamily:"Outfit,sans-serif", fontSize:15, fontWeight:700, color:T.text, margin:0 }}>👤 Profil</h3>
-              <span style={{ fontFamily:"Outfit,sans-serif", fontSize:18, fontWeight:800, color:T.green }}>78%</span>
+            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12 }}>
+              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>👤 Profil</h3>
+              <span style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.green }}>78%</span>
             </div>
             <div style={{ height:6,borderRadius:999,background:T.border,marginBottom:12,overflow:"hidden" }}>
               <div style={{ height:"100%",borderRadius:999,background:`linear-gradient(90deg,${T.green},${T.greenLight})`,width:"78%",transition:"width 1s ease" }}/>
             </div>
             {[
               { label:"Informații de bază", done:true },
-              { label:"Foto profil", done:true },
-              { label:"Skills completate", done:true },
               { label:"Verificare identitate", done:gs.user.verified },
               { label:"Primele 3 recenzii", done:false },
             ].map(item=>(
               <div key={item.label} style={{ display:"flex",alignItems:"center",gap:8,padding:"4px 0" }}>
                 <div style={{ width:16,height:16,borderRadius:"50%",background:item.done?T.green:T.border,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:"#fff",flexShrink:0 }}>{item.done?"✓":""}</div>
-                <span style={{ fontSize:12, color:item.done?T.text:T.text3, textDecoration:item.done?"none":"line-through" }}>{item.label}</span>
+                <span style={{ fontSize:12,color:item.done?T.text:T.text3 }}>{item.label}</span>
               </div>
             ))}
           </Card>
@@ -308,6 +378,192 @@ function PageHome({ gs, update, navigate }) {
   );
 }
 
+
+// ══════════════════════════════════════════════════════════════
+//  PAGE: JOBS BROWSER
+// ══════════════════════════════════════════════════════════════
+function PageJobs({ gs, update, navigate }) {
+  const [category, setCategory]         = useState(gs.jobsCategory || "Toate");
+  const [subcategory, setSubcategory]   = useState("");
+  const [urgent, setUrgent]             = useState(false);
+  const [workDuration, setWorkDuration] = useState("");
+  const [secondJob, setSecondJob]       = useState(false);
+  const [sortBy, setSortBy]             = useState("recent");
+  const [searchText, setSearchText]     = useState("");
+
+  const allJobs = gs.jobs || [];
+  const selectedCatObj = CATEGORIES.find(c => c.key === category);
+
+  const jobMatchesCat = (job, catKey) => {
+    if (catKey === "Toate") return true;
+    if (catKey === "diverse") {
+      return !CATEGORIES.some(c => {
+        const jc = (job.category||"").toLowerCase();
+        return jc === c.key || jc === c.label.toLowerCase() || c.label.toLowerCase().includes(jc) || jc.includes(c.key);
+      });
+    }
+    const cat = CATEGORIES.find(c => c.key === catKey);
+    if (!cat) return false;
+    const jc = (job.category||"").toLowerCase();
+    return jc === catKey || jc === cat.label.toLowerCase() || cat.label.toLowerCase().includes(jc) || jc.includes(catKey);
+  };
+
+  const filtered = allJobs.filter(j => {
+    if (searchText && !j.title?.toLowerCase().includes(searchText.toLowerCase()) && !(j.description||"").toLowerCase().includes(searchText.toLowerCase())) return false;
+    if (!jobMatchesCat(j, category)) return false;
+    if (subcategory && !(j.skills||[]).some(s => s.toLowerCase().includes(subcategory.toLowerCase()))) return false;
+    if (urgent && !j.urgent) return false;
+    if (workDuration === "permanent" && j.type !== "full-time") return false;
+    if (workDuration === "ore" && j.work_duration !== "ore") return false;
+    if (workDuration === "zile" && j.work_duration !== "zile") return false;
+    if (secondJob && !j.second_job) return false;
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a,b) => {
+    if (sortBy === "salary_desc") return b.salary - a.salary;
+    if (sortBy === "distance")    return (a.distance||999) - (b.distance||999);
+    return (b.promoted?1:0) - (a.promoted?1:0);
+  });
+
+  const promotedInView = sorted.filter(j => j.promoted);
+  const urgentInView   = sorted.filter(j => !j.promoted && j.urgent);
+  const regularInView  = sorted.filter(j => !j.promoted && !j.urgent);
+
+  const diverseJobs = category === "Toate" ? allJobs.filter(j => !CATEGORIES.some(c => {
+    const jc = (j.category||"").toLowerCase();
+    return jc === c.key || jc === c.label.toLowerCase() || c.label.toLowerCase().includes(jc) || jc.includes(c.key);
+  })) : [];
+
+  const FilterToggle = ({active, onClick, children, color=T.green}) => (
+    <button onClick={onClick} style={{ padding:"5px 12px",borderRadius:999,border:"none",cursor:"pointer",background:active?color:"#f5f5f4",color:active?"#fff":T.text2,fontSize:11,fontWeight:600,transition:"all 0.15s",whiteSpace:"nowrap" }}>{children}</button>
+  );
+
+  return (
+    <div style={{ animation:"fadeIn 0.3s ease" }}>
+      <div style={{ marginBottom:20 }}>
+        <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:16,flexWrap:"wrap" }}>
+          <h1 style={{ fontFamily:"Outfit,sans-serif",fontSize:22,fontWeight:800,color:T.text,margin:0 }}>
+            {selectedCatObj ? `${selectedCatObj.icon} ${selectedCatObj.label}` : category==="diverse"?"✨ Diverse / Anunțuri Noi":"🗂️ Toate Joburile & Serviciile"}
+          </h1>
+          <Badge color={T.green}>{sorted.length} anunțuri</Badge>
+          {gs.user.role === "employer" && (
+            <Btn size="sm" color={T.green} onClick={()=>navigate("post_job")} style={{marginLeft:"auto"}}>+ Postează anunț</Btn>
+          )}
+        </div>
+
+        <div style={{ position:"relative",marginBottom:12 }}>
+          <div style={{ position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:16 }}>🔍</div>
+          <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="Caută joburi, servicii, abilități..." style={{ width:"100%",height:44,borderRadius:12,border:`1.5px solid ${T.border}`,paddingLeft:40,paddingRight:16,fontSize:14,fontFamily:"DM Sans,sans-serif",outline:"none",boxSizing:"border-box",background:T.white }} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
+        </div>
+
+        <div style={{ overflowX:"auto",paddingBottom:4,marginBottom:10 }}>
+          <div style={{ display:"flex",gap:6,minWidth:"max-content" }}>
+            <FilterToggle active={category==="Toate"} onClick={()=>{ setCategory("Toate"); setSubcategory(""); }}>Toate</FilterToggle>
+            {CATEGORIES.map(cat=>(
+              <FilterToggle key={cat.key} active={category===cat.key} onClick={()=>{ setCategory(cat.key); setSubcategory(""); }} color={cat.color}>
+                {cat.icon} {cat.label}
+              </FilterToggle>
+            ))}
+            <FilterToggle active={category==="diverse"} onClick={()=>{ setCategory("diverse"); setSubcategory(""); }} color={T.text3}>✨ Diverse</FilterToggle>
+          </div>
+        </div>
+
+        {selectedCatObj && (
+          <div style={{ display:"flex",gap:5,flexWrap:"wrap",marginBottom:10 }}>
+            <button onClick={()=>setSubcategory("")} style={{ padding:"3px 10px",borderRadius:999,border:`1px solid ${subcategory===""?selectedCatObj.color:T.border}`,cursor:"pointer",background:subcategory===""?`${selectedCatObj.color}15`:"transparent",color:subcategory===""?selectedCatObj.color:T.text3,fontSize:11,fontWeight:600 }}>Toate</button>
+            {selectedCatObj.sub.map(s=>(
+              <button key={s} onClick={()=>setSubcategory(subcategory===s?"":s)} style={{ padding:"3px 10px",borderRadius:999,border:`1px solid ${subcategory===s?selectedCatObj.color:T.border}`,cursor:"pointer",background:subcategory===s?`${selectedCatObj.color}15`:"transparent",color:subcategory===s?selectedCatObj.color:T.text3,fontSize:11 }}>{s}</button>
+            ))}
+          </div>
+        )}
+
+        <Card style={{ padding:"10px 14px" }}>
+          <div style={{ display:"flex",alignItems:"center",gap:8,flexWrap:"wrap" }}>
+            <span style={{ fontSize:11,fontWeight:700,color:T.text3,textTransform:"uppercase",letterSpacing:"0.06em",whiteSpace:"nowrap" }}>Filtre:</span>
+            <FilterToggle active={urgent} onClick={()=>setUrgent(!urgent)} color={T.red}>🔥 Urgent</FilterToggle>
+            <FilterToggle active={secondJob} onClick={()=>setSecondJob(!secondJob)} color={T.blue}>💼 Al doilea job</FilterToggle>
+            <div style={{ display:"flex",gap:4 }}>
+              {[{k:"",l:"Orice"},{k:"ore",l:"🕐 Ore"},{k:"zile",l:"📅 Zile"},{k:"permanent",l:"♾️ Permanent"}].map(opt=>(
+                <button key={opt.k} onClick={()=>setWorkDuration(opt.k)} style={{ padding:"4px 10px",borderRadius:999,border:`1px solid ${workDuration===opt.k?T.green:T.border}`,cursor:"pointer",background:workDuration===opt.k?`${T.green}15`:"transparent",color:workDuration===opt.k?T.green:T.text3,fontSize:11,fontWeight:600 }}>{opt.l}</button>
+              ))}
+            </div>
+            <div style={{ display:"flex",alignItems:"center",gap:6,marginLeft:"auto" }}>
+              <span style={{ fontSize:11,color:T.text3 }}>Sortare:</span>
+              <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{ fontSize:11,borderRadius:8,border:`1px solid ${T.border}`,padding:"4px 8px",cursor:"pointer",outline:"none" }}>
+                <option value="recent">Cele mai noi</option>
+                <option value="salary_desc">Salariu ↓</option>
+                <option value="distance">Distanță</option>
+              </select>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {promotedInView.length > 0 && (
+        <div style={{ marginBottom:20 }}>
+          <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
+            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.amber,margin:0 }}>⭐ Anunțuri Promovate</h3>
+            <div style={{ flex:1,height:1,background:`${T.amber}44` }}/>
+          </div>
+          <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+            {promotedInView.map(job=><JobCardRow key={job.id||job._id} job={job} promoted navigate={navigate} update={update}/>)}
+          </div>
+        </div>
+      )}
+
+      {urgentInView.length > 0 && (
+        <div style={{ marginBottom:20 }}>
+          <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
+            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.red,margin:0 }}>🔥 Joburi Urgente</h3>
+            <div style={{ flex:1,height:1,background:`${T.red}44` }}/>
+          </div>
+          <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+            {urgentInView.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update}/>)}
+          </div>
+        </div>
+      )}
+
+      <div>
+        {regularInView.length > 0 ? (
+          <>
+            <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
+              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>📋 Anunțuri</h3>
+              <div style={{ flex:1,height:1,background:T.border }}/>
+            </div>
+            <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+              {regularInView.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update}/>)}
+            </div>
+          </>
+        ) : sorted.length === 0 && (
+          <div style={{ textAlign:"center",padding:"60px 20px",color:T.text3 }}>
+            <div style={{ fontSize:48,marginBottom:12 }}>🔍</div>
+            <div style={{ fontSize:16,fontWeight:700,color:T.text,marginBottom:8 }}>Niciun anunț găsit</div>
+            <div style={{ fontSize:13 }}>Încearcă să ajustezi filtrele sau caută în altă categorie.</div>
+            <Btn onClick={()=>{ setCategory("Toate"); setUrgent(false); setWorkDuration(""); setSecondJob(false); setSearchText(""); }} variant="outline" size="sm" style={{marginTop:16}}>🔄 Resetează filtrele</Btn>
+          </div>
+        )}
+      </div>
+
+      {category === "Toate" && diverseJobs.length > 0 && (
+        <div style={{ marginTop:28 }}>
+          <div style={{ background:"linear-gradient(135deg,#f8fafc,#f1f5f9)",borderRadius:16,border:`1.5px dashed ${T.border}`,padding:"16px 20px" }}>
+            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14 }}>
+              <div>
+                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:"0 0 4px" }}>✨ Diverse / Anunțuri Noi</h3>
+                <p style={{ fontSize:12,color:T.text3,margin:0 }}>Servicii care nu se încadrează în categoriile principale — în ordinea postării</p>
+              </div>
+              <Badge color={T.text3}>{diverseJobs.length} anunțuri</Badge>
+            </div>
+            <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
+              {diverseJobs.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update}/>)}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ══════════════════════════════════════════════════════════════
 //  PAGE: MAP
@@ -1745,6 +2001,7 @@ function ConnectJobApp() {
 
   const NAV = [
     { key:"home",      icon:"🏠", label:t("nav_home") },
+    { key:"jobs",      icon:"🗂️", label:"Caută Joburi" },
     { key:"map",       icon:"🗺️", label:t("nav_map"),      badge: null },
     { key:"chat",      icon:"💬", label:t("nav_chat"),     badge: gs.unreadMessages },
     { key:"escrow",    icon:"🔒", label:t("nav_escrow") },
@@ -1758,6 +2015,7 @@ function ConnectJobApp() {
 
   const PAGE_TITLES = {
     home:      t("nav_home"),
+    jobs:      "🗂️ Caută Joburi",
     map:       t("nav_map"),
     chat:      t("nav_chat"),
     escrow:    t("nav_escrow"),
@@ -1774,6 +2032,7 @@ function ConnectJobApp() {
     if(loadingPage) return <Loader text="Se încarcă..."/>;
     switch(page) {
       case "home":      return <PageHome      {...props}/>;
+      case "jobs":      return <PageJobs      {...props}/>;
       case "map":       return <MapPage       gs={gs} update={update} navigate={navigate}/>;
       case "post_job":  return <PostJobPage navigate={navigate} onSuccess={()=>api.get("/jobs").then(r=>update({jobs:r.data.jobs||r.data})).catch(()=>{})}/>;
       case "chat":      return <PageChat     {...props}/>;
