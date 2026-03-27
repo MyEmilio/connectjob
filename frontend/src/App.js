@@ -1647,6 +1647,7 @@ function ConnectJobApp() {
     if (user) {
       updateGs({
         user: {
+          id: user.id || user._id,
           name: user.name,
           initials: user.initials || user.name?.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2),
           verified: !!user.verified,
