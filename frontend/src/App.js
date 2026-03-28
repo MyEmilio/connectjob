@@ -1966,7 +1966,14 @@ function ConnectJobApp() {
   const [page, setPage] = useState("home");
   const [loadingPage, setLoadingPage] = useState(false);
   const [pwaShow, setPwaShow] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const prevPage = useRef("home");
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // Sincronizeaza userul din AuthContext cu globalState
   useEffect(() => {
@@ -2147,7 +2154,7 @@ function ConnectJobApp() {
       <div style={{display:"flex",minHeight:"calc(100vh - 58px)"}}>
 
         {/* Sidebar navigation */}
-        <aside style={{ width:210,flexShrink:0,background:T.white,borderRight:`1.5px solid ${T.border}`,padding:"12px 10px",position:"sticky",top:58,height:"calc(100vh - 58px)",overflowY:"auto" }}>
+        <aside className="jc-desktop-sidebar" style={{ width:210,flexShrink:0,background:T.white,borderRight:`1.5px solid ${T.border}`,padding:"12px 10px",position:"sticky",top:58,height:"calc(100vh - 58px)",overflowY:"auto" }}>
           <div style={{fontSize:9,fontWeight:700,color:T.text3,textTransform:"uppercase",letterSpacing:"0.1em",padding:"6px 10px",marginBottom:4}}>Navigare</div>
           {NAV.map(item=>(
             <div key={item.key} onClick={()=>navigate(item.key)}
@@ -2197,10 +2204,38 @@ function ConnectJobApp() {
         </aside>
 
         {/* Main content */}
-        <main style={{flex:1,padding:"24px 22px",minWidth:0,overflowY:"auto"}}>
+        <main className="jc-main-content" style={{flex:1,padding:"24px 22px",minWidth:0,overflowY:"auto"}}>
           {renderPage()}
         </main>
       </div>
+
+      {/* Bottom navigation — mobile only */}
+      <nav className="jc-bottom-nav" style={{
+        display:"none", position:"fixed", bottom:0, left:0, right:0, zIndex:90,
+        background:"rgba(255,255,255,0.97)", backdropFilter:"blur(14px)",
+        borderTop:`1.5px solid ${T.border}`, height:60,
+        alignItems:"stretch", boxShadow:"0 -4px 20px rgba(0,0,0,0.08)",
+      }}>
+        {[
+          { key:"home",  icon:"🏠", label:t("nav_home") },
+          { key:"jobs",  icon:"🗂️", label:"Joburi" },
+          { key:"map",   icon:"🗺️", label:t("nav_map") },
+          { key:"chat",  icon:"💬", label:t("nav_chat"), badge: gs.unreadMessages },
+          { key:"verify",icon: gs.user.verified?"✅":"👤", label:gs.user.verified?"Profil":"Profil" },
+        ].map(item=>(
+          <button key={item.key} onClick={()=>navigate(item.key)} style={{
+            flex:1, background:"none", border:"none", cursor:"pointer",
+            display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+            gap:2, padding:"4px 0", position:"relative",
+            borderTop: page===item.key ? `2px solid ${T.green}` : "2px solid transparent",
+            transition:"all 0.15s",
+          }}>
+            <span style={{ fontSize:20 }}>{item.icon}</span>
+            <span style={{ fontSize:10, fontWeight:page===item.key?700:500, color:page===item.key?T.green:T.text3 }}>{item.label}</span>
+            {item.badge>0 && <div style={{ position:"absolute",top:6,right:"25%",width:14,height:14,borderRadius:"50%",background:T.red,border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,color:"#fff" }}>{item.badge}</div>}
+          </button>
+        ))}
+      </nav>
 
       {/* ── FLOATING BUTTONS: Carburant + Transport ── */}
       <FuelButton
@@ -2719,7 +2754,7 @@ export function FuelButton({ defaultFrom="", defaultTo="" }) {
   return (
     <>
       {/* Floating button */}
-      <div style={{ position:"fixed", bottom:28, left:28, zIndex:990 }}>
+      <div className="jc-float-left" style={{ position:"fixed", bottom:28, left:28, zIndex:990 }}>
         {/* Tooltip */}
         {pulse && (
           <div style={{

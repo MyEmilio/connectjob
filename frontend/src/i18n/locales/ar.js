@@ -64,6 +64,11 @@ const ar = {
   btn_back:"رجوع", btn_save:"حفظ", btn_cancel:"إلغاء", btn_close:"إغلاق",
   btn_next:"التالي", btn_logout:"تسجيل الخروج", loading:"جارٍ التحميل...",
   error_generic:"حدث خطأ. يرجى المحاولة مرة أخرى.", ron:"€", km:"كم",
+  nav_jobs:"البحث عن وظائف",
+  register_pass_hint:"8 أحرف على الأقل، حرف كبير، رقم، رمز",
+  pass_min8:"8 أحرف على الأقل", pass_upper:"يحتاج حرفاً كبيراً",
+  pass_number:"يحتاج رقماً", pass_special:"يحتاج رمزاً خاصاً (!@#...)",
+  or_google:"أو تابع مع",
 };
 
 export default ar;

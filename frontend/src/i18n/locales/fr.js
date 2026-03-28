@@ -78,6 +78,11 @@ const fr = {
   btn_back:"Retour", btn_save:"Enregistrer", btn_cancel:"Annuler", btn_close:"Fermer",
   btn_next:"Suivant", btn_logout:"Se déconnecter", loading:"Chargement...",
   error_generic:"Une erreur s'est produite. Veuillez réessayer.", ron:"€", km:"km",
+  nav_jobs:"Trouver des emplois",
+  register_pass_hint:"min. 8 car., majuscule, chiffre, symbole",
+  pass_min8:"Minimum 8 caractères", pass_upper:"Nécessite une majuscule",
+  pass_number:"Nécessite un chiffre", pass_special:"Nécessite un caractère spécial (!@#...)",
+  or_google:"ou continuer avec",
 };
 
 export default fr;

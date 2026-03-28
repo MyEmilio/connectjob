@@ -9,7 +9,7 @@ const ro = {
   login_no_account:"Nu ai cont?", login_register:"Înregistrează-te",
   register_title:"Creare cont", register_subtitle:"Înregistrează-te pe ConnectJob",
   register_name:"Nume complet", register_email:"Email", register_password:"Parolă",
-  register_pass_hint:"minim 6 caractere", register_role:"Tip cont",
+  register_role:"Tip cont",
   register_worker:"👷 Lucrător", register_employer:"🏢 Angajator",
   register_btn:"Creează cont", register_loading:"Se creează contul...",
   register_have_account:"Ai deja cont?", register_login:"Conectează-te",
@@ -64,6 +64,11 @@ const ro = {
   btn_back:"Înapoi", btn_save:"Salvează", btn_cancel:"Anulează", btn_close:"Închide",
   btn_next:"Următor", btn_logout:"Deconectare", loading:"Se încarcă...",
   error_generic:"A apărut o eroare. Încearcă din nou.", ron:"€", km:"km",
+  nav_jobs:"Caută Joburi",
+  register_pass_hint:"min. 8 car., majusculă, cifră, simbol",
+  pass_min8:"Minim 8 caractere", pass_upper:"Necesită o literă majusculă",
+  pass_number:"Necesită o cifră", pass_special:"Necesită un caracter special (!@#...)",
+  or_google:"sau continuă cu",
 };
 
 export default ro;

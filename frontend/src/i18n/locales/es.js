@@ -11,6 +11,7 @@ const es = {
   nav_verify:      "Verificación",
   nav_verified:    "Verificado",
   nav_post_job:    "Publicar empleo",
+  nav_jobs:        "Buscar empleos",
 
   // Auth
   login_title:     "Iniciar sesión",
@@ -27,7 +28,12 @@ const es = {
   register_name:      "Nombre completo",
   register_email:     "Correo electrónico",
   register_password:  "Contraseña",
-  register_pass_hint: "mínimo 6 caracteres",
+  register_pass_hint: "mín. 8 caracteres, mayúscula, número, símbolo",
+  pass_min8:       "Mínimo 8 caracteres",
+  pass_upper:      "Necesita al menos una mayúscula",
+  pass_number:     "Necesita al menos un número",
+  pass_special:    "Necesita un carácter especial (!@#$...)",
+  or_google:       "o continúa con",
   register_role:      "Tipo de cuenta",
   register_worker:    "👷 Trabajador",
   register_employer:  "🏢 Empleador",

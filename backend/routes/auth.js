@@ -1,13 +1,50 @@
-const express = require("express");
-const bcrypt  = require("bcryptjs");
-const jwt     = require("jsonwebtoken");
-const db      = require("../db/database");
+const express  = require("express");
+const bcrypt   = require("bcryptjs");
+const jwt      = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
+const db       = require("../db/database");
 const authMiddleware = require("../middleware/auth");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = express.Router();
 
 const sign = (user) =>
   jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+// POST /api/auth/google — OAuth cu Google
+router.post("/google", async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: "Token Google lipsa" });
+    if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).json({ error: "Google OAuth neconfigutat pe server" });
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const { email, name, picture, sub: googleId, email_verified } = ticket.getPayload();
+    if (!email_verified) return res.status(401).json({ error: "Email Google neverificat" });
+
+    let user = await db.findUserByEmail(email);
+    if (!user) {
+      const initials = (name || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+      user = await db.createUser({
+        name: name || email.split("@")[0],
+        email, password: "", role: "worker",
+        initials, google_id: googleId,
+        avatar: picture || "", verified: true,
+      });
+    } else if (!user.google_id) {
+      await db.updateUser(user.id || user._id, { google_id: googleId, avatar: user.avatar || picture || "" });
+    }
+
+    const { password: _, ...safeUser } = user;
+    res.json({ token: sign(safeUser), user: safeUser });
+  } catch (err) {
+    res.status(401).json({ error: "Token Google invalid: " + err.message });
+  }
+});
 
 // POST /api/auth/register
 router.post("/register", async (req, res) => {

@@ -64,6 +64,11 @@ const nl = {
   btn_back:"Terug", btn_save:"Opslaan", btn_cancel:"Annuleren", btn_close:"Sluiten",
   btn_next:"Volgende", btn_logout:"Uitloggen", loading:"Laden...",
   error_generic:"Er is een fout opgetreden. Probeer het opnieuw.", ron:"€", km:"km",
+  nav_jobs:"Vacatures zoeken",
+  register_pass_hint:"min. 8 tekens, hoofdletter, cijfer, symbool",
+  pass_min8:"Minimaal 8 tekens", pass_upper:"Heeft een hoofdletter nodig",
+  pass_number:"Heeft een cijfer nodig", pass_special:"Heeft een speciaal teken nodig (!@#...)",
+  or_google:"of doorgaan met",
 };
 
 export default nl;

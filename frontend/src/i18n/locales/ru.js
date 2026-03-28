@@ -9,7 +9,7 @@ const ru = {
   login_no_account:"Нет аккаунта?", login_register:"Зарегистрироваться",
   register_title:"Создать аккаунт", register_subtitle:"Зарегистрируйтесь в ConnectJob",
   register_name:"Полное имя", register_email:"Электронная почта", register_password:"Пароль",
-  register_pass_hint:"минимум 6 символов", register_role:"Тип аккаунта",
+  register_role:"Тип аккаунта",
   register_worker:"👷 Работник", register_employer:"🏢 Работодатель",
   register_btn:"Создать аккаунт", register_loading:"Создание аккаунта...",
   register_have_account:"Уже есть аккаунт?", register_login:"Войти",
@@ -64,6 +64,11 @@ const ru = {
   btn_back:"Назад", btn_save:"Сохранить", btn_cancel:"Отмена", btn_close:"Закрыть",
   btn_next:"Далее", btn_logout:"Выйти", loading:"Загрузка...",
   error_generic:"Произошла ошибка. Попробуйте снова.", ron:"€", km:"км",
+  nav_jobs:"Найти работу",
+  register_pass_hint:"мин. 8 симв., заглавная, цифра, спецсимвол",
+  pass_min8:"Минимум 8 символов", pass_upper:"Нужна заглавная буква",
+  pass_number:"Нужна цифра", pass_special:"Нужен спецсимвол (!@#...)",
+  or_google:"или продолжить с",
 };
 
 export default ru;

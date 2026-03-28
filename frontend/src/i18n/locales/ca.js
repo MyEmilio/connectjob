@@ -78,6 +78,11 @@ const ca = {
   btn_back:"Tornar", btn_save:"Desar", btn_cancel:"Cancel·lar", btn_close:"Tancar",
   btn_next:"Següent", btn_logout:"Tancar sessió", loading:"Carregant...",
   error_generic:"S'ha produït un error. Torna-ho a intentar.", ron:"€", km:"km",
+  nav_jobs:"Cercar feines",
+  register_pass_hint:"mín. 8 car., majúscula, número, símbol",
+  pass_min8:"Mínim 8 caràcters", pass_upper:"Cal una majúscula",
+  pass_number:"Cal un número", pass_special:"Cal un caràcter especial (!@#...)",
+  or_google:"o continua amb",
 };
 
 export default ca;

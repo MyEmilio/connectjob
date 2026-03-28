@@ -64,6 +64,11 @@ const it = {
   btn_back:"Indietro", btn_save:"Salva", btn_cancel:"Annulla", btn_close:"Chiudi",
   btn_next:"Avanti", btn_logout:"Esci", loading:"Caricamento...",
   error_generic:"Si è verificato un errore. Riprova.", ron:"€", km:"km",
+  nav_jobs:"Trova lavoro",
+  register_pass_hint:"min. 8 car., maiuscola, numero, simbolo",
+  pass_min8:"Minimo 8 caratteri", pass_upper:"Serve una maiuscola",
+  pass_number:"Serve un numero", pass_special:"Serve un carattere speciale (!@#...)",
+  or_google:"o continua con",
 };
 
 export default it;

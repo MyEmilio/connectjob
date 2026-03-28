@@ -78,6 +78,11 @@ const de = {
   btn_back:"Zurück", btn_save:"Speichern", btn_cancel:"Abbrechen", btn_close:"Schließen",
   btn_next:"Weiter", btn_logout:"Abmelden", loading:"Laden...",
   error_generic:"Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.", ron:"€", km:"km",
+  nav_jobs:"Jobs suchen",
+  register_pass_hint:"mind. 8 Zeichen, Großbuchstabe, Zahl, Symbol",
+  pass_min8:"Mindestens 8 Zeichen", pass_upper:"Benötigt einen Großbuchstaben",
+  pass_number:"Benötigt eine Zahl", pass_special:"Benötigt ein Sonderzeichen (!@#...)",
+  or_google:"oder weiter mit",
 };
 
 export default de;

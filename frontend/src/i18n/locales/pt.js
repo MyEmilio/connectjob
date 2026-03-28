@@ -9,7 +9,7 @@ const pt = {
   login_no_account:"Não tem conta?", login_register:"Registar-se",
   register_title:"Criar conta", register_subtitle:"Registe-se no ConnectJob",
   register_name:"Nome completo", register_email:"E-mail", register_password:"Palavra-passe",
-  register_pass_hint:"mínimo 6 caracteres", register_role:"Tipo de conta",
+  register_role:"Tipo de conta",
   register_worker:"👷 Trabalhador", register_employer:"🏢 Empregador",
   register_btn:"Criar conta", register_loading:"A criar conta...",
   register_have_account:"Já tem conta?", register_login:"Entrar",
@@ -64,6 +64,11 @@ const pt = {
   btn_back:"Voltar", btn_save:"Guardar", btn_cancel:"Cancelar", btn_close:"Fechar",
   btn_next:"Seguinte", btn_logout:"Sair", loading:"A carregar...",
   error_generic:"Ocorreu um erro. Tente novamente.", ron:"€", km:"km",
+  nav_jobs:"Encontrar empregos",
+  register_pass_hint:"mín. 8 car., maiúscula, número, símbolo",
+  pass_min8:"Mínimo 8 caracteres", pass_upper:"Precisa de uma maiúscula",
+  pass_number:"Precisa de um número", pass_special:"Precisa de um carácter especial (!@#...)",
+  or_google:"ou continuar com",
 };
 
 export default pt;
