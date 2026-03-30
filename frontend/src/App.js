@@ -215,10 +215,93 @@ function JobCardRow({ job, promoted=false, navigate, update }) {
 // ══════════════════════════════════════════════════════════════
 //  PAGE: HOME / DASHBOARD
 // ══════════════════════════════════════════════════════════════
+function HowItWorksModal({ onClose }) {
+  const STEPS = [
+    { icon:"👤", color:"#3b82f6", title:"Creează cont gratuit",    desc:"30 de secunde — nume, email, parolă. Gata!",                  tag:"GRATUIT" },
+    { icon:"🗂️", color:"#059669", title:"Caută după categorie",     desc:"12 categorii + subcategorii. Găsești orice serviciu local.",   tag:"RAPID" },
+    { icon:"📩", color:"#8b5cf6", title:"Aplică cu un singur click", desc:"Trimite candidatura direct din aplicație. Fără CV complicat.", tag:"1 CLICK" },
+    { icon:"💬", color:"#f59e0b", title:"Chat & Contract digital",   desc:"Negociezi condițiile, semnezi contractul în aplicație.",       tag:"SIGUR" },
+    { icon:"🔒", color:"#ef4444", title:"Plată prin Escrow",         desc:"Banii sunt blocați și eliberați doar după finalizarea jobului.",tag:"PROTEJAT" },
+  ];
+
+  return (
+    <div onClick={onClose} style={{ position:"fixed",inset:0,zIndex:1200,background:"rgba(0,0,0,0.55)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",padding:16,animation:"fadeInBg 0.2s ease" }}>
+      <div onClick={e=>e.stopPropagation()} style={{ background:"#fff",borderRadius:22,width:"min(560px,100%)",maxHeight:"90vh",overflowY:"auto",boxShadow:"0 32px 80px rgba(0,0,0,0.22)",animation:"slideUpModal 0.3s cubic-bezier(0.175,0.885,0.32,1.275)" }}>
+        {/* Header */}
+        <div style={{ background:`linear-gradient(135deg,${T.dark},${T.dark2})`,borderRadius:"22px 22px 0 0",padding:"22px 24px 20px",position:"relative",overflow:"hidden" }}>
+          <div style={{ position:"absolute",top:-30,right:-30,width:120,height:120,borderRadius:"50%",background:"rgba(5,150,105,0.12)" }}/>
+          <div style={{ position:"absolute",bottom:-20,left:40,width:80,height:80,borderRadius:"50%",background:"rgba(59,130,246,0.08)" }}/>
+          <button onClick={onClose} style={{ position:"absolute",top:14,right:14,background:"rgba(255,255,255,0.1)",border:"none",color:"#94a3b8",fontSize:18,cursor:"pointer",borderRadius:8,width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center" }}>✕</button>
+          <div style={{ position:"relative" }}>
+            <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:8 }}>
+              <div style={{ width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:`0 4px 12px ${T.green}44` }}>⚡</div>
+              <span style={{ fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:20,color:"#f1f5f9",letterSpacing:"-0.02em" }}>Connect<span style={{color:T.greenLight}}>Job</span></span>
+            </div>
+            <h2 style={{ fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:20,color:"#f1f5f9",margin:"0 0 6px" }}>Cum funcționează? 🚀</h2>
+            <p style={{ color:"#94a3b8",fontSize:13,margin:0 }}>De la înregistrare la plată — totul în <strong style={{color:T.greenLight}}>5 pași simpli</strong></p>
+          </div>
+        </div>
+
+        {/* Stats bar */}
+        <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",background:"#f8fafc",borderBottom:`1px solid ${T.border}` }}>
+          {[{v:"2 min",l:"setup cont"},{v:"12",l:"categorii"},{v:"100%",l:"gratuit workers"}].map(s=>(
+            <div key={s.l} style={{ padding:"12px 8px",textAlign:"center",borderRight:`1px solid ${T.border}` }}>
+              <div style={{ fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:18,color:T.green }}>{s.v}</div>
+              <div style={{ fontSize:10,color:T.text3,marginTop:2 }}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Steps */}
+        <div style={{ padding:"20px 24px" }}>
+          {STEPS.map((step, i) => (
+            <div key={i} style={{ display:"flex",gap:14,marginBottom:i<STEPS.length-1?16:0,animation:`fadeIn 0.4s ease ${i*0.08}s both` }}>
+              {/* Left: icon + connector */}
+              <div style={{ display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0 }}>
+                <div style={{ width:46,height:46,borderRadius:14,background:`${step.color}12`,border:`2px solid ${step.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,position:"relative" }}>
+                  {step.icon}
+                  <div style={{ position:"absolute",top:-8,right:-8,background:step.color,color:"#fff",borderRadius:999,minWidth:18,height:18,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,border:"2px solid #fff" }}>{i+1}</div>
+                </div>
+                {i<STEPS.length-1 && <div style={{ width:2,flex:1,background:`linear-gradient(${step.color}44,${STEPS[i+1].color}22)`,marginTop:6,minHeight:14 }}/>}
+              </div>
+              {/* Right: content */}
+              <div style={{ flex:1,paddingTop:4,paddingBottom:i<STEPS.length-1?0:0 }}>
+                <div style={{ display:"flex",alignItems:"center",gap:7,marginBottom:3 }}>
+                  <span style={{ fontWeight:700,fontSize:14,color:T.text }}>{step.title}</span>
+                  <span style={{ background:`${step.color}15`,color:step.color,border:`1px solid ${step.color}33`,borderRadius:999,padding:"1px 7px",fontSize:9,fontWeight:800,letterSpacing:"0.06em" }}>{step.tag}</span>
+                </div>
+                <p style={{ fontSize:12,color:T.text3,margin:0,lineHeight:1.5 }}>{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Benefits */}
+        <div style={{ margin:"0 24px 20px",background:`linear-gradient(135deg,${T.green}08,${T.blue}08)`,border:`1.5px solid ${T.green}22`,borderRadius:14,padding:"14px 16px" }}>
+          <div style={{ fontWeight:700,fontSize:12,color:T.text,marginBottom:10 }}>✅ De ce ConnectJob?</div>
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:7 }}>
+            {["🔒 Plată protejată prin Escrow","📝 Contract digital semnat","⭐ Sistem de recenzii verificate","📍 Joburi locale pe hartă","💬 Chat în timp real","🛡️ Profiluri verificate ID"].map(b=>(
+              <div key={b} style={{ fontSize:12,color:T.text2,display:"flex",alignItems:"center",gap:6 }}>{b}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div style={{ padding:"0 24px 24px",display:"flex",gap:9 }}>
+          <button onClick={onClose} style={{ flex:1,padding:"12px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontWeight:700,fontSize:14,fontFamily:"DM Sans,sans-serif",boxShadow:`0 4px 16px ${T.green}44` }}>
+            🚀 Începe acum — e gratuit!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PageHome({ gs, update, navigate }) {
   const allJobs = gs.jobs || [];
   const promotedJobs = allJobs.filter(j => j.promoted);
   const recentJobs = allJobs.slice(0, 6);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   const getCatCount = (cat) => allJobs.filter(j => {
     const jc = (j.category||"").toLowerCase();
@@ -227,6 +310,8 @@ function PageHome({ gs, update, navigate }) {
 
   return (
     <div style={{ animation:"fadeIn 0.3s ease" }}>
+      {showHowItWorks && <HowItWorksModal onClose={()=>setShowHowItWorks(false)}/>}
+
       {/* Compact hero */}
       <div style={{ background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`, borderRadius:18, padding:"22px 26px", marginBottom:24, position:"relative", overflow:"hidden" }}>
         <div style={{ position:"absolute",top:-40,right:-40,width:180,height:180,borderRadius:"50%",background:"rgba(5,150,105,0.08)" }}/>
@@ -242,6 +327,15 @@ function PageHome({ gs, update, navigate }) {
             <Btn onClick={()=>navigate("map")} color={T.green} size="sm">🗺️ Pe hartă</Btn>
             <Btn onClick={()=>{ update({jobsCategory:""}); navigate("jobs"); }} color={T.blue} size="sm">🔍 Caută joburi</Btn>
             {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>🛡️ Verifică-te</Btn>}
+            {/* How it works button */}
+            <button
+              onClick={()=>setShowHowItWorks(true)}
+              style={{ padding:"7px 13px",borderRadius:10,border:"1.5px solid rgba(52,211,153,0.35)",background:"rgba(52,211,153,0.08)",color:T.greenLight,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontFamily:"DM Sans,sans-serif",animation:"ringPulse 2.4s ease-in-out infinite",transition:"all 0.2s" }}
+              onMouseEnter={e=>{ e.currentTarget.style.background="rgba(52,211,153,0.18)"; e.currentTarget.style.borderColor=T.greenLight; e.currentTarget.style.animation="none"; }}
+              onMouseLeave={e=>{ e.currentTarget.style.background="rgba(52,211,153,0.08)"; e.currentTarget.style.borderColor="rgba(52,211,153,0.35)"; e.currentTarget.style.animation="ringPulse 2.4s ease-in-out infinite"; }}
+            >
+              <span style={{ fontSize:15 }}>💡</span> Cum funcționează?
+            </button>
           </div>
         </div>
       </div>
