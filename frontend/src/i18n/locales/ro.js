@@ -65,6 +65,7 @@ const ro = {
   btn_next:"Următor", btn_logout:"Deconectare", loading:"Se încarcă...",
   error_generic:"A apărut o eroare. Încearcă din nou.", ron:"€", km:"km",
   nav_jobs:"Caută Joburi",
+  nav_calendar:"Agendă",
   register_pass_hint:"min. 8 car., majusculă, cifră, simbol",
   pass_min8:"Minim 8 caractere", pass_upper:"Necesită o literă majusculă",
   pass_number:"Necesită o cifră", pass_special:"Necesită un caracter special (!@#...)",

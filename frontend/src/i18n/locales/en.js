@@ -79,6 +79,7 @@ const en = {
   btn_next:"Next", btn_logout:"Sign out", loading:"Loading...",
   error_generic:"An error occurred. Please try again.", ron:"€", km:"km",
   nav_jobs:"Find Jobs",
+  nav_calendar:"Schedule",
   register_pass_hint:"min. 8 chars, uppercase, number, symbol",
   pass_min8:"Minimum 8 characters", pass_upper:"Needs an uppercase letter",
   pass_number:"Needs a number", pass_special:"Needs a special character (!@#...)",

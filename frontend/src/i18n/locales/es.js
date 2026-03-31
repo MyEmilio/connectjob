@@ -12,6 +12,7 @@ const es = {
   nav_verified:    "Verificado",
   nav_post_job:    "Publicar empleo",
   nav_jobs:        "Buscar empleos",
+  nav_calendar:    "Agenda",
 
   // Auth
   login_title:     "Iniciar sesión",
