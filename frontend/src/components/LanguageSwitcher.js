@@ -8,27 +8,26 @@ export default function LanguageSwitcher() {
   const { i18n } = useTranslation("t");
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top:0, right:0 });
-  const btnRef = useRef(null);
+  const btnRef  = useRef(null);
+  const dropRef = useRef(null);
 
   const current = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
 
-  // Calculeaza pozitia dropdown-ului relativ la viewport (fixed), ca sa nu fie taiat de harta
   const handleToggle = () => {
     if (!open && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
-      setDropPos({
-        top: rect.bottom + 6,
-        right: window.innerWidth - rect.right,
-      });
+      setDropPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
     }
     setOpen(o => !o);
   };
 
-  // Inchide la click afara
+  // Inchide doar daca click-ul e in afara AMBELOR elemente (buton + dropdown)
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
-      if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false);
+      const inBtn  = btnRef.current  && btnRef.current.contains(e.target);
+      const inDrop = dropRef.current && dropRef.current.contains(e.target);
+      if (!inBtn && !inDrop) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -41,7 +40,6 @@ export default function LanguageSwitcher() {
 
   return (
     <div style={{ position:"relative" }}>
-      {/* Buton principal */}
       <button ref={btnRef} onClick={handleToggle} style={{
         display:"flex", alignItems:"center", gap:6, padding:"6px 12px",
         borderRadius:10, border:`1.5px solid ${T.border}`, background:"#fff",
@@ -53,28 +51,29 @@ export default function LanguageSwitcher() {
         <span style={{ fontSize:10, color:T.text2, marginLeft:2 }}>{open ? "▲" : "▼"}</span>
       </button>
 
-      {/* Dropdown — position:fixed ca sa apara peste harta Leaflet */}
+      {/* Dropdown — position:fixed peste harta Leaflet si orice overflow */}
       {open && (
-        <div style={{
+        <div ref={dropRef} style={{
           position:"fixed",
           top: dropPos.top,
           right: dropPos.right,
           background:"#fff", border:`1.5px solid ${T.border}`,
           borderRadius:12, boxShadow:"0 8px 32px rgba(0,0,0,0.18)",
           zIndex:99999, minWidth:190,
-          maxHeight:"70vh", overflowY:"auto",
+          maxHeight:"calc(100vh - 80px)", overflowY:"auto",
           animation:"fadeIn 0.15s ease",
         }}>
           {LANGUAGES.map(lang => (
             <div
               key={lang.code}
+              onMouseDown={e => e.preventDefault()} // previne blur care ar inchide dropdown-ul
               onClick={() => select(lang.code)}
               style={{
                 display:"flex", alignItems:"center", gap:10, padding:"9px 14px",
                 cursor:"pointer",
                 background: lang.code === i18n.language ? `${T.green}10` : "transparent",
                 borderLeft: lang.code === i18n.language ? `3px solid ${T.green}` : "3px solid transparent",
-                transition:"all 0.1s",
+                transition:"background 0.1s",
               }}
               onMouseEnter={e => { if (lang.code !== i18n.language) e.currentTarget.style.background = T.bg; }}
               onMouseLeave={e => { if (lang.code !== i18n.language) e.currentTarget.style.background = "transparent"; }}
