@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import api from "../services/api";
 import { getSocket } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const T = {
   green:"#059669", dark:"#0f172a", blue:"#3b82f6",
@@ -21,6 +22,7 @@ function Avatar({ name, size=36 }) {
 
 export default function ChatPage() {
   const { user } = useAuth();
+  const { t } = useTranslation("t");
   const [conversations, setConversations] = useState([]);
   const [activeConv, setActiveConv]       = useState(null);
   const [messages, setMessages]           = useState([]);
@@ -104,11 +106,11 @@ export default function ChatPage() {
       {/* Lista conversatii */}
       <div style={{ width:300, background:"#fff", borderRight:`1px solid ${T.border}`, overflowY:"auto" }}>
         <div style={{ padding:"16px 16px 10px", borderBottom:`1px solid ${T.border}`, fontWeight:800, fontSize:16, color:T.dark }}>
-          Mesaje
+          {t("chat_title","Mesaje")}
         </div>
         {conversations.length === 0 && (
           <div style={{ padding:24, color:T.text3, fontSize:13, textAlign:"center" }}>
-            Nicio conversatie inca.<br/>Aplica la un job pentru a incepe!
+            {t("chat_no_convs","Nicio conversatie.\nAplica la un job pentru a incepe!").split("\n").map((l,i)=><span key={i}>{l}{i===0&&<br/>}</span>)}
           </div>
         )}
         {conversations.map(conv => (
@@ -124,7 +126,7 @@ export default function ChatPage() {
             </div>
             <div style={{ flex:1, minWidth:0 }}>
               <div style={{ fontWeight:700, fontSize:13, color:T.text, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{otherName(conv)}</div>
-              <div style={{ fontSize:11, color:T.text3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{conv.last_msg || "Incepe o conversatie..."}</div>
+              <div style={{ fontSize:11, color:T.text3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{conv.last_msg || t("chat_start_conv","Incepe o conversatie...")}</div>
               {conv.job_title && <div style={{ fontSize:10, color:T.green, fontWeight:600 }}>💼 {conv.job_title}</div>}
             </div>
             {conv.unread > 0 && (
@@ -140,7 +142,7 @@ export default function ChatPage() {
       {!activeConv ? (
         <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", color:T.text3, flexDirection:"column", gap:8 }}>
           <div style={{ fontSize:48 }}>💬</div>
-          <div style={{ fontSize:16, fontWeight:600 }}>Selecteaza o conversatie</div>
+          <div style={{ fontSize:16, fontWeight:600 }}>{t("chat_select","Selectează o conversație")}</div>
         </div>
       ) : (
         <div style={{ flex:1, display:"flex", flexDirection:"column" }}>
@@ -150,7 +152,7 @@ export default function ChatPage() {
             <div>
               <div style={{ fontWeight:700, fontSize:14, color:T.dark }}>{otherName(activeConv)}</div>
               <div style={{ fontSize:11, color: isOnline(activeConv) ? "#22c55e" : T.text3 }}>
-                {isOnline(activeConv) ? "● Online acum" : "○ Offline"}
+                {isOnline(activeConv) ? t("chat_online","● Online acum") : t("chat_offline","○ Offline")}
               </div>
             </div>
             {activeConv.job_title && (
@@ -186,7 +188,7 @@ export default function ChatPage() {
             {typing && (
               <div style={{ display:"flex", alignItems:"center", gap:8 }}>
                 <div style={{ background:"#fff", border:`1px solid ${T.border}`, borderRadius:16, padding:"10px 14px", fontSize:13, color:T.text3 }}>
-                  scrie...
+                  {t("chat_typing","scrie...")}
                 </div>
               </div>
             )}
@@ -199,7 +201,7 @@ export default function ChatPage() {
               value={text}
               onChange={e => handleTyping(e.target.value)}
               onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
-              placeholder="Scrie un mesaj..."
+              placeholder={t("chat_placeholder","Scrie un mesaj...")}
               style={{ flex:1, padding:"10px 14px", borderRadius:20, border:`1.5px solid ${T.border}`, fontSize:14, outline:"none" }}
             />
             <button onClick={sendMessage} disabled={!text.trim()} style={{

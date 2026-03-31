@@ -14,6 +14,7 @@ const es = {
   nav_jobs:        "Buscar empleos",
   nav_calendar:    "Agenda",
   map_routes:      "Rutas",
+  chat_start_conv: "Inicia una conversación...",
 
   sched_maintenance:"Mantenimiento casa",
   sched_garden:    "Jardinería",

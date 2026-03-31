@@ -110,7 +110,7 @@ export default function MapPage({ navigate, update }) {
                 </div>
                 <div style={{ marginLeft:"auto", fontWeight:800, fontSize:14, color:job.color||T.green, whiteSpace:"nowrap" }}>{job.salary} RON</div>
               </div>
-              {job.urgent && <span style={{ fontSize:10, background:"#fef3c7", color:"#d97706", fontWeight:700, borderRadius:4, padding:"2px 6px", marginTop:4, display:"inline-block" }}>⚡ URGENT</span>}
+              {job.urgent && <span style={{ fontSize:10, background:"#fef3c7", color:"#d97706", fontWeight:700, borderRadius:4, padding:"2px 6px", marginTop:4, display:"inline-block" }}>⚡ {t("home_urgent","URGENT")}</span>}
             </div>
           ))}
         </div>
@@ -120,10 +120,10 @@ export default function MapPage({ navigate, update }) {
           <div style={{ borderTop:`2px solid ${T.border}`, padding:16, background:"#fafaf9", overflowY:"auto" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
               <div style={{ fontWeight:800, fontSize:15, color:T.text }}>{selected.title}</div>
-              {selected.urgent && <span style={{ fontSize:10, background:"#fef3c7", color:"#d97706", fontWeight:700, borderRadius:4, padding:"2px 6px" }}>🔥 Urgent</span>}
+              {selected.urgent && <span style={{ fontSize:10, background:"#fef3c7", color:"#d97706", fontWeight:700, borderRadius:4, padding:"2px 6px" }}>🔥 {t("home_urgent","Urgent")}</span>}
             </div>
             <div style={{ fontSize:12, color:T.text3, marginBottom:4 }}>{selected.employer} · {selected.category}</div>
-            <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:8 }}>{selected.salary} RON/zi</div>
+            <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:8 }}>{selected.salary} {t("job_per_day","€/zi")}</div>
             {selected.description && <div style={{ fontSize:12, color:T.text2, marginBottom:10, lineHeight:1.5 }}>{selected.description}</div>}
             {selected.skills?.length > 0 && (
               <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:10 }}>

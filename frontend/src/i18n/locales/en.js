@@ -81,6 +81,7 @@ const en = {
   nav_jobs:"Find Jobs",
   nav_calendar:"Schedule",
   map_routes:"Routes",
+  chat_start_conv:"Start a conversation...",
 
   sched_maintenance:"Home Maintenance",
   sched_garden:"Gardening",

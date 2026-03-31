@@ -67,6 +67,7 @@ const ro = {
   nav_jobs:"Caută Joburi",
   nav_calendar:"Agendă",
   map_routes:"Trasee",
+  chat_start_conv:"Începe o conversație...",
 
   sched_maintenance:"Mentenanță casă",
   sched_garden:"Grădinărit",
