@@ -1276,9 +1276,18 @@ function PageEscrow({ gs, update, navigate }) {
   const [disputed, setDisputed] = useState(false);
   const [paymentId, setPaymentId] = useState(null);
   const [apiMsg, setApiMsg] = useState("");
-  const fee=Math.round(job.salary*0.05), total=job.salary+fee;
+  const fee=job?Math.round(job.salary*0.05):0;
+  const total=job?(job.salary+fee):0;
   const fmt=s=>`${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-  useEffect(()=>{if(step===2){const iv=setInterval(()=>setTimer(t=>t+1),1000);return()=>clearInterval(iv);}},[step]);
+  useEffect(()=>{if(step===2){const iv=setInterval(()=>setTimer(tc=>tc+1),1000);return()=>clearInterval(iv);}},[step]);
+  if(!job) return (
+    <div style={{textAlign:"center",padding:"60px 24px",color:T.text2}}>
+      <div style={{fontSize:52,marginBottom:14}}>🔒</div>
+      <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:700,color:T.text,marginBottom:8}}>{t("nav_escrow")}</div>
+      <div style={{fontSize:14,marginBottom:24,color:T.text2}}>{t("jobs_no_results_sub","Selectează un job pentru a folosi Escrow.")}</div>
+      <Btn onClick={()=>navigate("jobs")} color={T.green} style={{margin:"0 auto"}}>🗂️ {t("nav_jobs")}</Btn>
+    </div>
+  );
 
   const fmtCard=v=>v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
   const fmtExp=v=>{const c=v.replace(/\D/g,"").slice(0,4);return c.length>2?c.slice(0,2)+"/"+c.slice(2):c;};
@@ -2081,17 +2090,21 @@ function PageAdmin({ gs }) {
 // ══════════════════════════════════════════════════════════════
 //  PAGE CALENDAR — Agendă personală cu programări & alerte
 // ══════════════════════════════════════════════════════════════
-const SCHEDULE_TYPES = [
-  { key:"maintenance", icon:"🏠", label:"Mentenanță casă",   color:"#3b82f6" },
-  { key:"garden",      icon:"🌿", label:"Grădinărit",         color:"#10b981" },
-  { key:"dogwalk",     icon:"🐕", label:"Plimbare câini",     color:"#f59e0b" },
-  { key:"cleaning",    icon:"🧹", label:"Curățenie",          color:"#8b5cf6" },
-  { key:"repair",      icon:"🔧", label:"Reparații",          color:"#ef4444" },
-  { key:"other",       icon:"⭐", label:"Altele",             color:"#6b7280" },
+const SCHEDULE_TYPE_DEFS = [
+  { key:"maintenance", icon:"🏠", color:"#3b82f6" },
+  { key:"garden",      icon:"🌿", color:"#10b981" },
+  { key:"dogwalk",     icon:"🐕", color:"#f59e0b" },
+  { key:"cleaning",    icon:"🧹", color:"#8b5cf6" },
+  { key:"repair",      icon:"🔧", color:"#ef4444" },
+  { key:"other",       icon:"⭐", color:"#6b7280" },
 ];
 
 function PageCalendar({ gs, update }) {
   const { t } = useTranslation("t");
+  const SCHEDULE_TYPES = SCHEDULE_TYPE_DEFS.map(d => ({
+    ...d,
+    label: t(`sched_${d.key}`, { defaultValue: d.key }),
+  }));
   const today = new Date();
   const todayStr = today.toISOString().slice(0,10);
   const [curMonth, setCurMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
@@ -2193,8 +2206,8 @@ function PageCalendar({ gs, update }) {
 
   const deleteEvent = (id) => update({ schedule: events.filter(e => e.id !== id) });
 
-  const MONTH_NAMES = ["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"];
-  const DAY_SHORT = ["Lu","Ma","Mi","Jo","Vi","Sâ","Du"];
+  const MONTH_NAMES = t("cal_months",{returnObjects:true,defaultValue:["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"]});
+  const DAY_SHORT   = t("cal_days_short",{returnObjects:true,defaultValue:["Lu","Ma","Mi","Jo","Vi","Sâ","Du"]});
 
   // Count upcoming events for header badge
   const upcomingCount = events.filter(ev => ev.date >= todayStr).length;
@@ -2211,7 +2224,7 @@ function PageCalendar({ gs, update }) {
           <button onClick={()=>setCurMonth(new Date(year,month-1,1))} style={{width:34,height:34,borderRadius:9,border:`1.5px solid ${T.border}`,background:"#fff",cursor:"pointer",fontSize:16,color:T.text2,display:"flex",alignItems:"center",justifyContent:"center"}}>◀</button>
           <div>
             <div style={{fontFamily:"Outfit,sans-serif",fontSize:17,fontWeight:800,color:T.text,textAlign:"center"}}>{MONTH_NAMES[month]} {year}</div>
-            {upcomingCount>0 && <div style={{fontSize:11,color:T.green,fontWeight:700,textAlign:"center"}}>📅 {upcomingCount} programări viitoare</div>}
+            {upcomingCount>0 && <div style={{fontSize:11,color:T.green,fontWeight:700,textAlign:"center"}}>📅 {upcomingCount} {t("cal_upcoming_count","programări viitoare")}</div>}
           </div>
           <button onClick={()=>setCurMonth(new Date(year,month+1,1))} style={{width:34,height:34,borderRadius:9,border:`1.5px solid ${T.border}`,background:"#fff",cursor:"pointer",fontSize:16,color:T.text2,display:"flex",alignItems:"center",justifyContent:"center"}}>▶</button>
         </div>
@@ -2265,16 +2278,16 @@ function PageCalendar({ gs, update }) {
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
           <div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text}}>
             {new Date(selectedDate+"T12:00").toLocaleDateString("ro",{weekday:"long",day:"numeric",month:"long"})}
-            {selectedDate === todayStr && <span style={{marginLeft:8,fontSize:11,padding:"2px 8px",borderRadius:20,background:T.green,color:"#fff",fontWeight:700}}>Azi</span>}
+            {selectedDate === todayStr && <span style={{marginLeft:8,fontSize:11,padding:"2px 8px",borderRadius:20,background:T.green,color:"#fff",fontWeight:700}}>{t("home_today")}</span>}
           </div>
-          <Btn onClick={openAdd} color={T.green} size="sm">+ Adaugă</Btn>
+          <Btn onClick={openAdd} color={T.green} size="sm">+ {t("cal_add","Adaugă")}</Btn>
         </div>
 
         {selectedEvents.length === 0 ? (
           <div style={{textAlign:"center",padding:"28px 0",color:T.text3}}>
             <div style={{fontSize:36,marginBottom:8}}>📭</div>
-            <div style={{fontSize:13}}>Nicio programare în această zi</div>
-            <div style={{fontSize:12,marginTop:4,color:T.text3}}>Apasă + Adaugă pentru a programa o lucrare</div>
+            <div style={{fontSize:13}}>{t("cal_no_events","Nicio programare în această zi")}</div>
+            <div style={{fontSize:12,marginTop:4,color:T.text3}}>{t("cal_no_events_hint","Apasă + Adaugă pentru a programa o lucrare")}</div>
           </div>
         ) : selectedEvents.sort((a,b)=>a.time>b.time?1:-1).map(ev => {
           const tp = typeObj(ev.type);
@@ -2291,7 +2304,7 @@ function PageCalendar({ gs, update }) {
                 {ev.notes && <div style={{fontSize:11,color:T.text3,marginTop:3,fontStyle:"italic"}}>{ev.notes}</div>}
                 <div style={{display:"flex",gap:5,marginTop:6,flexWrap:"wrap"}}>
                   <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:tp.color+"18",color:tp.color,fontWeight:700}}>{tp.icon} {tp.label}</span>
-                  {ev.recurring!=="none" && <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:"#fef3c7",color:"#92400e",fontWeight:700}}>🔁 {ev.recurring==="weekly"?"Săptămânal":"Lunar"}</span>}
+                  {ev.recurring!=="none" && <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:"#fef3c7",color:"#92400e",fontWeight:700}}>🔁 {ev.recurring==="weekly"?t("cal_weekly","Săptămânal"):t("cal_monthly","Lunar")}</span>}
                   <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:"#ede9fe",color:"#5b21b6",fontWeight:700}}>⏰ -{ev.reminderMin}min</span>
                 </div>
               </div>
@@ -2307,7 +2320,7 @@ function PageCalendar({ gs, update }) {
       {/* Upcoming events list */}
       {events.filter(ev=>ev.date>=todayStr&&ev.date>selectedDate).sort((a,b)=>a.date>b.date?1:a.time>b.time?1:-1).slice(0,5).length > 0 && (
         <Card style={{padding:"16px 18px",marginTop:12}}>
-          <div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,marginBottom:10}}>📆 Urmează în curând</div>
+          <div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,marginBottom:10}}>📆 {t("cal_coming_soon","Urmează în curând")}</div>
           {events.filter(ev=>ev.date>=todayStr&&ev.date>selectedDate).sort((a,b)=>a.date>b.date?1:a.time>b.time?1:-1).slice(0,5).map(ev=>{
             const tp=typeObj(ev.type);
             const evDate=new Date(ev.date+"T12:00").toLocaleDateString("ro",{weekday:"short",day:"numeric",month:"short"});
@@ -2330,7 +2343,7 @@ function PageCalendar({ gs, update }) {
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:9000,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowForm(false)}>
           <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"22px 18px 32px",width:"100%",maxWidth:500,maxHeight:"88vh",overflowY:"auto",animation:"slideUp 0.3s ease"}}>
             <div style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:800,color:T.text,marginBottom:14,textAlign:"center"}}>
-              {editId ? "✏️ Editează programare" : "➕ Programare nouă"}
+              {editId ? `✏️ ${t("cal_edit_title","Editează programare")}` : `➕ ${t("cal_add_title","Programare nouă")}`}
             </div>
 
             {/* Type selector */}
@@ -2349,10 +2362,10 @@ function PageCalendar({ gs, update }) {
             </div>
 
             {[
-              {label:"Titlu / Descriere *", key:"title", ph:"ex: Tuns gazon la Vila Ionescu"},
-              {label:"Client / Proprietar",  key:"client",   ph:"ex: Familia Popescu"},
-              {label:"Adresă / Locație",     key:"location", ph:"ex: Str. Rozelor 12, Cluj"},
-              {label:"Note",                 key:"notes",    ph:"Detalii suplimentare..."},
+              {label:t("cal_f_title","Titlu / Descriere *"), key:"title", ph:t("cal_f_title_ph","ex: Tuns gazon la Vila Ionescu")},
+              {label:t("cal_f_client","Client / Proprietar"), key:"client", ph:t("cal_f_client_ph","ex: Familia Popescu")},
+              {label:t("cal_f_location","Adresă / Locație"), key:"location", ph:t("cal_f_location_ph","ex: Str. Rozelor 12, Cluj")},
+              {label:t("cal_f_notes","Note"), key:"notes", ph:t("cal_f_notes_ph","Detalii suplimentare...")},
             ].map(f=>(
               <div key={f.key} style={{marginBottom:10}}>
                 <label style={labelSt}>{f.label}</label>
@@ -2373,27 +2386,27 @@ function PageCalendar({ gs, update }) {
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
               <div>
-                <label style={labelSt}>Recurență</label>
+                <label style={labelSt}>{t("cal_recurring","Recurență")}</label>
                 <select value={form.recurring} onChange={e=>setForm(v=>({...v,recurring:e.target.value}))} style={{...inputSt}}>
-                  <option value="none">O singură dată</option>
-                  <option value="weekly">Săptămânal 🔁</option>
-                  <option value="monthly">Lunar 🔁</option>
+                  <option value="none">{t("cal_once","O singură dată")}</option>
+                  <option value="weekly">{t("cal_weekly","Săptămânal")} 🔁</option>
+                  <option value="monthly">{t("cal_monthly","Lunar")} 🔁</option>
                 </select>
               </div>
               <div>
-                <label style={labelSt}>Alertă înainte</label>
+                <label style={labelSt}>{t("cal_reminder","Alertă înainte")}</label>
                 <select value={form.reminderMin} onChange={e=>setForm(v=>({...v,reminderMin:parseInt(e.target.value)}))} style={{...inputSt}}>
-                  <option value={15}>15 minute</option>
-                  <option value={30}>30 minute</option>
-                  <option value={60}>1 oră</option>
-                  <option value={120}>2 ore</option>
-                  <option value={1440}>1 zi înainte</option>
+                  <option value={15}>15 {t("cal_min","minute")}</option>
+                  <option value={30}>30 {t("cal_min","minute")}</option>
+                  <option value={60}>1 {t("cal_hour","oră")}</option>
+                  <option value={120}>2 {t("cal_hours","ore")}</option>
+                  <option value={1440}>1 {t("cal_day_before","zi înainte")}</option>
                 </select>
               </div>
             </div>
 
             <Btn onClick={saveEvent} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg" disabled={!form.title?.trim()||!form.date}>
-              {editId ? "💾 Salvează modificările" : "✅ Adaugă programare"}
+              {editId ? `💾 ${t("cal_save","Salvează modificările")}` : `✅ ${t("cal_add_event","Adaugă programare")}`}
             </Btn>
           </div>
         </div>

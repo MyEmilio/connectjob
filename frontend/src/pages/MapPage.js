@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import api from "../services/api";
+import { useTranslation } from "react-i18next";
 
 // Fix icoane Leaflet cu Webpack
 delete L.Icon.Default.prototype._getIconUrl;
@@ -18,7 +19,7 @@ const T = {
 };
 
 // Buton pentru localizare utilizator
-function LocateUser({ onLocate }) {
+function LocateUser({ onLocate, label }) {
   const map = useMap();
   return (
     <button onClick={() => {
@@ -32,7 +33,7 @@ function LocateUser({ onLocate }) {
       padding:"10px 16px", cursor:"pointer", fontWeight:700, fontSize:13,
       boxShadow:"0 4px 12px rgba(5,150,105,0.4)",
     }}>
-      📍 Locatia mea
+      {label || "📍 Locatia mea"}
     </button>
   );
 }
@@ -46,14 +47,15 @@ const jobIcon = (color, emoji) => L.divIcon({
 });
 
 export default function MapPage({ navigate, update }) {
+  const { t } = useTranslation("t");
   const [jobs, setJobs]         = useState([]);
   const [selected, setSelected] = useState(null);
-  const [filter, setFilter]     = useState("Toate");
+  const [filter, setFilter]     = useState("all");
   const [userPos, setUserPos]   = useState(null);
   const [loading, setLoading]   = useState(true);
 
-  const cats = ["Toate", ...new Set(jobs.map(j => j.category).filter(Boolean))];
-  const filtered = filter === "Toate" ? jobs : jobs.filter(j => j.category === filter);
+  const cats = ["all", ...new Set(jobs.map(j => j.category).filter(Boolean))];
+  const filtered = filter === "all" ? jobs : jobs.filter(j => j.category === filter);
 
   useEffect(() => {
     const params = {};
@@ -73,23 +75,23 @@ export default function MapPage({ navigate, update }) {
       <div style={{ width:320, background:"#fff", borderRight:`1px solid ${T.border}`, display:"flex", flexDirection:"column", overflow:"hidden" }}>
         {/* Filtre categorii */}
         <div style={{ padding:"14px 14px 10px", borderBottom:`1px solid ${T.border}` }}>
-          <div style={{ fontSize:12, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:8 }}>Filtreaza</div>
+          <div style={{ fontSize:12, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:8 }}>{t("map_filter","Filtrează")}</div>
           <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
             {cats.map(c => (
               <button key={c} onClick={() => setFilter(c)} style={{
                 padding:"5px 12px", borderRadius:20, border:"none", cursor:"pointer", fontSize:12, fontWeight:600,
                 background: filter===c ? T.green : "#f5f5f4",
                 color: filter===c ? "#fff" : T.text2,
-              }}>{c}</button>
+              }}>{c === "all" ? t("map_all","Toate") : c}</button>
             ))}
           </div>
         </div>
 
         {/* Lista joburi */}
         <div style={{ flex:1, overflowY:"auto" }}>
-          {loading && <div style={{ padding:20, color:T.text3, fontSize:13 }}>Se incarca joburile...</div>}
+          {loading && <div style={{ padding:20, color:T.text3, fontSize:13 }}>{t("map_loading","Se încarcă...")}</div>}
           {!loading && filtered.length === 0 && (
-            <div style={{ padding:20, color:T.text3, fontSize:13 }}>Niciun job gasit in aceasta categorie.</div>
+            <div style={{ padding:20, color:T.text3, fontSize:13 }}>{t("map_no_jobs","Niciun job în această categorie.")}</div>
           )}
           {filtered.map(job => (
             <div key={job.id} onClick={() => setSelected(job)} style={{
@@ -131,12 +133,12 @@ export default function MapPage({ navigate, update }) {
 
             {/* Rute */}
             <div style={{ marginBottom:10 }}>
-              <div style={{ fontSize:10, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:5 }}>Trasee</div>
+              <div style={{ fontSize:10, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:5 }}>{t("map_routes","Trasee")}</div>
               {[
-                {mode:"🚶", label:"Pietonal",   time:"23 min", color:"#059669"},
-                {mode:"🚲", label:"Bicicletă",  time:"8 min",  color:"#3b82f6"},
-                {mode:"🚗", label:"Mașină",     time:"5 min",  color:"#f59e0b"},
-                {mode:"🚌", label:"Transport",  time:"18 min", color:"#8b5cf6"},
+                {mode:"🚶", label:t("route_pedestrian","Pietonal"),  time:"23 min", color:"#059669"},
+                {mode:"🚲", label:t("route_bike","Bicicletă"),       time:"8 min",  color:"#3b82f6"},
+                {mode:"🚗", label:t("route_car","Mașină"),           time:"5 min",  color:"#f59e0b"},
+                {mode:"🚌", label:t("route_transit","Transport"),    time:"18 min", color:"#8b5cf6"},
               ].map(r=>(
                 <div key={r.mode} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"5px 8px", borderRadius:7, marginBottom:3, background:"#fff", border:`1px solid ${T.border}`, cursor:"pointer", fontSize:12 }}
                   onMouseEnter={e=>e.currentTarget.style.background="#f0fdf4"}
@@ -152,16 +154,16 @@ export default function MapPage({ navigate, update }) {
               <button onClick={() => { update({ selectedJob: selected }); navigate("escrow"); }} style={{
                 padding:"8px", borderRadius:8, border:"none", cursor:"pointer",
                 background:T.green, color:"#fff", fontWeight:700, fontSize:12,
-              }}>🔒 Aplică + Escrow</button>
+              }}>🔒 {t("home_apply","Aplică")} + {t("nav_escrow","Escrow")}</button>
               <div style={{ display:"flex", gap:6 }}>
                 <button onClick={() => { update({ selectedJob: selected }); navigate("contract"); }} style={{
                   flex:1, padding:"7px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
                   background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
-                }}>📝 Contract</button>
+                }}>📝 {t("nav_contract","Contract")}</button>
                 <button onClick={() => navigate("chat")} style={{
                   flex:1, padding:"7px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
                   background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
-                }}>💬 Mesaj</button>
+                }}>💬 {t("chat_send","Mesaj")}</button>
               </div>
             </div>
           </div>
@@ -198,7 +200,7 @@ export default function MapPage({ navigate, update }) {
               iconSize:[18,18], iconAnchor:[9,9],
             })}/>
           )}
-          <LocateUser onLocate={setUserPos}/>
+          <LocateUser onLocate={setUserPos} label={t("map_locate","📍 Locatia mea")}/>
         </MapContainer>
       </div>
     </div>
