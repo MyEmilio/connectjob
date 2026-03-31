@@ -28,7 +28,7 @@ function LocateUser({ onLocate, label }) {
         onLocate([pos.coords.latitude, pos.coords.longitude]);
       });
     }} style={{
-      position:"absolute", bottom:16, right:16, zIndex:1000,
+      position:"absolute", bottom:80, right:16, zIndex:1000,
       background:T.green, color:"#fff", border:"none", borderRadius:10,
       padding:"10px 16px", cursor:"pointer", fontWeight:700, fontSize:13,
       boxShadow:"0 4px 12px rgba(5,150,105,0.4)",
