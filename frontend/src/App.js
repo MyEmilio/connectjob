@@ -183,30 +183,32 @@ function Sparkline({ data, color=T.green, height=36 }) {
 }
 
 
-function JobCardRow({ job, promoted=false, navigate, update }) {
+function JobCardRow({ job, promoted=false, navigate, update, t }) {
+  const { t: tFallback } = useTranslation("t");
+  const tr = t || tFallback;
   return (
     <div onClick={()=>{ update({selectedJob:job}); navigate("map"); }}
       style={{ background:T.white, borderRadius:12, border:promoted?`2px solid ${T.amber}`:`1.5px solid ${T.border}`, padding:"12px 14px", cursor:"pointer", display:"flex", alignItems:"center", gap:12, transition:"all 0.15s", boxShadow:promoted?`0 4px 16px ${T.amber}22`:"none", position:"relative" }}
       onMouseEnter={e=>{ e.currentTarget.style.borderColor=promoted?T.amber:job.color+"66"; e.currentTarget.style.background="#fafffe"; e.currentTarget.style.boxShadow=`0 4px 16px ${job.color}22`; }}
       onMouseLeave={e=>{ e.currentTarget.style.borderColor=promoted?T.amber:T.border; e.currentTarget.style.background=T.white; e.currentTarget.style.boxShadow=promoted?`0 4px 16px ${T.amber}22`:"none"; }}
     >
-      {promoted && <div style={{ position:"absolute",top:-7,left:12,background:`linear-gradient(135deg,${T.amber},${T.amberDark})`,color:"#fff",borderRadius:999,padding:"2px 9px",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.08em" }}>⭐ PROMOVAT</div>}
+      {promoted && <div style={{ position:"absolute",top:-7,left:12,background:`linear-gradient(135deg,${T.amber},${T.amberDark})`,color:"#fff",borderRadius:999,padding:"2px 9px",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.08em" }}>⭐ {tr("home_stats_promoted")}</div>}
       <div style={{ width:46,height:46,borderRadius:12,background:`${job.color||T.green}15`,border:`1.5px solid ${job.color||T.green}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0 }}>{job.icon||"💼"}</div>
       <div style={{ flex:1,minWidth:0 }}>
         <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:2 }}>
           <div style={{ fontWeight:700,fontSize:14,color:T.text }}>{job.title}</div>
-          {job.urgent&&<Badge color={T.red}>🔥 Urgent</Badge>}
+          {job.urgent&&<Badge color={T.red}>{tr("job_urgent_badge")}</Badge>}
           {job.second_job&&<Badge color={T.blue}>💼 2nd job</Badge>}
         </div>
-        <div style={{ fontSize:11,color:T.text3 }}>👤 {job.employer||"—"} · 📂 {job.category||"Diverse"} · {job.type==="full-time"?"Full-time":"Part-time"}{job.work_duration?` · ${job.work_duration}`:""}</div>
+        <div style={{ fontSize:11,color:T.text3 }}>👤 {job.employer||"—"} · 📂 {job.category||tr("job_diverse_cat")} · {job.type==="full-time"?tr("job_fulltime"):tr("job_parttime")}{job.work_duration?` · ${job.work_duration}`:""}</div>
         <div style={{ display:"flex",gap:4,marginTop:4,flexWrap:"wrap" }}>
           {(job.skills||[]).slice(0,3).map(s=><Badge key={s} color={job.color||T.green}>{s}</Badge>)}
         </div>
       </div>
       <div style={{ textAlign:"right",flexShrink:0 }}>
         <div style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:job.color||T.green }}>{job.salary}</div>
-        <div style={{ fontSize:10,color:T.text3 }}>RON/zi</div>
-        {job.distance&&<div style={{ fontSize:11,color:T.text3,marginTop:2 }}>📍 {job.distance}km</div>}
+        <div style={{ fontSize:10,color:T.text3 }}>{tr("job_per_day")}</div>
+        {job.distance&&<div style={{ fontSize:11,color:T.text3,marginTop:2 }}>📍 {job.distance}{tr("km")}</div>}
       </div>
     </div>
   );
@@ -216,12 +218,13 @@ function JobCardRow({ job, promoted=false, navigate, update }) {
 //  PAGE: HOME / DASHBOARD
 // ══════════════════════════════════════════════════════════════
 function HowItWorksModal({ onClose }) {
+  const { t } = useTranslation("t");
   const STEPS = [
-    { icon:"👤", color:"#3b82f6", title:"Creează cont gratuit",    desc:"30 de secunde — nume, email, parolă. Gata!",                  tag:"GRATUIT" },
-    { icon:"🗂️", color:"#059669", title:"Caută după categorie",     desc:"12 categorii + subcategorii. Găsești orice serviciu local.",   tag:"RAPID" },
-    { icon:"📩", color:"#8b5cf6", title:"Aplică cu un singur click", desc:"Trimite candidatura direct din aplicație. Fără CV complicat.", tag:"1 CLICK" },
-    { icon:"💬", color:"#f59e0b", title:"Chat & Contract digital",   desc:"Negociezi condițiile, semnezi contractul în aplicație.",       tag:"SIGUR" },
-    { icon:"🔒", color:"#ef4444", title:"Plată prin Escrow",         desc:"Banii sunt blocați și eliberați doar după finalizarea jobului.",tag:"PROTEJAT" },
+    { icon:"👤", color:"#3b82f6", title:t("hiw_step1_title"), desc:t("hiw_step1_desc"), tag:t("hiw_step1_tag") },
+    { icon:"🗂️", color:"#059669", title:t("hiw_step2_title"), desc:t("hiw_step2_desc"), tag:t("hiw_step2_tag") },
+    { icon:"📩", color:"#8b5cf6", title:t("hiw_step3_title"), desc:t("hiw_step3_desc"), tag:t("hiw_step3_tag") },
+    { icon:"💬", color:"#f59e0b", title:t("hiw_step4_title"), desc:t("hiw_step4_desc"), tag:t("hiw_step4_tag") },
+    { icon:"🔒", color:"#ef4444", title:t("hiw_step5_title"), desc:t("hiw_step5_desc"), tag:t("hiw_step5_tag") },
   ];
 
   return (
@@ -237,14 +240,14 @@ function HowItWorksModal({ onClose }) {
               <div style={{ width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:`0 4px 12px ${T.green}44` }}>⚡</div>
               <span style={{ fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:20,color:"#f1f5f9",letterSpacing:"-0.02em" }}>Connect<span style={{color:T.greenLight}}>Job</span></span>
             </div>
-            <h2 style={{ fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:20,color:"#f1f5f9",margin:"0 0 6px" }}>Cum funcționează? 🚀</h2>
-            <p style={{ color:"#94a3b8",fontSize:13,margin:0 }}>De la înregistrare la plată — totul în <strong style={{color:T.greenLight}}>5 pași simpli</strong></p>
+            <h2 style={{ fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:20,color:"#f1f5f9",margin:"0 0 6px" }}>{t("hiw_title")}</h2>
+            <p style={{ color:"#94a3b8",fontSize:13,margin:0 }}>{t("hiw_subtitle")} <strong style={{color:T.greenLight}}>{t("hiw_5steps")}</strong></p>
           </div>
         </div>
 
         {/* Stats bar */}
         <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",background:"#f8fafc",borderBottom:`1px solid ${T.border}` }}>
-          {[{v:"2 min",l:"setup cont"},{v:"12",l:"categorii"},{v:"100%",l:"gratuit workers"}].map(s=>(
+          {[{v:"2 min",l:t("hiw_stat1_label")},{v:"12",l:t("hiw_stat2_label")},{v:"100%",l:t("hiw_stat3_label")}].map(s=>(
             <div key={s.l} style={{ padding:"12px 8px",textAlign:"center",borderRight:`1px solid ${T.border}` }}>
               <div style={{ fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:18,color:T.green }}>{s.v}</div>
               <div style={{ fontSize:10,color:T.text3,marginTop:2 }}>{s.l}</div>
@@ -278,9 +281,9 @@ function HowItWorksModal({ onClose }) {
 
         {/* Benefits */}
         <div style={{ margin:"0 24px 20px",background:`linear-gradient(135deg,${T.green}08,${T.blue}08)`,border:`1.5px solid ${T.green}22`,borderRadius:14,padding:"14px 16px" }}>
-          <div style={{ fontWeight:700,fontSize:12,color:T.text,marginBottom:10 }}>✅ De ce ConnectJob?</div>
+          <div style={{ fontWeight:700,fontSize:12,color:T.text,marginBottom:10 }}>{t("hiw_why_title")}</div>
           <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:7 }}>
-            {["🔒 Plată protejată prin Escrow","📝 Contract digital semnat","⭐ Sistem de recenzii verificate","📍 Joburi locale pe hartă","💬 Chat în timp real","🛡️ Profiluri verificate ID"].map(b=>(
+            {[t("hiw_benefit_1"),t("hiw_benefit_2"),t("hiw_benefit_3"),t("hiw_benefit_4"),t("hiw_benefit_5"),t("hiw_benefit_6")].map(b=>(
               <div key={b} style={{ fontSize:12,color:T.text2,display:"flex",alignItems:"center",gap:6 }}>{b}</div>
             ))}
           </div>
@@ -289,7 +292,7 @@ function HowItWorksModal({ onClose }) {
         {/* CTA */}
         <div style={{ padding:"0 24px 24px",display:"flex",gap:9 }}>
           <button onClick={onClose} style={{ flex:1,padding:"12px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontWeight:700,fontSize:14,fontFamily:"DM Sans,sans-serif",boxShadow:`0 4px 16px ${T.green}44` }}>
-            🚀 Începe acum — e gratuit!
+            {t("hiw_cta")}
           </button>
         </div>
       </div>
@@ -298,6 +301,7 @@ function HowItWorksModal({ onClose }) {
 }
 
 function PageHome({ gs, update, navigate }) {
+  const { t } = useTranslation("t");
   const allJobs = gs.jobs || [];
   const promotedJobs = allJobs.filter(j => j.promoted);
   const recentJobs = allJobs.slice(0, 6);
@@ -318,15 +322,15 @@ function PageHome({ gs, update, navigate }) {
         <div style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
           <div>
             <div style={{ fontSize:12,color:"#64748b",marginBottom:4 }}>{new Date().toLocaleDateString("ro",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
-            <h1 style={{ fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:"#f1f5f9",margin:"0 0 6px" }}>Bună, {gs.user.name.split(" ")[0]}! 👋</h1>
+            <h1 style={{ fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:"#f1f5f9",margin:"0 0 6px" }}>{t("home_greeting")}, {gs.user.name.split(" ")[0]}! 👋</h1>
             <p style={{ color:"#94a3b8",fontSize:13,margin:0 }}>
-              {allJobs.length > 0 ? <><strong style={{color:T.greenLight}}>{allJobs.length} anunțuri</strong> disponibile în zona ta</> : "Găsește servicii și joburi în zona ta"}
+              {allJobs.length > 0 ? <><strong style={{color:T.greenLight}}>{allJobs.length} {t("jobs_ads_label")}</strong> {t("home_jobs_available")}</> : t("home_no_jobs_hero")}
             </p>
           </div>
           <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
-            <Btn onClick={()=>navigate("map")} color={T.green} size="sm">🗺️ Pe hartă</Btn>
-            <Btn onClick={()=>{ update({jobsCategory:""}); navigate("jobs"); }} color={T.blue} size="sm">🔍 Caută joburi</Btn>
-            {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>🛡️ Verifică-te</Btn>}
+            <Btn onClick={()=>navigate("map")} color={T.green} size="sm">{t("home_on_map_btn")}</Btn>
+            <Btn onClick={()=>{ update({jobsCategory:""}); navigate("jobs"); }} color={T.blue} size="sm">{t("home_search_btn")}</Btn>
+            {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>{t("home_verify_btn")}</Btn>}
             {/* How it works button */}
             <button
               onClick={()=>setShowHowItWorks(true)}
@@ -334,7 +338,7 @@ function PageHome({ gs, update, navigate }) {
               onMouseEnter={e=>{ e.currentTarget.style.background="rgba(52,211,153,0.18)"; e.currentTarget.style.borderColor=T.greenLight; e.currentTarget.style.animation="none"; }}
               onMouseLeave={e=>{ e.currentTarget.style.background="rgba(52,211,153,0.08)"; e.currentTarget.style.borderColor="rgba(52,211,153,0.35)"; e.currentTarget.style.animation="ringPulse 2.4s ease-in-out infinite"; }}
             >
-              <span style={{ fontSize:15 }}>💡</span> Cum funcționează?
+              <span style={{ fontSize:15 }}>💡</span> {t("home_hiw_btn")}
             </button>
           </div>
         </div>
@@ -344,14 +348,15 @@ function PageHome({ gs, update, navigate }) {
       <div style={{ marginBottom:28 }}>
         <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14 }}>
           <div>
-            <h2 style={{ fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 2px" }}>Categorii de servicii</h2>
-            <p style={{ fontSize:12,color:T.text3,margin:0 }}>Selectează o categorie pentru a vedea toate anunțurile disponibile</p>
+            <h2 style={{ fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 2px" }}>{t("home_categories_title")}</h2>
+            <p style={{ fontSize:12,color:T.text3,margin:0 }}>{t("home_categories_subtitle")}</p>
           </div>
-          <Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>Vezi toate →</Btn>
+          <Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>{t("home_see_all_arrow")}</Btn>
         </div>
         <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:10 }}>
           {CATEGORIES.map(cat => {
             const cnt = getCatCount(cat);
+            const label = t(`cat_${cat.key}`, { defaultValue: cat.label });
             return (
               <div key={cat.key}
                 onClick={()=>{ update({jobsCategory:cat.key}); navigate("jobs"); }}
@@ -361,8 +366,8 @@ function PageHome({ gs, update, navigate }) {
               >
                 <div style={{ width:44,height:44,borderRadius:12,background:`${cat.color}15`,border:`1.5px solid ${cat.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>{cat.icon}</div>
                 <div style={{ minWidth:0 }}>
-                  <div style={{ fontWeight:700,fontSize:12,color:T.text,lineHeight:1.3 }}>{cat.label}</div>
-                  {cnt > 0 && <div style={{ fontSize:11,color:cat.color,fontWeight:600,marginTop:2 }}>{cnt} anunț{cnt===1?"":"uri"}</div>}
+                  <div style={{ fontWeight:700,fontSize:12,color:T.text,lineHeight:1.3 }}>{label}</div>
+                  {cnt > 0 && <div style={{ fontSize:11,color:cat.color,fontWeight:600,marginTop:2 }}>{cnt} {t("jobs_ads_label")}</div>}
                 </div>
               </div>
             );
@@ -375,8 +380,8 @@ function PageHome({ gs, update, navigate }) {
           >
             <div style={{ width:44,height:44,borderRadius:12,background:"#e2e8f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0 }}>✨</div>
             <div>
-              <div style={{ fontWeight:700,fontSize:12,color:T.text,lineHeight:1.3 }}>Diverse</div>
-              <div style={{ fontSize:11,color:T.text3,marginTop:2 }}>Alte servicii</div>
+              <div style={{ fontWeight:700,fontSize:12,color:T.text,lineHeight:1.3 }}>{t("home_diverse_label")}</div>
+              <div style={{ fontSize:11,color:T.text3,marginTop:2 }}>{t("home_diverse_sublabel")}</div>
             </div>
           </div>
         </div>
@@ -388,29 +393,29 @@ function PageHome({ gs, update, navigate }) {
           {promotedJobs.length > 0 && (
             <div style={{ marginBottom:20 }}>
               <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
-                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.amber,margin:0 }}>⭐ Anunțuri Promovate</h3>
+                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.amber,margin:0 }}>{t("home_promoted_section")}</h3>
                 <div style={{ flex:1,height:1,background:`${T.amber}44` }}/>
               </div>
               <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-                {promotedJobs.slice(0,3).map(job=><JobCardRow key={job.id||job._id} job={job} promoted navigate={navigate} update={update}/>)}
+                {promotedJobs.slice(0,3).map(job=><JobCardRow key={job.id||job._id} job={job} promoted navigate={navigate} update={update} t={t}/>)}
               </div>
             </div>
           )}
           <div>
             <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10 }}>
-              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>🆕 Anunțuri Recente</h3>
-              <Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>Toate anunțurile →</Btn>
+              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>{t("home_recent_section")}</h3>
+              <Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>{t("home_all_ads_arrow")}</Btn>
             </div>
             {recentJobs.length > 0 ? (
               <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-                {recentJobs.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update}/>)}
+                {recentJobs.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update} t={t}/>)}
               </div>
             ) : (
               <Card style={{ padding:"32px",textAlign:"center" }}>
                 <div style={{ fontSize:40,marginBottom:10 }}>📋</div>
-                <div style={{ fontSize:14,fontWeight:600,color:T.text,marginBottom:8 }}>Niciun anunț momentan</div>
-                <div style={{ fontSize:12,color:T.text3,marginBottom:16 }}>Fii primul care postează un serviciu sau job!</div>
-                {gs.user.role === "employer" && <Btn onClick={()=>navigate("post_job")} color={T.green}>+ Postează anunț</Btn>}
+                <div style={{ fontSize:14,fontWeight:600,color:T.text,marginBottom:8 }}>{t("home_no_ads")}</div>
+                <div style={{ fontSize:12,color:T.text3,marginBottom:16 }}>{t("home_no_ads_sub")}</div>
+                {gs.user.role === "employer" && <Btn onClick={()=>navigate("post_job")} color={T.green}>{t("home_post_ad_btn")}</Btn>}
               </Card>
             )}
           </div>
@@ -418,12 +423,12 @@ function PageHome({ gs, update, navigate }) {
 
         <div style={{ display:"flex",flexDirection:"column",gap:14 }}>
           <Card style={{ padding:"16px 18px" }}>
-            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:"0 0 12px" }}>📊 Pe ConnectJob azi</h3>
+            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:"0 0 12px" }}>{t("home_stats_title")}</h3>
             {[
-              { icon:"📋", label:"Anunțuri active",  value:allJobs.length,                        color:T.green  },
-              { icon:"🔥", label:"Urgente",           value:allJobs.filter(j=>j.urgent).length,    color:T.red    },
-              { icon:"⭐", label:"Promovate",         value:promotedJobs.length,                   color:T.amber  },
-              { icon:"📂", label:"Categorii active",  value:new Set(allJobs.map(j=>j.category||"Diverse").filter(Boolean)).size, color:T.blue },
+              { icon:"📋", label:t("home_stats_active"),   value:allJobs.length,                        color:T.green  },
+              { icon:"🔥", label:t("home_stats_urgent"),   value:allJobs.filter(j=>j.urgent).length,    color:T.red    },
+              { icon:"⭐", label:t("home_stats_promoted"), value:promotedJobs.length,                   color:T.amber  },
+              { icon:"📂", label:t("home_stats_cats"),     value:new Set(allJobs.map(j=>j.category||t("home_diverse_label")).filter(Boolean)).size, color:T.blue },
             ].map(s=>(
               <div key={s.label} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:`1px solid ${T.border}` }}>
                 <span style={{ fontSize:12,color:T.text2 }}>{s.icon} {s.label}</span>
@@ -432,11 +437,11 @@ function PageHome({ gs, update, navigate }) {
             ))}
           </Card>
           <Card style={{ padding:"16px 18px" }}>
-            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:"0 0 14px" }}>🔔 Activitate recentă</h3>
+            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:"0 0 14px" }}>{t("home_activity_title")}</h3>
             {[
-              { icon:"💬", text:"SC CleanPro ți-a trimis un mesaj", time:"2 min", color:T.green },
-              { icon:"👁️", text:"Profilul tău a fost văzut de 12 ori azi", time:"1 oră", color:T.blue },
-              { icon:"🎯", text:"Job nou potrivit: Plimbare câini", time:"2 ore", color:T.purple },
+              { icon:"💬", text:t("home_activity_1"), time:"2 min", color:T.green },
+              { icon:"👁️", text:t("home_activity_2"), time:"1h",    color:T.blue },
+              { icon:"🎯", text:t("home_activity_3"), time:"2h",    color:T.purple },
             ].map((a,i)=>(
               <div key={i} style={{ display:"flex",gap:10,padding:"8px 0",borderBottom:i<2?`1px solid ${T.border}`:"none" }}>
                 <div style={{ width:30,height:30,borderRadius:8,background:`${a.color}15`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0 }}>{a.icon}</div>
@@ -449,16 +454,16 @@ function PageHome({ gs, update, navigate }) {
           </Card>
           <Card style={{ padding:"16px 18px" }}>
             <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12 }}>
-              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>👤 Profil</h3>
+              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>{t("home_profile_card")}</h3>
               <span style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.green }}>78%</span>
             </div>
             <div style={{ height:6,borderRadius:999,background:T.border,marginBottom:12,overflow:"hidden" }}>
               <div style={{ height:"100%",borderRadius:999,background:`linear-gradient(90deg,${T.green},${T.greenLight})`,width:"78%",transition:"width 1s ease" }}/>
             </div>
             {[
-              { label:"Informații de bază", done:true },
-              { label:"Verificare identitate", done:gs.user.verified },
-              { label:"Primele 3 recenzii", done:false },
+              { label:t("home_profile_basic"),    done:true },
+              { label:t("home_profile_identity"), done:gs.user.verified },
+              { label:t("home_profile_reviews_label"), done:false },
             ].map(item=>(
               <div key={item.label} style={{ display:"flex",alignItems:"center",gap:8,padding:"4px 0" }}>
                 <div style={{ width:16,height:16,borderRadius:"50%",background:item.done?T.green:T.border,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:"#fff",flexShrink:0 }}>{item.done?"✓":""}</div>
@@ -477,6 +482,7 @@ function PageHome({ gs, update, navigate }) {
 //  PAGE: JOBS BROWSER
 // ══════════════════════════════════════════════════════════════
 function PageJobs({ gs, update, navigate }) {
+  const { t } = useTranslation("t");
   const [category, setCategory]         = useState(gs.jobsCategory || "Toate");
   const [subcategory, setSubcategory]   = useState("");
   const [urgent, setUrgent]             = useState(false);
@@ -538,35 +544,35 @@ function PageJobs({ gs, update, navigate }) {
       <div style={{ marginBottom:20 }}>
         <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:16,flexWrap:"wrap" }}>
           <h1 style={{ fontFamily:"Outfit,sans-serif",fontSize:22,fontWeight:800,color:T.text,margin:0 }}>
-            {selectedCatObj ? `${selectedCatObj.icon} ${selectedCatObj.label}` : category==="diverse"?"✨ Diverse / Anunțuri Noi":"🗂️ Toate Joburile & Serviciile"}
+            {selectedCatObj ? `${selectedCatObj.icon} ${t(`cat_${selectedCatObj.key}`,{defaultValue:selectedCatObj.label})}` : category==="diverse"?t("jobs_title_diverse"):t("jobs_title_all")}
           </h1>
-          <Badge color={T.green}>{sorted.length} anunțuri</Badge>
+          <Badge color={T.green}>{sorted.length} {t("jobs_ads_label")}</Badge>
           {gs.user.role === "employer" && (
-            <Btn size="sm" color={T.green} onClick={()=>navigate("post_job")} style={{marginLeft:"auto"}}>+ Postează anunț</Btn>
+            <Btn size="sm" color={T.green} onClick={()=>navigate("post_job")} style={{marginLeft:"auto"}}>{t("jobs_post_btn")}</Btn>
           )}
         </div>
 
         <div style={{ position:"relative",marginBottom:12 }}>
           <div style={{ position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:16 }}>🔍</div>
-          <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder="Caută joburi, servicii, abilități..." style={{ width:"100%",height:44,borderRadius:12,border:`1.5px solid ${T.border}`,paddingLeft:40,paddingRight:16,fontSize:14,fontFamily:"DM Sans,sans-serif",outline:"none",boxSizing:"border-box",background:T.white }} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
+          <input value={searchText} onChange={e=>setSearchText(e.target.value)} placeholder={t("jobs_search_ph")} style={{ width:"100%",height:44,borderRadius:12,border:`1.5px solid ${T.border}`,paddingLeft:40,paddingRight:16,fontSize:14,fontFamily:"DM Sans,sans-serif",outline:"none",boxSizing:"border-box",background:T.white }} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
         </div>
 
         <div style={{ overflowX:"auto",paddingBottom:4,marginBottom:10 }}>
           <div style={{ display:"flex",gap:6,minWidth:"max-content" }}>
-            <FilterToggle active={category==="Toate"} onClick={()=>{ setCategory("Toate"); setSubcategory(""); }}>Toate</FilterToggle>
+            <FilterToggle active={category==="Toate"} onClick={()=>{ setCategory("Toate"); setSubcategory(""); }}>{t("jobs_all_tab")}</FilterToggle>
             {CATEGORIES.map(cat=>(
               <FilterToggle key={cat.key} active={category===cat.key} onClick={()=>{ setCategory(cat.key); setSubcategory(""); }} color={cat.color}>
-                {cat.icon} {cat.label}
+                {cat.icon} {t(`cat_${cat.key}`,{defaultValue:cat.label})}
               </FilterToggle>
             ))}
-            <FilterToggle active={category==="diverse"} onClick={()=>{ setCategory("diverse"); setSubcategory(""); }} color={T.text3}>✨ Diverse</FilterToggle>
+            <FilterToggle active={category==="diverse"} onClick={()=>{ setCategory("diverse"); setSubcategory(""); }} color={T.text3}>{t("jobs_diverse_tab")}</FilterToggle>
           </div>
         </div>
 
         {selectedCatObj && (
           <div style={{ display:"flex",gap:5,flexWrap:"wrap",marginBottom:10 }}>
-            <button onClick={()=>setSubcategory("")} style={{ padding:"3px 10px",borderRadius:999,border:`1px solid ${subcategory===""?selectedCatObj.color:T.border}`,cursor:"pointer",background:subcategory===""?`${selectedCatObj.color}15`:"transparent",color:subcategory===""?selectedCatObj.color:T.text3,fontSize:11,fontWeight:600 }}>Toate</button>
-            {selectedCatObj.sub.map(s=>(
+            <button onClick={()=>setSubcategory("")} style={{ padding:"3px 10px",borderRadius:999,border:`1px solid ${subcategory===""?selectedCatObj.color:T.border}`,cursor:"pointer",background:subcategory===""?`${selectedCatObj.color}15`:"transparent",color:subcategory===""?selectedCatObj.color:T.text3,fontSize:11,fontWeight:600 }}>{t("jobs_all_tab")}</button>
+            {(t(`cat_${selectedCatObj.key}_sub`,{returnObjects:true,defaultValue:selectedCatObj.sub})||selectedCatObj.sub).map(s=>(
               <button key={s} onClick={()=>setSubcategory(subcategory===s?"":s)} style={{ padding:"3px 10px",borderRadius:999,border:`1px solid ${subcategory===s?selectedCatObj.color:T.border}`,cursor:"pointer",background:subcategory===s?`${selectedCatObj.color}15`:"transparent",color:subcategory===s?selectedCatObj.color:T.text3,fontSize:11 }}>{s}</button>
             ))}
           </div>
@@ -574,20 +580,20 @@ function PageJobs({ gs, update, navigate }) {
 
         <Card style={{ padding:"10px 14px" }}>
           <div style={{ display:"flex",alignItems:"center",gap:8,flexWrap:"wrap" }}>
-            <span style={{ fontSize:11,fontWeight:700,color:T.text3,textTransform:"uppercase",letterSpacing:"0.06em",whiteSpace:"nowrap" }}>Filtre:</span>
-            <FilterToggle active={urgent} onClick={()=>setUrgent(!urgent)} color={T.red}>🔥 Urgent</FilterToggle>
-            <FilterToggle active={secondJob} onClick={()=>setSecondJob(!secondJob)} color={T.blue}>💼 Al doilea job</FilterToggle>
+            <span style={{ fontSize:11,fontWeight:700,color:T.text3,textTransform:"uppercase",letterSpacing:"0.06em",whiteSpace:"nowrap" }}>{t("jobs_filters_label")}</span>
+            <FilterToggle active={urgent} onClick={()=>setUrgent(!urgent)} color={T.red}>{t("jobs_urgent_filter")}</FilterToggle>
+            <FilterToggle active={secondJob} onClick={()=>setSecondJob(!secondJob)} color={T.blue}>{t("jobs_second_filter")}</FilterToggle>
             <div style={{ display:"flex",gap:4 }}>
-              {[{k:"",l:"Orice"},{k:"ore",l:"🕐 Ore"},{k:"zile",l:"📅 Zile"},{k:"permanent",l:"♾️ Permanent"}].map(opt=>(
+              {[{k:"",l:t("jobs_any_duration")},{k:"ore",l:t("jobs_hours")},{k:"zile",l:t("jobs_days")},{k:"permanent",l:t("jobs_permanent")}].map(opt=>(
                 <button key={opt.k} onClick={()=>setWorkDuration(opt.k)} style={{ padding:"4px 10px",borderRadius:999,border:`1px solid ${workDuration===opt.k?T.green:T.border}`,cursor:"pointer",background:workDuration===opt.k?`${T.green}15`:"transparent",color:workDuration===opt.k?T.green:T.text3,fontSize:11,fontWeight:600 }}>{opt.l}</button>
               ))}
             </div>
             <div style={{ display:"flex",alignItems:"center",gap:6,marginLeft:"auto" }}>
-              <span style={{ fontSize:11,color:T.text3 }}>Sortare:</span>
+              <span style={{ fontSize:11,color:T.text3 }}>{t("jobs_sort_label")}</span>
               <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{ fontSize:11,borderRadius:8,border:`1px solid ${T.border}`,padding:"4px 8px",cursor:"pointer",outline:"none" }}>
-                <option value="recent">Cele mai noi</option>
-                <option value="salary_desc">Salariu ↓</option>
-                <option value="distance">Distanță</option>
+                <option value="recent">{t("jobs_sort_recent")}</option>
+                <option value="salary_desc">{t("jobs_sort_salary")}</option>
+                <option value="distance">{t("jobs_sort_distance")}</option>
               </select>
             </div>
           </div>
@@ -597,11 +603,11 @@ function PageJobs({ gs, update, navigate }) {
       {promotedInView.length > 0 && (
         <div style={{ marginBottom:20 }}>
           <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
-            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.amber,margin:0 }}>⭐ Anunțuri Promovate</h3>
+            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.amber,margin:0 }}>{t("jobs_promoted_section")}</h3>
             <div style={{ flex:1,height:1,background:`${T.amber}44` }}/>
           </div>
           <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-            {promotedInView.map(job=><JobCardRow key={job.id||job._id} job={job} promoted navigate={navigate} update={update}/>)}
+            {promotedInView.map(job=><JobCardRow key={job.id||job._id} job={job} promoted navigate={navigate} update={update} t={t}/>)}
           </div>
         </div>
       )}
@@ -609,11 +615,11 @@ function PageJobs({ gs, update, navigate }) {
       {urgentInView.length > 0 && (
         <div style={{ marginBottom:20 }}>
           <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
-            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.red,margin:0 }}>🔥 Joburi Urgente</h3>
+            <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.red,margin:0 }}>{t("jobs_urgent_section")}</h3>
             <div style={{ flex:1,height:1,background:`${T.red}44` }}/>
           </div>
           <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-            {urgentInView.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update}/>)}
+            {urgentInView.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update} t={t}/>)}
           </div>
         </div>
       )}
@@ -622,19 +628,19 @@ function PageJobs({ gs, update, navigate }) {
         {regularInView.length > 0 ? (
           <>
             <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:10 }}>
-              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>📋 Anunțuri</h3>
+              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0 }}>{t("jobs_regular_section")}</h3>
               <div style={{ flex:1,height:1,background:T.border }}/>
             </div>
             <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-              {regularInView.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update}/>)}
+              {regularInView.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update} t={t}/>)}
             </div>
           </>
         ) : sorted.length === 0 && (
           <div style={{ textAlign:"center",padding:"60px 20px",color:T.text3 }}>
             <div style={{ fontSize:48,marginBottom:12 }}>🔍</div>
-            <div style={{ fontSize:16,fontWeight:700,color:T.text,marginBottom:8 }}>Niciun anunț găsit</div>
-            <div style={{ fontSize:13 }}>Încearcă să ajustezi filtrele sau caută în altă categorie.</div>
-            <Btn onClick={()=>{ setCategory("Toate"); setUrgent(false); setWorkDuration(""); setSecondJob(false); setSearchText(""); }} variant="outline" size="sm" style={{marginTop:16}}>🔄 Resetează filtrele</Btn>
+            <div style={{ fontSize:16,fontWeight:700,color:T.text,marginBottom:8 }}>{t("jobs_no_results_title")}</div>
+            <div style={{ fontSize:13 }}>{t("jobs_no_results_sub")}</div>
+            <Btn onClick={()=>{ setCategory("Toate"); setUrgent(false); setWorkDuration(""); setSecondJob(false); setSearchText(""); }} variant="outline" size="sm" style={{marginTop:16}}>{t("jobs_reset_filters")}</Btn>
           </div>
         )}
       </div>
@@ -644,13 +650,13 @@ function PageJobs({ gs, update, navigate }) {
           <div style={{ background:"linear-gradient(135deg,#f8fafc,#f1f5f9)",borderRadius:16,border:`1.5px dashed ${T.border}`,padding:"16px 20px" }}>
             <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14 }}>
               <div>
-                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:"0 0 4px" }}>✨ Diverse / Anunțuri Noi</h3>
-                <p style={{ fontSize:12,color:T.text3,margin:0 }}>Servicii care nu se încadrează în categoriile principale — în ordinea postării</p>
+                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:"0 0 4px" }}>{t("jobs_diverse_title")}</h3>
+                <p style={{ fontSize:12,color:T.text3,margin:0 }}>{t("jobs_diverse_desc")}</p>
               </div>
-              <Badge color={T.text3}>{diverseJobs.length} anunțuri</Badge>
+              <Badge color={T.text3}>{diverseJobs.length} {t("jobs_ads_label")}</Badge>
             </div>
             <div style={{ display:"flex",flexDirection:"column",gap:8 }}>
-              {diverseJobs.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update}/>)}
+              {diverseJobs.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update} t={t}/>)}
             </div>
           </div>
         </div>
@@ -663,6 +669,7 @@ function PageJobs({ gs, update, navigate }) {
 //  PAGE: MAP
 // ══════════════════════════════════════════════════════════════
 function PageMap({ gs, update, navigate }) {
+  const { t } = useTranslation("t");
   const [selected, setSelected] = useState(gs.selectedJob);
   const [filter, setFilter]     = useState("Toate");
   const [dark, setDark]         = useState(false);
@@ -676,10 +683,10 @@ function PageMap({ gs, update, navigate }) {
   });
 
   const ROUTES=[
-    {mode:"🚶",label:"Pietonal",time:"23 min",dist:"1.8 km",color:T.green},
-    {mode:"🚲",label:"Bicicletă",time:"8 min",dist:"1.8 km",color:T.blue},
-    {mode:"🚗",label:"Mașină",time:"5 min",dist:"2.1 km",color:T.amber},
-    {mode:"🚌",label:"Transport",time:"18 min",dist:"2.4 km",color:T.purple},
+    {mode:"🚶",label:t("route_pedestrian"),time:"23 min",dist:"1.8 km",color:T.green},
+    {mode:"🚲",label:t("route_bike"),time:"8 min",dist:"1.8 km",color:T.blue},
+    {mode:"🚗",label:t("route_car"),time:"5 min",dist:"2.1 km",color:T.amber},
+    {mode:"🚌",label:t("route_transit"),time:"18 min",dist:"2.4 km",color:T.purple},
   ];
 
   useEffect(()=>{ if(gs.selectedJob) setSelected(gs.selectedJob); },[gs.selectedJob]);
@@ -838,6 +845,7 @@ function PageMap({ gs, update, navigate }) {
 //  PAGE: CHAT
 // ══════════════════════════════════════════════════════════════
 function PageChat({ gs, update, navigate }) {
+  const { t } = useTranslation("t");
   const [convs, setConvs]       = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -1010,13 +1018,13 @@ function PageChat({ gs, update, navigate }) {
           <div style={{ background:T.white,borderRadius:20,padding:"28px 24px",maxWidth:400,width:"100%" }}>
             <div style={{ textAlign:"center",marginBottom:20 }}>
               <div style={{ fontSize:48,marginBottom:10 }}>💬</div>
-              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px" }}>Apel WhatsApp</h3>
+              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px" }}>{t("chat_whatsapp_title")}</h3>
             </div>
             <div style={{ display:"flex",flexDirection:"column",gap:8,marginBottom:16 }}>
               {[
-                {icon:"📞",label:"Apel vocal",href:`https://wa.me/`},
-                {icon:"📹",label:"Video Call",href:`https://wa.me/`},
-                {icon:"💬",label:"Mesaj",href:`https://wa.me/`},
+                {icon:"📞",label:t("chat_voice_call"),href:`https://wa.me/`},
+                {icon:"📹",label:t("chat_video_call_btn"),href:`https://wa.me/`},
+                {icon:"💬",label:t("chat_message_btn"),href:`https://wa.me/`},
               ].map(opt=>(
                 <a key={opt.label} href={opt.href} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none"}}>
                   <Btn color="#25d366" style={{width:"100%",justifyContent:"center"}}>{opt.icon} {opt.label}</Btn>
@@ -1033,7 +1041,7 @@ function PageChat({ gs, update, navigate }) {
           <div style={{ background:T.white,borderRadius:20,padding:"28px 24px",maxWidth:420,width:"100%" }}>
             <div style={{ textAlign:"center",marginBottom:20 }}>
               <div style={{ fontSize:48,marginBottom:10 }}>📹</div>
-              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px" }}>Video Meeting</h3>
+              <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px" }}>{t("chat_video_title")}</h3>
             </div>
             <div style={{ display:"flex",gap:8,marginBottom:16 }}>
               {[{icon:"🎥",label:"Google Meet",color:"#1a73e8",href:"https://meet.google.com/new"},{icon:"📹",label:"Zoom",color:"#2d8cff",href:"https://zoom.us/start/videomeeting"},{icon:"💼",label:"Teams",color:"#6264a7",href:"https://teams.microsoft.com"}].map(p=>(
@@ -1056,7 +1064,7 @@ function PageChat({ gs, update, navigate }) {
             {reportStatus ? (
               <div style={{ textAlign:"center" }}>
                 <div style={{ fontSize:52,marginBottom:12 }}>✅</div>
-                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:"0 0 8px" }}>Raport trimis!</h3>
+                <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:"0 0 8px" }}>{t("chat_report_sent_title")}</h3>
                 <p style={{ fontSize:13,color:T.text2,marginBottom:20 }}>{reportStatus}</p>
                 <Btn onClick={()=>setModal(null)} color={T.green} style={{width:"100%",justifyContent:"center"}}>Închide</Btn>
               </div>
@@ -1064,7 +1072,7 @@ function PageChat({ gs, update, navigate }) {
               <>
                 <div style={{ textAlign:"center",marginBottom:20 }}>
                   <div style={{ fontSize:40,marginBottom:8 }}>⚠️</div>
-                  <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:"0 0 4px" }}>Raportează utilizatorul</h3>
+                  <h3 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:"0 0 4px" }}>{t("chat_report_modal_title")}</h3>
                   <p style={{ fontSize:12,color:T.text3 }}>
                     {active ? (String(active.user1_id)===String(gs.user?.id)?active.user2_name:active.user1_name) : ""}
                   </p>
@@ -1073,12 +1081,12 @@ function PageChat({ gs, update, navigate }) {
                   <div style={{ fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",marginBottom:8 }}>Motiv</div>
                   <div style={{ display:"flex",flexDirection:"column",gap:6 }}>
                     {[
-                      {k:"limbaj_ofensiv", l:"🤬 Limbaj ofensiv / injurii"},
-                      {k:"rasism",         l:"🚫 Rasism / discriminare"},
-                      {k:"hartuire",       l:"😨 Hărțuire / amenințări"},
-                      {k:"spam",           l:"📢 Spam / reclame"},
-                      {k:"frauda",         l:"💸 Tentativă de fraudă"},
-                      {k:"altele",         l:"❓ Altele"},
+                      {k:"limbaj_ofensiv", l:t("chat_report_offensive")},
+                      {k:"rasism",         l:t("chat_report_racism")},
+                      {k:"hartuire",       l:t("chat_report_harassment")},
+                      {k:"spam",           l:t("chat_report_spam")},
+                      {k:"frauda",         l:t("chat_report_fraud")},
+                      {k:"altele",         l:t("chat_report_other")},
                     ].map(r=>(
                       <div key={r.k} onClick={()=>setReportReason(r.k)} style={{ display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:9,cursor:"pointer",border:reportReason===r.k?`2px solid ${T.red}`:`1.5px solid ${T.border}`,background:reportReason===r.k?"#fef2f2":"#fafaf9",transition:"all 0.15s" }}>
                         <div style={{ width:16,height:16,borderRadius:"50%",border:reportReason===r.k?"none":`2px solid ${T.border}`,background:reportReason===r.k?T.red:"transparent",flexShrink:0 }}/>
@@ -1087,7 +1095,7 @@ function PageChat({ gs, update, navigate }) {
                     ))}
                   </div>
                 </div>
-                <textarea value={reportDetails} onChange={e=>setReportDetails(e.target.value)} placeholder="Detalii suplimentare (opțional)..." rows={2} style={{ width:"100%",borderRadius:9,border:`1.5px solid ${T.border}`,padding:"8px 12px",fontSize:13,resize:"none",outline:"none",marginBottom:14,boxSizing:"border-box",fontFamily:"DM Sans,sans-serif" }} onFocus={e=>e.target.style.border=`1.5px solid ${T.red}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
+                <textarea value={reportDetails} onChange={e=>setReportDetails(e.target.value)} placeholder={t("chat_report_details_ph")} rows={2} style={{ width:"100%",borderRadius:9,border:`1.5px solid ${T.border}`,padding:"8px 12px",fontSize:13,resize:"none",outline:"none",marginBottom:14,boxSizing:"border-box",fontFamily:"DM Sans,sans-serif" }} onFocus={e=>e.target.style.border=`1.5px solid ${T.red}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
                 <div style={{ display:"flex",gap:8,marginBottom:10 }}>
                   <Btn onClick={async()=>{
                     if(!reportReason) return;
@@ -1095,7 +1103,7 @@ function PageChat({ gs, update, navigate }) {
                     if(!otherId) return;
                     try {
                       const res = await api.post("/reports",{ reported_user_id:otherId, message_id: reportMsg?.id||null, reason:reportReason, details:reportDetails });
-                      setReportStatus(res.data.message||"Raport trimis. Echipa va analiza în 24h.");
+                      setReportStatus(res.data.message||t("chat_report_sent_msg"));
                     } catch(e){ setReportStatus(e.response?.data?.error||"Raport trimis."); }
                   }} disabled={!reportReason} color={T.red} style={{flex:1,justifyContent:"center"}}>⚠️ Trimite raport</Btn>
                   <Btn onClick={async()=>{
@@ -1177,7 +1185,7 @@ function PageChat({ gs, update, navigate }) {
           <div style={{ display:"flex",gap:6 }}>
             <button onClick={()=>setModal("whatsapp")} style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:18,background:"linear-gradient(135deg,#25d366,#128c7e)",display:"flex",alignItems:"center",justifyContent:"center" }}>💬</button>
             <button onClick={()=>setModal("video")} style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:18,background:`linear-gradient(135deg,${T.blue},${T.blueDark})`,display:"flex",alignItems:"center",justifyContent:"center" }}>📹</button>
-            <button onClick={()=>{ setReportMsg(null); setReportReason(""); setReportDetails(""); setReportStatus(""); setModal("report"); }} title="Raportează utilizatorul" style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:16,background:"#fef2f2",border:"1px solid #fecaca",display:"flex",alignItems:"center",justifyContent:"center" }}>⚠️</button>
+            <button onClick={()=>{ setReportMsg(null); setReportReason(""); setReportDetails(""); setReportStatus(""); setModal("report"); }} title={t("chat_report_modal_title")} style={{ width:34,height:34,borderRadius:8,border:"none",cursor:"pointer",fontSize:16,background:"#fef2f2",border:"1px solid #fecaca",display:"flex",alignItems:"center",justifyContent:"center" }}>⚠️</button>
           </div>
         </div>
 
@@ -1193,7 +1201,7 @@ function PageChat({ gs, update, navigate }) {
         <div style={{ margin:"8px 12px 0",background:"linear-gradient(135deg,#f0fdf4,#dcfce7)",borderRadius:10,padding:"7px 14px",display:"flex",alignItems:"center",gap:8,border:"1px solid #bbf7d0" }}>
           <span style={{fontSize:16}}>🎯</span>
           <span style={{fontSize:12,fontWeight:700,color:"#065f46"}}>Match Score: 92%</span>
-          <span style={{fontSize:11,color:"#057a55"}}>· Disponibil în zonă ✓ · Verificat ✓</span>
+          <span style={{fontSize:11,color:"#057a55"}}>{t("chat_status_zone")}</span>
           <Btn size="sm" color={T.green} style={{marginLeft:"auto"}} onClick={()=>navigate("map")}>Profil</Btn>
         </div>
 
@@ -1240,7 +1248,7 @@ function PageChat({ gs, update, navigate }) {
           )}
           <div style={{ display:"flex",alignItems:"flex-end",gap:6 }}>
             <div style={{ flex:1,background:"#f5f5f4",borderRadius:12,border:isListening?`1.5px solid #ef4444`:`1.5px solid ${T.border}`,padding:"8px 12px",transition:"border 0.2s" }}>
-              <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={isListening?"🎙️ Vorbește...":"Scrie un mesaj..."} rows={1} style={{ width:"100%",background:"transparent",border:"none",outline:"none",fontSize:13,fontFamily:"DM Sans,sans-serif",color:T.text,resize:"none",lineHeight:1.5,maxHeight:72 }}/>
+              <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={isListening?t("chat_speaking"):t("chat_placeholder")} rows={1} style={{ width:"100%",background:"transparent",border:"none",outline:"none",fontSize:13,fontFamily:"DM Sans,sans-serif",color:T.text,resize:"none",lineHeight:1.5,maxHeight:72 }}/>
             </div>
             <button onClick={isListening?stopVoice:startVoice} style={{ width:38,height:38,borderRadius:10,border:"none",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",background:isListening?"linear-gradient(135deg,#ef4444,#dc2626)":`linear-gradient(135deg,${T.dark},${T.dark3})`,boxShadow:isListening?"0 0 0 3px rgba(239,68,68,0.3)":"none",transition:"all 0.2s" }}>{isListening?"⏹":"🎤"}</button>
             <button onClick={send} disabled={!input.trim()&&!interim.trim()} style={{ width:38,height:38,borderRadius:10,border:"none",cursor:(input.trim()||interim.trim())?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",background:(input.trim()||interim.trim())?`linear-gradient(135deg,${T.green},${T.greenDark})`:"#e7e5e4",boxShadow:(input.trim()||interim.trim())?`0 4px 12px ${T.green}44`:"none",transition:"all 0.2s" }}>➤</button>
@@ -1257,6 +1265,7 @@ function PageChat({ gs, update, navigate }) {
 //  PAGE: ESCROW
 // ══════════════════════════════════════════════════════════════
 function PageEscrow({ gs, update, navigate }) {
+  const { t } = useTranslation("t");
   const job = gs.selectedJob || (gs.jobs||[])[0];
   const [step, setStep]     = useState(0);
   const [method, setMethod] = useState("card");
@@ -1415,15 +1424,15 @@ function PageEscrow({ gs, update, navigate }) {
               setDisputed(true);
             }} variant="outline" style={{width:"100%",justifyContent:"center",borderColor:"#fecaca",color:T.red,background:"#fef2f2"}} size="md">⚠️ Deschide dispută</Btn>
           </div>
-          {disputed&&<div style={{marginTop:10,background:"#fef2f2",borderRadius:9,padding:"10px 13px",border:"1px solid #fecaca",fontSize:12,color:T.red}}><strong>⚠️ Dispută deschisă</strong> — Echipa noastră va analiza în 24h. Banii rămân blocați.</div>}
+          {disputed&&<div style={{marginTop:10,background:"#fef2f2",borderRadius:9,padding:"10px 13px",border:"1px solid #fecaca",fontSize:12,color:T.red}}>{t("escrow_dispute_msg")}</div>}
         </Card>
       )}
 
       {step===3&&(
         <Card style={{padding:"36px 28px",border:`2px solid ${T.green}`,textAlign:"center"}}>
           <div style={{fontSize:62,marginBottom:14,animation:"popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275)"}}>🎉</div>
-          <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 8px"}}>Task finalizat!</h2>
-          <p style={{fontSize:14,color:T.text2,marginBottom:20}}>Banii au fost eliberați cu succes. Mulțumim!</p>
+          <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 8px"}}>{t("escrow_task_done_title")}</h2>
+          <p style={{fontSize:14,color:T.text2,marginBottom:20}}>{t("escrow_task_done_msg")}</p>
           <div style={{display:"flex",gap:10}}>
             <Btn onClick={()=>navigate("reviews")} color={T.amber} style={{flex:1,justifyContent:"center"}}>⭐ Lasă recenzie</Btn>
             <Btn onClick={()=>navigate("home")} variant="outline" style={{flex:1,justifyContent:"center"}}>🏠 Acasă</Btn>
@@ -1438,6 +1447,7 @@ function PageEscrow({ gs, update, navigate }) {
 //  PAGE: CONTRACT
 // ══════════════════════════════════════════════════════════════
 function PageContract({ gs, update, navigate }) {
+  const { t } = useTranslation("t");
   const job=gs.selectedJob||(gs.jobs||[])[0];
   const [step,setStep]=useState(0);
   const [name,setName]=useState("");
@@ -1454,7 +1464,7 @@ function PageContract({ gs, update, navigate }) {
         <Card style={{overflow:"hidden"}}>
           <div style={{background:`linear-gradient(135deg,${T.dark},${T.dark2})`,padding:"22px 26px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div>
-              <div style={{fontSize:10,color:"#64748b",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:3}}>Contract de prestări servicii</div>
+              <div style={{fontSize:10,color:"#64748b",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:3}}>{t("contract_services_title")}</div>
               <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:"#f1f5f9"}}>ConnectJob</div>
               <div style={{fontSize:11,color:"#64748b",marginTop:2}}>Nr. {contractId}</div>
             </div>
@@ -1465,22 +1475,22 @@ function PageContract({ gs, update, navigate }) {
           </div>
           <div style={{padding:"22px 26px",maxHeight:380,overflowY:"auto"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
-              {[{l:"Angajator",v:job.employer},{l:"Prestator",v:"Alexandru Ionescu"},{l:"Serviciu",v:job.title},{l:"Categorie",v:job.category},{l:"Remunerație",v:`${job.salary} RON`},{l:"Plată",v:"Escrow ConnectJob"}].map(r=>(
+              {[{l:t("contract_employer_lbl"),v:job.employer},{l:t("contract_provider_lbl"),v:"Alexandru Ionescu"},{l:t("contract_service_lbl"),v:job.title},{l:t("contract_category_lbl"),v:job.category},{l:t("contract_remuneration_lbl"),v:`${job.salary} RON`},{l:t("contract_payment_lbl"),v:t("contract_payment_method")}].map(r=>(
                 <div key={r.l} style={{background:"#fafaf9",borderRadius:9,padding:"9px 11px",border:`1px solid ${T.border}`}}>
                   <div style={{fontSize:9,color:T.text3,fontWeight:700,textTransform:"uppercase",marginBottom:2}}>{r.l}</div>
                   <div style={{fontSize:13,fontWeight:600,color:T.text}}>{r.v}</div>
                 </div>
               ))}
             </div>
-            {[{n:"1.",t:"Obiectul contractului",tx:`Prestatorul se obligă să execute serviciul de ${job.title} conform cerințelor angajatorului.`},{n:"2.",t:"Remunerație",tx:`Suma de ${job.salary} RON va fi plătită prin Escrow ConnectJob după confirmare.`},{n:"3.",t:"Responsabilități",tx:"Prestatorul garantează calitatea. Daunele din neglijență îi revin."},{n:"4.",t:"Confidențialitate",tx:"Ambele părți respectă GDPR."},{n:"5.",t:"Litigii",tx:"Disputele se rezolvă prin medierea ConnectJob."}].map(c=>(
+            {[{n:"1.",title:t("contract_clause1_title"),tx:`Prestatorul se obligă să execute serviciul de ${job.title} conform cerințelor angajatorului.`},{n:"2.",title:t("contract_clause2_title"),tx:`Suma de ${job.salary} RON va fi plătită prin Escrow ConnectJob după confirmare.`},{n:"3.",title:t("contract_clause3_title"),tx:t("contract_clause3_text")},{n:"4.",title:t("contract_clause4_title"),tx:t("contract_clause4_text")},{n:"5.",title:t("contract_clause5_title"),tx:t("contract_clause5_text")}].map(c=>(
               <div key={c.n} style={{marginBottom:10,padding:"11px",background:"#fafaf9",borderRadius:9,border:`1px solid ${T.border}`}}>
-                <div style={{fontSize:13,fontWeight:700,color:T.text,marginBottom:3}}>{c.n} {c.t}</div>
+                <div style={{fontSize:13,fontWeight:700,color:T.text,marginBottom:3}}>{c.n} {c.title}</div>
                 <div style={{fontSize:12,color:T.text2,lineHeight:1.7}}>{c.tx}</div>
               </div>
             ))}
           </div>
           <div style={{padding:"14px 26px 22px"}}>
-            <Btn onClick={()=>setStep(1)} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">✍️ Semnează contractul</Btn>
+            <Btn onClick={()=>setStep(1)} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{t("contract_sign_cta")}</Btn>
           </div>
         </Card>
       )}
@@ -1489,16 +1499,16 @@ function PageContract({ gs, update, navigate }) {
         <Card style={{padding:"28px 26px"}}>
           <div style={{textAlign:"center",marginBottom:22}}>
             <div style={{fontSize:44,marginBottom:10}}>✍️</div>
-            <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>Semnătură digitală</h3>
+            <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>{t("contract_digital_sig")}</h3>
           </div>
           <div style={{marginBottom:16}}>
-            <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:7}}>Nume complet</label>
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder="ex: Alexandru Ionescu" style={{width:"100%",height:52,borderRadius:11,border:`1.5px solid ${T.border}`,padding:"0 16px",fontSize:20,fontFamily:"Georgia,serif",color:T.text,outline:"none",boxSizing:"border-box",fontStyle:"italic"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
+            <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:7}}>{t("contract_fullname_lbl")}</label>
+            <input value={name} onChange={e=>setName(e.target.value)} placeholder={t("contract_fullname_ph")} style={{width:"100%",height:52,borderRadius:11,border:`1.5px solid ${T.border}`,padding:"0 16px",fontSize:20,fontFamily:"Georgia,serif",color:T.text,outline:"none",boxSizing:"border-box",fontStyle:"italic"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
             {name&&<div style={{marginTop:8,padding:"10px 14px",background:"#fafaf9",borderRadius:9,border:"1px dashed #d1d5db",fontFamily:"Georgia,serif",fontSize:22,color:T.text,fontStyle:"italic",textAlign:"center"}}>{name}</div>}
           </div>
           <div onClick={()=>setAgree(!agree)} style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:18,cursor:"pointer",padding:"11px",borderRadius:9,background:agree?"#f0fdf4":"#fafaf9",border:agree?"1px solid #bbf7d0":`1px solid ${T.border}`,transition:"all 0.2s"}}>
             <div style={{width:19,height:19,borderRadius:5,flexShrink:0,marginTop:1,background:agree?T.green:T.white,border:agree?"none":`2px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff"}}>{agree?"✓":""}</div>
-            <span style={{fontSize:12,color:T.text2,lineHeight:1.6}}>Confirm că am citit și accept toate clauzele. Semnătura mea are valoare juridică.</span>
+            <span style={{fontSize:12,color:T.text2,lineHeight:1.6}}>{t("contract_confirm_terms")}</span>
           </div>
           <Btn onClick={async()=>{
             if(!name.trim()||!agree) return;
@@ -1518,7 +1528,7 @@ function PageContract({ gs, update, navigate }) {
             } catch(e){ setApiError(e.response?.data?.error||"Eroare la semnare"); }
             finally{ setLoading(false); }
           }} disabled={!name.trim()||!agree||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
-            {loading?"⏳ Se semnează...":"✅ Semnează contractul"}
+            {loading?t("contract_signing"):t("contract_sign_now")}
           </Btn>
           {apiError && <div style={{marginTop:8,fontSize:12,color:"#dc2626",background:"#fef2f2",borderRadius:8,padding:"6px 10px"}}>{apiError}</div>}
         </Card>
@@ -1527,8 +1537,8 @@ function PageContract({ gs, update, navigate }) {
       {step===2&&(
         <Card style={{padding:"36px 28px",border:`2px solid ${T.green}`,textAlign:"center"}}>
           <div style={{fontSize:62,marginBottom:14,animation:"popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275)"}}>📜</div>
-          <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 8px"}}>Contract semnat!</h2>
-          <p style={{fontSize:14,color:T.text2,marginBottom:20}}>A fost trimis pe email ambelor părți. Are valoare juridică.</p>
+          <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 8px"}}>{t("contract_success_title")}</h2>
+          <p style={{fontSize:14,color:T.text2,marginBottom:20}}>{t("contract_success_msg")}</p>
           <div style={{display:"flex",gap:10}}>
             <Btn color={T.green} style={{flex:1,justifyContent:"center"}}>📥 Descarcă PDF</Btn>
             <Btn onClick={()=>navigate("escrow")} variant="outline" style={{flex:1,justifyContent:"center"}}>🔒 Mergi la Escrow</Btn>
@@ -1544,6 +1554,7 @@ function PageContract({ gs, update, navigate }) {
 //  PAGE: VERIFY IDENTITY
 // ══════════════════════════════════════════════════════════════
 function PageVerify({ gs, update, navigate }) {
+  const { t } = useTranslation("t");
   const [step,setStep]=useState(gs.user.verified?4:0);
   const [phone,setPhone]=useState("");
   const [otp,setOtp]=useState(["","","","","",""]);
@@ -1558,13 +1569,13 @@ function PageVerify({ gs, update, navigate }) {
   const timerRef=useRef(null);
   useEffect(()=>{if(otpTimer>0){timerRef.current=setTimeout(()=>setOtpTimer(t=>t-1),1000);}return()=>clearTimeout(timerRef.current);},[otpTimer]);
 
-  const steps=["Telefon","Document","Selfie","Gata"];
+  const steps=[t("verify_step1"),t("verify_step2"),t("verify_step3"),t("verify_step4")];
 
   if(step===4||gs.user.verified) return (
     <div style={{maxWidth:480,margin:"0 auto",textAlign:"center",padding:"60px 20px",animation:"fadeIn 0.3s ease"}}>
       <div style={{fontSize:72,marginBottom:16}}>✅</div>
-      <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:28,fontWeight:800,color:T.text,margin:"0 0 10px"}}>Identitate verificată!</h2>
-      <p style={{fontSize:15,color:T.text2,marginBottom:24}}>Profilul tău are badge-ul ✓ și este vizibil pentru toți angajatorii.</p>
+      <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:28,fontWeight:800,color:T.text,margin:"0 0 10px"}}>{t("verify_success_title")}</h2>
+      <p style={{fontSize:15,color:T.text2,marginBottom:24}}>{t("verify_success_msg")}</p>
       <div style={{display:"inline-flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,#f0fdf4,#dcfce7)",border:`2px solid ${T.green}`,borderRadius:14,padding:"14px 22px",marginBottom:24}}>
         <Avatar initials={gs.user.initials} color={T.green} size={46}/>
         <div style={{textAlign:"left"}}>
@@ -1595,23 +1606,23 @@ function PageVerify({ gs, update, navigate }) {
 
       {step===0&&(
         <Card style={{padding:"28px 24px"}}>
-          <div style={{textAlign:"center",marginBottom:22}}><div style={{fontSize:44,marginBottom:10}}>🛡️</div><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>Verificare Identitate</h3><p style={{fontSize:13,color:T.text2}}>Obții badge-ul ✓ și <strong>3x</strong> mai multe contacte!</p></div>
-          {[{i:"📱",t:"Verificare număr telefon prin SMS"},{i:"🪪",t:"Document de identitate (CI/Pașaport)"},{i:"🤳",t:"Selfie pentru confirmare"}].map(s=>(
+          <div style={{textAlign:"center",marginBottom:22}}><div style={{fontSize:44,marginBottom:10}}>🛡️</div><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>Verificare Identitate</h3><p style={{fontSize:13,color:T.text2}}>{t("verify_get_badge")} <strong>3x</strong> {t("verify_3x")}</p></div>
+          {[{i:"📱",t:t("verify_req_phone")},{i:"🪪",t:t("verify_req_doc")},{i:"🤳",t:t("verify_req_selfie")}].map(s=>(
             <div key={s.t} style={{display:"flex",alignItems:"center",gap:12,padding:"9px 13px",background:"#f0fdf4",borderRadius:9,border:"1px solid #bbf7d0",marginBottom:8}}>
               <span style={{fontSize:18}}>{s.i}</span><span style={{fontSize:13,color:"#057a55",fontWeight:500}}>{s.t}</span>
             </div>
           ))}
-          <Btn onClick={()=>setStep(1)} color={T.green} style={{width:"100%",justifyContent:"center",marginTop:16}} size="lg">🚀 Începe verificarea</Btn>
+          <Btn onClick={()=>setStep(1)} color={T.green} style={{width:"100%",justifyContent:"center",marginTop:16}} size="lg">{t("verify_start_btn")}</Btn>
         </Card>
       )}
 
       {step===1&&(
         <Card style={{padding:"28px 24px"}}>
-          <div style={{textAlign:"center",marginBottom:20}}><div style={{fontSize:42,marginBottom:10}}>📱</div><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>Verificare telefon</h3></div>
+          <div style={{textAlign:"center",marginBottom:20}}><div style={{fontSize:42,marginBottom:10}}>📱</div><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>{t("verify_phone_title")}</h3></div>
           {!otpSent?(
             <>
               <div style={{marginBottom:14}}>
-                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>Număr telefon</label>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>{t("verify_phone_lbl")}</label>
                 <div style={{display:"flex",gap:8}}>
                   <div style={{padding:"0 12px",background:"#f5f5f4",borderRadius:9,border:`1.5px solid ${T.border}`,display:"flex",alignItems:"center",fontSize:14,fontWeight:600,whiteSpace:"nowrap"}}>🇷🇴 +40</div>
                   <input value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,""))} placeholder="722 123 456" maxLength={9} style={{flex:1,height:44,borderRadius:9,border:`1.5px solid ${T.border}`,padding:"0 12px",fontSize:15,fontFamily:"DM Sans,sans-serif",outline:"none",letterSpacing:"0.1em"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
@@ -1626,19 +1637,19 @@ function PageVerify({ gs, update, navigate }) {
                   setOtpSent(true); setOtpTimer(60);
                 } catch(e){ alert(e.response?.data?.error||"Eroare la trimitere SMS"); }
                 finally{ setLoading(false); }
-              }} disabled={phone.length<9||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{loading?"Se trimite...":"📨 Trimite codul SMS"}</Btn>
+              }} disabled={phone.length<9||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{loading?t("verify_sending_sms"):t("verify_send_sms_btn")}</Btn>
             </>
           ):(
             <>
-              <p style={{fontSize:13,color:"#057a55",textAlign:"center",marginBottom:14,background:"#f0fdf4",borderRadius:8,padding:"7px",border:"1px solid #bbf7d0"}}>✅ Cod trimis la +40 {phone}</p>
+              <p style={{fontSize:13,color:"#057a55",textAlign:"center",marginBottom:14,background:"#f0fdf4",borderRadius:8,padding:"7px",border:"1px solid #bbf7d0"}}>{t("verify_code_sent")} +40 {phone}</p>
               <div style={{marginBottom:14}}>
-                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",marginBottom:9}}>Cod 6 cifre</label>
+                <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",marginBottom:9}}>{t("verify_code_lbl")}</label>
                 <div style={{display:"flex",gap:7,justifyContent:"center"}}>
                   {otp.map((v,i)=>(
                     <input key={i} id={`otp-${i}`} value={v} maxLength={1} onChange={e=>{const n=[...otp];n[i]=e.target.value.slice(-1);setOtp(n);if(e.target.value&&i<5)document.getElementById(`otp-${i+1}`)?.focus();}} style={{width:42,height:50,borderRadius:9,textAlign:"center",border:`1.5px solid ${v?T.green:T.border}`,fontSize:20,fontWeight:800,fontFamily:"Outfit,sans-serif",outline:"none",background:v?"#f0fdf4":"#fff",color:T.text}}/>
                   ))}
                 </div>
-                {otpTimer>0&&<p style={{fontSize:12,color:T.text3,textAlign:"center",marginTop:7}}>Retrimite în {otpTimer}s</p>}
+                {otpTimer>0&&<p style={{fontSize:12,color:T.text3,textAlign:"center",marginTop:7}}>{t("verify_resend_timer")} {otpTimer}s</p>}
               </div>
               <Btn onClick={async()=>{
                 const code = otp.join("");
@@ -1649,7 +1660,7 @@ function PageVerify({ gs, update, navigate }) {
                   setStep(2);
                 } catch(e){ alert(e.response?.data?.error||"Cod invalid sau expirat"); }
                 finally{ setLoading(false); }
-              }} disabled={otp.join("").length<6||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{loading?"Se verifică...":"✓ Verifică codul"}</Btn>
+              }} disabled={otp.join("").length<6||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{loading?t("verify_verifying_code"):t("verify_check_code")}</Btn>
             </>
           )}
         </Card>
@@ -1657,9 +1668,9 @@ function PageVerify({ gs, update, navigate }) {
 
       {step===2&&(
         <Card style={{padding:"28px 24px"}}>
-          <div style={{textAlign:"center",marginBottom:20}}><div style={{fontSize:42,marginBottom:10}}>🪪</div><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>Document de identitate</h3></div>
+          <div style={{textAlign:"center",marginBottom:20}}><div style={{fontSize:42,marginBottom:10}}>🪪</div><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>{t("verify_doc_title")}</h3></div>
           <div style={{display:"flex",gap:8,marginBottom:16}}>
-            {[{k:"ci",l:"🪪 CI"},{k:"pasaport",l:"📘 Pașaport"},{k:"permis",l:"🚗 Permis"}].map(d=>(
+            {[{k:"ci",l:t("verify_doc_ci")},{k:"pasaport",l:t("verify_doc_passport")},{k:"permis",l:t("verify_doc_license")}].map(d=>(
               <button key={d.k} onClick={()=>setDocType(d.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,cursor:"pointer",border:docType===d.k?`2px solid ${T.green}`:`1.5px solid ${T.border}`,background:docType===d.k?"#f0fdf4":"#fafaf9",fontSize:12,fontWeight:700,color:docType===d.k?T.green:T.text2,transition:"all 0.2s"}}>{d.l}</button>
             ))}
           </div>
@@ -1678,15 +1689,15 @@ function PageVerify({ gs, update, navigate }) {
             onMouseEnter={e=>{if(!docOk)e.currentTarget.style.borderColor=T.green;}}
             onMouseLeave={e=>{if(!docOk)e.currentTarget.style.borderColor=T.border;}}
           >
-            {loading?<div><div style={{fontSize:28,animation:"spin 1s linear infinite"}}>⏳</div><div style={{fontSize:13,color:"#057a55",marginTop:6}}>Se procesează...</div></div>:docOk?<div><div style={{fontSize:36}}>✅</div><div style={{fontSize:13,fontWeight:700,color:T.green,marginTop:6}}>Document încărcat!</div></div>:<div><div style={{fontSize:32}}>📤</div><div style={{fontSize:13,fontWeight:600,color:T.text,marginTop:8}}>Click pentru a încărca</div><div style={{fontSize:11,color:T.text3,marginTop:3}}>JPG, PNG sau PDF · Max 5MB</div></div>}
+            {loading?<div><div style={{fontSize:28,animation:"spin 1s linear infinite"}}>⏳</div><div style={{fontSize:13,color:"#057a55",marginTop:6}}>{t("verify_processing")}</div></div>:docOk?<div><div style={{fontSize:36}}>✅</div><div style={{fontSize:13,fontWeight:700,color:T.green,marginTop:6}}>{t("verify_doc_uploaded")}</div></div>:<div><div style={{fontSize:32}}>📤</div><div style={{fontSize:13,fontWeight:600,color:T.text,marginTop:8}}>{t("verify_upload_click")}</div><div style={{fontSize:11,color:T.text3,marginTop:3}}>{t("verify_upload_formats")}</div></div>}
           </div>
-          {docOk&&<Btn onClick={()=>setStep(3)} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">Continuă → Selfie</Btn>}
+          {docOk&&<Btn onClick={()=>setStep(3)} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">{t("verify_continue_selfie")}</Btn>}
         </Card>
       )}
 
       {step===3&&(
         <Card style={{padding:"28px 24px"}}>
-          <div style={{textAlign:"center",marginBottom:18}}><div style={{fontSize:42,marginBottom:10}}>🤳</div><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>Confirmare selfie</h3></div>
+          <div style={{textAlign:"center",marginBottom:18}}><div style={{fontSize:42,marginBottom:10}}>🤳</div><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 6px"}}>{t("verify_selfie_title")}</h3></div>
           <div style={{borderRadius:14,overflow:"hidden",background:T.dark,marginBottom:14,height:190,position:"relative",display:"flex",alignItems:"center",justifyContent:"center"}}>
             <video ref={videoRef} autoPlay muted playsInline style={{width:"100%",height:"100%",objectFit:"cover",transform:"scaleX(-1)"}} onLoadedMetadata={()=>{try{navigator.mediaDevices?.getUserMedia({video:true}).then(s=>{if(videoRef.current)videoRef.current.srcObject=s;});}catch(e){}}}/>
             <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none"}}>
@@ -1695,7 +1706,7 @@ function PageVerify({ gs, update, navigate }) {
             {loading&&<div style={{position:"absolute",inset:0,background:"rgba(5,150,105,0.9)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}><div style={{fontSize:32,marginBottom:8}}>🔍</div><div style={{color:"#fff",fontWeight:700,fontSize:14}}>Se analizează...</div></div>}
           </div>
           <div style={{display:"flex",gap:6,marginBottom:12}}>
-            {["💡 Lumină bună","👀 Privești camera","😐 Expresie neutră"].map(t=><div key={t} style={{flex:1,fontSize:10,color:"#057a55",background:"#f0fdf4",borderRadius:7,padding:"5px 3px",textAlign:"center",border:"1px solid #bbf7d0"}}>{t}</div>)}
+            {[t("verify_tip_light"),t("verify_tip_camera"),t("verify_tip_neutral")].map(tip=><div key={tip} style={{flex:1,fontSize:10,color:"#057a55",background:"#f0fdf4",borderRadius:7,padding:"5px 3px",textAlign:"center",border:"1px solid #bbf7d0"}}>{tip}</div>)}
           </div>
           <Btn onClick={async()=>{
             if(videoRef.current?.srcObject){videoRef.current.srcObject.getTracks().forEach(t=>t.stop());}
@@ -1720,11 +1731,17 @@ function PageVerify({ gs, update, navigate }) {
 //  PAGE: REVIEWS
 // ══════════════════════════════════════════════════════════════
 function PageReviews({ gs, update }) {
+  const { t } = useTranslation("t");
   const [myRating,setMyRating]=useState(0);
   const [myText,setMyText]=useState("");
   const [submitted,setSubmitted]=useState(false);
   const [reviews,setReviews]=useState([]);
-  const [filter,setFilter]=useState("Toate");
+  const [filter,setFilter]=useState(null);
+
+  useEffect(()=>{
+    if(filter===null) setFilter(t("reviews_all_filter"));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[t]);
 
   useEffect(()=>{
     if(!gs.user?.id) return;
@@ -1790,7 +1807,7 @@ function PageReviews({ gs, update }) {
 
           {/* Filters */}
           <div style={{display:"flex",gap:6,marginBottom:10}}>
-            {["Toate","Verificate","5 stele","4 stele"].map(f=>(
+            {[t("reviews_all_filter"),t("reviews_verified_filter2"),t("reviews_5stars"),t("reviews_4stars")].map(f=>(
               <button key={f} onClick={()=>setFilter(f)} style={{padding:"5px 12px",borderRadius:999,border:"none",cursor:"pointer",background:filter===f?T.green:"#f5f5f4",color:filter===f?"#fff":T.text2,fontSize:11,fontWeight:600,transition:"all 0.15s"}}>{f}</button>
             ))}
           </div>
@@ -1798,9 +1815,9 @@ function PageReviews({ gs, update }) {
           {/* Review list */}
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
             {reviews.filter(r=>{
-              if(filter==="Verificate")return r.reviewer_verified;
-              if(filter==="5 stele")return r.rating===5;
-              if(filter==="4 stele")return r.rating===4;
+              if(filter===t("reviews_verified_filter2"))return r.reviewer_verified;
+              if(filter===t("reviews_5stars"))return r.rating===5;
+              if(filter===t("reviews_4stars"))return r.rating===4;
               return true;
             }).map(r=>(
               <Card key={r.id} style={{padding:"14px 16px"}}>
@@ -1831,6 +1848,7 @@ function PageReviews({ gs, update }) {
 //  PAGE: ANALYTICS (Dashboard angajator)
 // ══════════════════════════════════════════════════════════════
 function PageAnalytics({ gs }) {
+  const { t } = useTranslation("t");
   const [period,setPeriod]=useState("7z");
   const d7={views:[12,18,15,22,30,28,35],apps:[2,3,2,4,6,5,8]};
   const d30={views:[45,52,38,61,55,70,48,65,72,80,55,68,74,90,82,95,78,88,100,92,85,110,98,105,92,88,115,108,120,118],apps:[8,10,7,12,9,14,8,13,15,16,10,12,14,18,16,19,14,17,20,18,16,22,19,21,18,17,23,21,24,23]};
@@ -1840,11 +1858,11 @@ function PageAnalytics({ gs }) {
     <div style={{animation:"fadeIn 0.3s ease"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:22,flexWrap:"wrap",gap:10}}>
         <div>
-          <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 4px"}}>📊 Dashboard Angajator</h2>
-          <p style={{fontSize:13,color:T.text3,margin:0}}>Performanța joburilor tale în timp real</p>
+          <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 4px"}}>{t("analytics_employer_title")}</h2>
+          <p style={{fontSize:13,color:T.text3,margin:0}}>{t("analytics_realtime_desc")}</p>
         </div>
         <div style={{display:"flex",background:"#f5f5f4",borderRadius:9,padding:3,gap:2}}>
-          {[{k:"7z",l:"7 zile"},{k:"30z",l:"30 zile"}].map(p=>(
+          {[{k:"7z",l:t("analytics_7days")},{k:"30z",l:t("analytics_30days")}].map(p=>(
             <button key={p.k} onClick={()=>setPeriod(p.k)} style={{padding:"7px 14px",borderRadius:7,border:"none",cursor:"pointer",background:period===p.k?T.white:"transparent",color:period===p.k?T.text:T.text3,fontWeight:700,fontSize:12,fontFamily:"DM Sans,sans-serif",boxShadow:period===p.k?"0 1px 4px rgba(0,0,0,0.08)":"none",transition:"all 0.2s"}}>{p.l}</button>
           ))}
         </div>
@@ -1852,10 +1870,10 @@ function PageAnalytics({ gs }) {
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:14,marginBottom:22}}>
         {[
-          {i:"👁️",l:"Vizualizări",v:"746",trend:"+23%",c:T.blue,s:d.views},
-          {i:"📨",l:"Aplicări",v:"54",trend:"+15%",c:T.green,s:d.apps},
-          {i:"💬",l:"Contacte",v:"23",trend:"+8%",c:T.purple,s:[1,1,2,2,3,2,4,3,5,4,6,5]},
-          {i:"🎯",l:"Conversie",v:"7.2%",trend:"+1.2%",c:T.amber,s:[5,5.8,6,5.5,6.2,6.8,7.1,6.9,7.2,7.0,7.3,7.2]},
+          {i:"👁️",l:t("analytics_views"),v:"746",trend:"+23%",c:T.blue,s:d.views},
+          {i:"📨",l:t("analytics_apps"),v:"54",trend:"+15%",c:T.green,s:d.apps},
+          {i:"💬",l:t("analytics_contacts"),v:"23",trend:"+8%",c:T.purple,s:[1,1,2,2,3,2,4,3,5,4,6,5]},
+          {i:"🎯",l:t("analytics_conversion"),v:"7.2%",trend:"+1.2%",c:T.amber,s:[5,5.8,6,5.5,6.2,6.8,7.1,6.9,7.2,7.0,7.3,7.2]},
         ].map(s=>(
           <Card key={s.l} style={{padding:"18px 18px 12px"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
@@ -1872,7 +1890,7 @@ function PageAnalytics({ gs }) {
       {/* Jobs performance */}
       <Card>
         <div style={{padding:"16px 20px 12px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:0}}>💼 Performanță joburi</h3>
+          <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:0}}>{t("analytics_perf_title")}</h3>
           <Btn color={T.green} size="sm">+ Job nou</Btn>
         </div>
         {(gs.jobs||[]).slice(0,4).map((job,i)=>(
@@ -1883,7 +1901,7 @@ function PageAnalytics({ gs }) {
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <div style={{width:36,height:36,borderRadius:9,background:`${job.color}15`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{job.icon}</div>
-                <div><div style={{fontWeight:700,fontSize:14,color:T.text,fontFamily:"Outfit,sans-serif"}}>{job.title}</div><div style={{fontSize:11,color:T.text3}}>📋 {job.category} · {job.salary} RON/zi</div></div>
+                <div><div style={{fontWeight:700,fontSize:14,color:T.text,fontFamily:"Outfit,sans-serif"}}>{job.title}</div><div style={{fontSize:11,color:T.text3}}>📋 {job.category} · {job.salary} {t("analytics_per_day")}</div></div>
               </div>
               <Badge color={T.green}>● activ</Badge>
             </div>
@@ -1907,6 +1925,7 @@ function PageAnalytics({ gs }) {
 //  PAGE: ADMIN — Moderare rapoarte
 // ══════════════════════════════════════════════════════════════
 function PageAdmin({ gs }) {
+  const { t } = useTranslation("t");
   const [reports, setReports]   = useState([]);
   const [stats, setStats]       = useState(null);
   const [filter, setFilter]     = useState("pending");
@@ -1914,9 +1933,9 @@ function PageAdmin({ gs }) {
   const [actioning, setActioning] = useState(null);
 
   const REASONS = {
-    limbaj_ofensiv:"🤬 Limbaj ofensiv", rasism:"🚫 Rasism",
-    hartuire:"😨 Hărțuire", spam:"📢 Spam",
-    frauda:"💸 Fraudă", altele:"❓ Altele",
+    limbaj_ofensiv:t("admin_reason_offensive"), rasism:t("admin_reason_racism"),
+    hartuire:t("admin_reason_harassment"), spam:t("admin_reason_spam"),
+    frauda:t("admin_reason_fraud"), altele:t("admin_reason_other"),
   };
 
   useEffect(()=>{
@@ -1931,7 +1950,7 @@ function PageAdmin({ gs }) {
 
   const takeAction = async (reportId, action) => {
     setActioning(reportId);
-    const labels = { warn:"Avertisment trimis", suspend:"Cont suspendat", ban:"Cont banat", dismiss:"Raport respins" };
+    const labels = { warn:t("admin_action_warned"), suspend:t("admin_action_suspended"), ban:t("admin_action_banned"), dismiss:t("admin_action_dismissed") };
     try {
       await api.post(`/reports/${reportId}/action`,{ action, note: labels[action] });
       setReports(p=>p.filter(r=>r.id!==reportId));
@@ -1948,17 +1967,17 @@ function PageAdmin({ gs }) {
 
   return (
     <div style={{ animation:"fadeIn 0.3s ease" }}>
-      <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text, margin:"0 0 20px" }}>🛡️ Panou Moderare</h2>
+      <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text, margin:"0 0 20px" }}>{t("admin_title")}</h2>
 
       {/* Stats */}
       {stats && (
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))", gap:12, marginBottom:22 }}>
           {[
-            {l:"Total rapoarte", v:stats.total, c:T.blue},
-            {l:"În așteptare",   v:stats.pending, c:T.amber},
-            {l:"Acționate",      v:stats.actioned, c:T.green},
-            {l:"Suspendate",     v:stats.suspended, c:T.orange},
-            {l:"Banate",         v:stats.banned, c:T.red},
+            {l:t("admin_total"), v:stats.total, c:T.blue},
+            {l:t("admin_pending_stat"),   v:stats.pending, c:T.amber},
+            {l:t("admin_actioned_stat"),      v:stats.actioned, c:T.green},
+            {l:t("admin_suspended_stat"),     v:stats.suspended, c:T.orange},
+            {l:t("admin_banned_stat"),         v:stats.banned, c:T.red},
           ].map(s=>(
             <Card key={s.l} style={{ padding:"14px 16px", textAlign:"center" }}>
               <div style={{ fontFamily:"Outfit,sans-serif", fontSize:28, fontWeight:800, color:s.c }}>{s.v}</div>
@@ -1972,17 +1991,17 @@ function PageAdmin({ gs }) {
       <div style={{ display:"flex", gap:6, marginBottom:16 }}>
         {["pending","reviewed","actioned","dismissed"].map(f=>(
           <button key={f} onClick={()=>setFilter(f)} style={{ padding:"6px 14px", borderRadius:999, border:"none", cursor:"pointer", fontSize:12, fontWeight:700, background:filter===f?T.green:"#f5f5f4", color:filter===f?"#fff":T.text2 }}>
-            {f==="pending"?"⏳ În așteptare":f==="actioned"?"✅ Acționate":f==="dismissed"?"❌ Respinse":"👀 Revizuite"}
+            {f==="pending"?t("admin_tab_pending"):f==="actioned"?t("admin_tab_actioned"):f==="dismissed"?t("admin_tab_dismissed"):t("admin_tab_reviewed")}
           </button>
         ))}
       </div>
 
-      {loading && <Loader text="Se incarca rapoartele..."/>}
+      {loading && <Loader text={t("admin_loading")}/>}
 
       {!loading && reports.length === 0 && (
         <Card style={{ padding:40, textAlign:"center" }}>
           <div style={{ fontSize:36, marginBottom:8 }}>✅</div>
-          <div style={{ color:T.text3 }}>Niciun raport în această categorie</div>
+          <div style={{ color:T.text3 }}>{t("admin_no_reports")}</div>
         </Card>
       )}
 
@@ -2004,12 +2023,12 @@ function PageAdmin({ gs }) {
 
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:12 }}>
               <div style={{ background:"#fafaf9", borderRadius:8, padding:"10px 12px" }}>
-                <div style={{ fontSize:10, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:3 }}>Raportat de</div>
+                <div style={{ fontSize:10, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:3 }}>{t("admin_reported_by")}</div>
                 <div style={{ fontSize:13, fontWeight:600, color:T.text }}>{r.reporter_id?.name||"?"}</div>
                 <div style={{ fontSize:11, color:T.text3 }}>{r.reporter_id?.email}</div>
               </div>
               <div style={{ background:"#fef2f2", borderRadius:8, padding:"10px 12px", border:"1px solid #fecaca" }}>
-                <div style={{ fontSize:10, fontWeight:700, color:T.red, textTransform:"uppercase", marginBottom:3 }}>Utilizator raportat</div>
+                <div style={{ fontSize:10, fontWeight:700, color:T.red, textTransform:"uppercase", marginBottom:3 }}>{t("admin_reported_user")}</div>
                 <div style={{ fontSize:13, fontWeight:600, color:T.text }}>{r.reported_user_id?.name||"?"}</div>
                 <div style={{ fontSize:11, color:T.text3 }}>{r.reported_user_id?.email}</div>
                 <div style={{ display:"flex", gap:6, marginTop:4 }}>
@@ -2028,16 +2047,16 @@ function PageAdmin({ gs }) {
             {r.status === "pending" && (
               <div style={{ display:"flex", gap:7, flexWrap:"wrap" }}>
                 <button onClick={()=>takeAction(r.id,"warn")} disabled={actioning===r.id} style={{ padding:"6px 12px", borderRadius:8, border:`1px solid ${T.amber}`, cursor:"pointer", background:"#fef3c7", color:"#92400e", fontSize:12, fontWeight:700 }}>
-                  ⚠️ Avertisment
+                  {t("admin_action_warn")}
                 </button>
                 <button onClick={()=>takeAction(r.id,"suspend")} disabled={actioning===r.id} style={{ padding:"6px 12px", borderRadius:8, border:`1px solid ${T.orange}`, cursor:"pointer", background:"#fff7ed", color:T.orange, fontSize:12, fontWeight:700 }}>
-                  ⏸️ Suspendare
+                  {t("admin_action_suspend")}
                 </button>
                 <button onClick={()=>takeAction(r.id,"ban")} disabled={actioning===r.id} style={{ padding:"6px 12px", borderRadius:8, border:`1px solid ${T.red}`, cursor:"pointer", background:"#fef2f2", color:T.red, fontSize:12, fontWeight:700 }}>
-                  🚫 Ban permanent
+                  {t("admin_action_ban")}
                 </button>
                 <button onClick={()=>takeAction(r.id,"dismiss")} disabled={actioning===r.id} style={{ padding:"6px 12px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer", background:"#fafaf9", color:T.text3, fontSize:12, fontWeight:600 }}>
-                  ✕ Respinge
+                  {t("admin_action_dismiss")}
                 </button>
               </div>
             )}
@@ -2102,7 +2121,7 @@ function ConnectJobApp() {
 
   const NAV = [
     { key:"home",      icon:"🏠", label:t("nav_home") },
-    { key:"jobs",      icon:"🗂️", label:"Caută Joburi" },
+    { key:"jobs",      icon:"🗂️", label:t("nav_jobs") },
     { key:"map",       icon:"🗺️", label:t("nav_map"),      badge: null },
     { key:"chat",      icon:"💬", label:t("nav_chat"),     badge: gs.unreadMessages },
     { key:"escrow",    icon:"🔒", label:t("nav_escrow") },
@@ -2111,12 +2130,12 @@ function ConnectJobApp() {
     { key:"analytics", icon:"📊", label:t("nav_analytics") },
     { key:"post_job",  icon:"➕", label:t("nav_post_job"),  hidden: gs.user.role !== "employer" },
     { key:"verify",    icon: gs.user.verified?"✅":"🛡️", label: gs.user.verified?t("nav_verified"):t("nav_verify"), badge: gs.user.verified?null:"!" },
-    { key:"admin",     icon:"🛡️", label:"Moderare",          hidden: gs.user.role !== "admin" },
+    { key:"admin",     icon:"🛡️", label:t("nav_admin"),         hidden: gs.user.role !== "admin" },
   ].filter(item => !item.hidden);
 
   const PAGE_TITLES = {
     home:      t("nav_home"),
-    jobs:      "🗂️ Caută Joburi",
+    jobs:      `🗂️ ${t("nav_jobs")}`,
     map:       t("nav_map"),
     chat:      t("nav_chat"),
     escrow:    t("nav_escrow"),
@@ -2125,7 +2144,7 @@ function ConnectJobApp() {
     analytics: t("nav_analytics"),
     post_job:  t("nav_post_job"),
     verify:    t("nav_verify"),
-    admin:     "🛡️ Moderare",
+    admin:     `🛡️ ${t("nav_admin")}`,
   };
 
   const renderPage = () => {
@@ -2195,17 +2214,17 @@ function ConnectJobApp() {
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <div style={{width:48,height:48,borderRadius:13,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0,boxShadow:`0 4px 12px ${T.green}44`,animation:"pwaBounce 2s ease-in-out infinite"}}>⚡</div>
             <div style={{flex:1}}>
-              <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:14,color:"#f1f5f9",marginBottom:2}}>Instalează ConnectJob ca App!</div>
-              <div style={{fontSize:11,color:"#94a3b8"}}>Acces rapid · Offline · Notificări push</div>
+              <div style={{fontFamily:"Outfit,sans-serif",fontWeight:800,fontSize:14,color:"#f1f5f9",marginBottom:2}}>{t("pwa_title")}</div>
+              <div style={{fontSize:11,color:"#94a3b8"}}>{t("pwa_subtitle")}</div>
             </div>
             <button onClick={()=>setPwaShow(false)} style={{background:"transparent",border:"none",color:"#64748b",fontSize:16,cursor:"pointer",padding:4}}>✕</button>
           </div>
           <div style={{display:"flex",gap:7,marginTop:11}}>
-            <button style={{flex:1,padding:"9px",borderRadius:9,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontWeight:700,fontSize:12,fontFamily:"DM Sans,sans-serif",boxShadow:`0 4px 12px ${T.green}44`}}>📱 Instalează acum</button>
-            <button onClick={()=>setPwaShow(false)} style={{padding:"9px 14px",borderRadius:9,border:`1px solid ${T.dark3}`,cursor:"pointer",background:"transparent",color:"#64748b",fontSize:12,fontFamily:"DM Sans,sans-serif"}}>Mai târziu</button>
+            <button style={{flex:1,padding:"9px",borderRadius:9,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontWeight:700,fontSize:12,fontFamily:"DM Sans,sans-serif",boxShadow:`0 4px 12px ${T.green}44`}}>{t("pwa_install_btn")}</button>
+            <button onClick={()=>setPwaShow(false)} style={{padding:"9px 14px",borderRadius:9,border:`1px solid ${T.dark3}`,cursor:"pointer",background:"transparent",color:"#64748b",fontSize:12,fontFamily:"DM Sans,sans-serif"}}>{t("pwa_later")}</button>
           </div>
           <div style={{display:"flex",justifyContent:"center",gap:16,marginTop:8}}>
-            {["⚡ Rapid","📴 Offline","🔔 Notificări","🔒 Sigur"].map(f=><span key={f} style={{fontSize:10,color:"#64748b"}}>{f}</span>)}
+            {[t("pwa_feat_fast"),t("pwa_feat_offline"),t("pwa_feat_notif"),t("pwa_feat_secure")].map(f=><span key={f} style={{fontSize:10,color:"#64748b"}}>{f}</span>)}
           </div>
         </div>
       )}
@@ -2249,7 +2268,7 @@ function ConnectJobApp() {
 
         {/* Sidebar navigation */}
         <aside className="jc-desktop-sidebar" style={{ width:210,flexShrink:0,background:T.white,borderRight:`1.5px solid ${T.border}`,padding:"12px 10px",position:"sticky",top:58,height:"calc(100vh - 58px)",overflowY:"auto" }}>
-          <div style={{fontSize:9,fontWeight:700,color:T.text3,textTransform:"uppercase",letterSpacing:"0.1em",padding:"6px 10px",marginBottom:4}}>Navigare</div>
+          <div style={{fontSize:9,fontWeight:700,color:T.text3,textTransform:"uppercase",letterSpacing:"0.1em",padding:"6px 10px",marginBottom:4}}>{t("sidebar_nav_label")}</div>
           {NAV.map(item=>(
             <div key={item.key} onClick={()=>navigate(item.key)}
               style={{
@@ -2269,8 +2288,8 @@ function ConnectJobApp() {
 
           {/* Quick stats in sidebar */}
           <div style={{marginTop:16,padding:"10px",background:`${T.green}08`,borderRadius:10,border:`1px solid ${T.green}22`}}>
-            <div style={{fontSize:10,fontWeight:700,color:T.green,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:8}}>Azi</div>
-            {[{l:"Vizualizări",v:"47"},{l:"Mesaje noi",v:`${gs.unreadMessages}`},{l:"Joburi potrivite",v:"3"}].map(s=>(
+            <div style={{fontSize:10,fontWeight:700,color:T.green,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:8}}>{t("sidebar_today")}</div>
+            {[{l:t("sidebar_views_label"),v:"47"},{l:t("sidebar_new_msgs"),v:`${gs.unreadMessages}`},{l:t("sidebar_matching"),v:"3"}].map(s=>(
               <div key={s.l} style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4}}>
                 <span style={{color:T.text3}}>{s.l}</span>
                 <span style={{fontWeight:700,color:T.text}}>{s.v}</span>
@@ -2281,7 +2300,7 @@ function ConnectJobApp() {
           {/* Job selected indicator */}
           {gs.selectedJob&&(
             <div style={{marginTop:10,padding:"9px 10px",background:"#fafaf9",borderRadius:9,border:`1px solid ${T.border}`}}>
-              <div style={{fontSize:9,fontWeight:700,color:T.text3,textTransform:"uppercase",marginBottom:5}}>Job selectat</div>
+              <div style={{fontSize:9,fontWeight:700,color:T.text3,textTransform:"uppercase",marginBottom:5}}>{t("sidebar_selected_job")}</div>
               <div style={{display:"flex",alignItems:"center",gap:7}}>
                 <span style={{fontSize:16}}>{gs.selectedJob.icon}</span>
                 <div style={{minWidth:0}}>
