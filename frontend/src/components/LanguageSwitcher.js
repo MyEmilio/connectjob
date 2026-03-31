@@ -8,39 +8,36 @@ export default function LanguageSwitcher() {
   const { i18n } = useTranslation("t");
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top:0, right:0 });
-  const btnRef  = useRef(null);
-  const dropRef = useRef(null);
+  const btnRef = useRef(null);
 
   const current = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
 
-  const handleToggle = () => {
-    if (!open && btnRef.current) {
+  const handleOpen = () => {
+    if (btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
       setDropPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
     }
     setOpen(o => !o);
   };
 
-  // Inchide doar daca click-ul e in afara AMBELOR elemente (buton + dropdown)
+  // Inchide la click oriunde in afara butonului
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => {
-      const inBtn  = btnRef.current  && btnRef.current.contains(e.target);
-      const inDrop = dropRef.current && dropRef.current.contains(e.target);
-      if (!inBtn && !inDrop) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    const close = () => setOpen(false);
+    // timeout mic ca sa nu se inchida imediat la deschidere
+    const timer = setTimeout(() => document.addEventListener("click", close), 10);
+    return () => { clearTimeout(timer); document.removeEventListener("click", close); };
   }, [open]);
 
-  const select = (code) => {
+  const select = (code, e) => {
+    e.stopPropagation(); // opreste inchiderea prin document click
     i18n.changeLanguage(code);
     setOpen(false);
   };
 
   return (
     <div style={{ position:"relative" }}>
-      <button ref={btnRef} onClick={handleToggle} style={{
+      <button ref={btnRef} onClick={handleOpen} style={{
         display:"flex", alignItems:"center", gap:6, padding:"6px 12px",
         borderRadius:10, border:`1.5px solid ${T.border}`, background:"#fff",
         cursor:"pointer", fontSize:13, fontWeight:600, color:T.text,
@@ -51,9 +48,9 @@ export default function LanguageSwitcher() {
         <span style={{ fontSize:10, color:T.text2, marginLeft:2 }}>{open ? "▲" : "▼"}</span>
       </button>
 
-      {/* Dropdown — position:fixed peste harta Leaflet si orice overflow */}
+      {/* Dropdown — position:fixed ca sa nu fie taiat de harta Leaflet */}
       {open && (
-        <div ref={dropRef} style={{
+        <div style={{
           position:"fixed",
           top: dropPos.top,
           right: dropPos.right,
@@ -66,17 +63,15 @@ export default function LanguageSwitcher() {
           {LANGUAGES.map(lang => (
             <div
               key={lang.code}
-              onMouseDown={e => e.preventDefault()} // previne blur care ar inchide dropdown-ul
-              onClick={() => select(lang.code)}
+              onClick={(e) => select(lang.code, e)}
               style={{
-                display:"flex", alignItems:"center", gap:10, padding:"9px 14px",
+                display:"flex", alignItems:"center", gap:10, padding:"10px 14px",
                 cursor:"pointer",
                 background: lang.code === i18n.language ? `${T.green}10` : "transparent",
                 borderLeft: lang.code === i18n.language ? `3px solid ${T.green}` : "3px solid transparent",
-                transition:"background 0.1s",
               }}
-              onMouseEnter={e => { if (lang.code !== i18n.language) e.currentTarget.style.background = T.bg; }}
-              onMouseLeave={e => { if (lang.code !== i18n.language) e.currentTarget.style.background = "transparent"; }}
+              onMouseEnter={e => { e.currentTarget.style.background = lang.code === i18n.language ? `${T.green}10` : T.bg; }}
+              onMouseLeave={e => { e.currentTarget.style.background = lang.code === i18n.language ? `${T.green}10` : "transparent"; }}
             >
               <span style={{ fontSize:18 }}>{lang.flag}</span>
               <span style={{
