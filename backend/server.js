@@ -1,63 +1,148 @@
 require("dotenv").config();
-const express      = require("express");
-const http         = require("http");
-const cors         = require("cors");
-const path         = require("path");
-const { Server }   = require("socket.io");
-const jwt          = require("jsonwebtoken");
-const rateLimit    = require("express-rate-limit");
-const mongoose     = require("mongoose");
-const db           = require("./db/database");
+const express = require("express");
+const http = require("http");
+const cors = require("cors");
+const path = require("path");
+const helmet = require("helmet");
+const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
+const mongoose = require("mongoose");
+const db = require("./db/database");
+const logger = require("./utils/logger");
 
-// ── Conexiune MongoDB ──────────────────────────────────────
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB conectat"))
-  .catch(err => { console.error("❌ MongoDB eroare:", err.message); process.exit(1); });
+// ── MongoDB Connection ─────────────────────────────────────────
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => logger.info("MongoDB connected successfully"))
+  .catch((err) => {
+    logger.error("MongoDB connection error", { error: err.message });
+    process.exit(1);
+  });
 
-const ALLOWED_ORIGINS = [
-  process.env.CLIENT_URL || "http://localhost:3000",
-  "http://localhost:3000",
-];
-
-const app    = express();
-const server = http.createServer(app);
-const io     = new Server(server, {
-  cors: { origin: ALLOWED_ORIGINS, credentials: true }
+// Track MongoDB connection state
+mongoose.connection.on("disconnected", () => {
+  logger.warn("MongoDB disconnected");
+});
+mongoose.connection.on("reconnected", () => {
+  logger.info("MongoDB reconnected");
 });
 
-// ── Rate limiters ──────────────────────────────────────────────
+// ── CORS Configuration ─────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  process.env.CLIENT_URL,
+  "http://localhost:3000",
+].filter(Boolean);
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: ALLOWED_ORIGINS, credentials: true },
+});
+
+// ── Security Middleware ────────────────────────────────────────
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: false, // Disable for API
+  })
+);
+
+// ── Rate Limiters ──────────────────────────────────────────────
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  message: { error: "Prea multe cereri. Incearca din nou mai tarziu." },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.path === "/api/health", // Skip health checks
+});
+
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minute
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
   message: { error: "Prea multe incercari. Incearca din nou dupa 15 minute." },
-  standardHeaders: true, legacyHeaders: false,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
+
 const otpLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 ora
+  windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
   message: { error: "Limita de SMS depasita. Incearca din nou dupa o ora." },
-  standardHeaders: true, legacyHeaders: false,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// ── Middleware ─────────────────────────────────────────────────
-app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
-app.use(express.json());
+// ── CORS Middleware ────────────────────────────────────────────
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
+      logger.warn("CORS blocked origin", { origin });
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
+
+// ── Body Parsing with Size Limits ──────────────────────────────
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// ── Static Files ───────────────────────────────────────────────
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// ── Apply General Rate Limiter to All API Routes ───────────────
+app.use("/api", generalLimiter);
+
 // ── Routes ─────────────────────────────────────────────────────
-app.use("/api/auth",      authLimiter, require("./routes/auth"));
-app.use("/api/jobs",      require("./routes/jobs"));
-app.use("/api/messages",  require("./routes/messages"));
-app.use("/api/payments",  require("./routes/payments"));
-app.use("/api/reviews",   require("./routes/reviews"));
+app.use("/api/auth", authLimiter, require("./routes/auth"));
+app.use("/api/jobs", require("./routes/jobs"));
+app.use("/api/messages", require("./routes/messages"));
+app.use("/api/payments", require("./routes/payments"));
+app.use("/api/reviews", require("./routes/reviews"));
 app.use("/api/contracts", require("./routes/contracts"));
-app.use("/api/kyc",       require("./routes/kyc"));
-app.use("/api/reports",  require("./routes/reports"));
+app.use("/api/kyc", require("./routes/kyc"));
+app.use("/api/reports", require("./routes/reports"));
 
-// ── Health check ───────────────────────────────────────────────
-app.get("/api/health", (_, res) => res.json({ status: "ok", time: new Date().toISOString() }));
+// ── Health Check ───────────────────────────────────────────────
+const startTime = Date.now();
+app.get("/api/health", (_, res) => {
+  const dbState = mongoose.connection.readyState;
+  const dbStatus = dbState === 1 ? "connected" : dbState === 2 ? "connecting" : "disconnected";
 
-// ── Socket.io — mesagerie in timp real ────────────────────────
+  res.json({
+    status: dbState === 1 ? "ok" : "degraded",
+    timestamp: new Date().toISOString(),
+    version: "1.0.0",
+    database: dbStatus,
+    uptime: Math.floor((Date.now() - startTime) / 1000),
+  });
+});
+
+// ── Error Handling Middleware ──────────────────────────────────
+app.use((err, req, res, next) => {
+  logger.error("Unhandled error", {
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+  });
+  res.status(500).json({ error: "Eroare interna de server" });
+});
+
+// ── 404 Handler ────────────────────────────────────────────────
+app.use((req, res) => {
+  logger.warn("Route not found", { path: req.path, method: req.method });
+  res.status(404).json({ error: "Ruta negasita" });
+});
+
+// ── Socket.io — Real-time Messaging ────────────────────────────
 const onlineUsers = new Map(); // userId → socketId
 
 io.use((socket, next) => {
@@ -76,31 +161,59 @@ io.on("connection", (socket) => {
   onlineUsers.set(userId, socket.id);
   io.emit("online_users", Array.from(onlineUsers.keys()));
 
-  console.log(`✅ User ${userId} conectat (${socket.id})`);
+  logger.debug("User connected", { userId, socketId: socket.id });
 
-  // Trimite mesaj
+  // Send message
   socket.on("send_message", async ({ conversation_id, text }) => {
     if (!text?.trim()) return;
-    const conv = await db.findConversationById(conversation_id);
-    if (!conv || (String(conv.user1_id) !== String(userId) && String(conv.user2_id) !== String(userId))) return;
+    try {
+      const conv = await db.findConversationById(conversation_id);
+      if (
+        !conv ||
+        (String(conv.user1_id) !== String(userId) &&
+          String(conv.user2_id) !== String(userId))
+      )
+        return;
 
-    const msg = await db.createMessage({ conversation_id, sender_id: userId, text: text.trim() });
-    const otherId = String(conv.user1_id) === String(userId) ? String(conv.user2_id) : String(conv.user1_id);
-    socket.emit("new_message", msg);
-    const otherSocket = onlineUsers.get(otherId);
-    if (otherSocket) io.to(otherSocket).emit("new_message", msg);
+      const msg = await db.createMessage({
+        conversation_id,
+        sender_id: userId,
+        text: text.trim(),
+      });
+      const otherId =
+        String(conv.user1_id) === String(userId)
+          ? String(conv.user2_id)
+          : String(conv.user1_id);
+      socket.emit("new_message", msg);
+      const otherSocket = onlineUsers.get(otherId);
+      if (otherSocket) io.to(otherSocket).emit("new_message", msg);
+    } catch (err) {
+      logger.error("Socket send_message error", { userId, error: err.message });
+    }
   });
 
-  // Indicator "scrie..."
+  // Typing indicator
   socket.on("typing", async ({ conversation_id, is_typing }) => {
-    const conv = await db.findConversationById(conversation_id);
-    if (!conv) return;
-    const otherId = String(conv.user1_id) === String(userId) ? String(conv.user2_id) : String(conv.user1_id);
-    const otherSocket = onlineUsers.get(otherId);
-    if (otherSocket) io.to(otherSocket).emit("typing", { conversation_id, user_id: userId, is_typing });
+    try {
+      const conv = await db.findConversationById(conversation_id);
+      if (!conv) return;
+      const otherId =
+        String(conv.user1_id) === String(userId)
+          ? String(conv.user2_id)
+          : String(conv.user1_id);
+      const otherSocket = onlineUsers.get(otherId);
+      if (otherSocket)
+        io.to(otherSocket).emit("typing", {
+          conversation_id,
+          user_id: userId,
+          is_typing,
+        });
+    } catch (err) {
+      logger.error("Socket typing error", { userId, error: err.message });
+    }
   });
 
-  // Intra in camera unei conversatii
+  // Join conversation room
   socket.on("join_conversation", (conversation_id) => {
     socket.join(`conv_${conversation_id}`);
   });
@@ -108,14 +221,29 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     onlineUsers.delete(userId);
     io.emit("online_users", Array.from(onlineUsers.keys()));
-    console.log(`❌ User ${userId} deconectat`);
+    logger.debug("User disconnected", { userId });
   });
 });
 
-// ── Start ──────────────────────────────────────────────────────
+// ── Graceful Shutdown ──────────────────────────────────────────
+const gracefulShutdown = async (signal) => {
+  logger.info(`${signal} received, shutting down gracefully`);
+  server.close(async () => {
+    await mongoose.connection.close();
+    logger.info("Server closed");
+    process.exit(0);
+  });
+};
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+// ── Start Server ───────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`\n🚀 ConnectJob Backend pornit pe portul ${PORT}`);
-  console.log(`   API:    http://localhost:${PORT}/api`);
-  console.log(`   Health: http://localhost:${PORT}/api/health\n`);
+  logger.info(`ConnectJob Backend started`, {
+    port: PORT,
+    nodeEnv: process.env.NODE_ENV || "development",
+    apiUrl: `http://localhost:${PORT}/api`,
+  });
 });
