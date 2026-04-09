@@ -7,6 +7,7 @@ const {
   createConversationValidator,
   mongoIdValidator,
 } = require("../utils/validators");
+const { sendPushNotification, notifications } = require("../utils/pushService");
 
 const router = express.Router();
 
@@ -92,11 +93,31 @@ router.post(
         String(conv.user2_id) !== String(req.user.id)
       )
         return res.status(403).json({ error: "Acces interzis" });
+      
       const msg = await db.createMessage({
         conversation_id: req.params.id,
         sender_id: req.user.id,
         text: text.trim(),
       });
+
+      // Send push notification to recipient
+      try {
+        const User = require("../models/User");
+        const sender = await User.findById(req.user.id).lean();
+        const recipientId = String(conv.user1_id) === String(req.user.id)
+          ? conv.user2_id
+          : conv.user1_id;
+
+        const notifPayload = notifications.newMessage(
+          sender.name,
+          text.trim(),
+          req.params.id
+        );
+        await sendPushNotification(recipientId, notifPayload);
+      } catch (notifErr) {
+        logger.error("Message notification error", { error: notifErr.message });
+      }
+
       logger.debug("Message sent", {
         conversationId: req.params.id,
         senderId: req.user.id,

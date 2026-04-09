@@ -138,6 +138,20 @@ ConnectJob is a job marketplace platform connecting workers with employers in Ro
    - ✅ Sidebar hidden on mobile devices
    - ✅ Categories grid adapts to screen size
 
+3. **Push Notifications System**
+   - ✅ Installed `web-push` package for backend
+   - ✅ Created `/app/backend/utils/pushService.js` with VAPID support
+   - ✅ Created `/app/backend/routes/notifications.js` for subscription API
+   - ✅ Created `/app/frontend/public/sw.js` Service Worker
+   - ✅ Created `/app/frontend/src/hooks/usePushNotifications.js` React hook
+   - ✅ Added notification toggle button on homepage
+   - ✅ Notifications triggered for:
+     - New job application (notify employer)
+     - Application accepted/rejected (notify worker)
+     - New message received (notify recipient)
+     - Contract signed by both parties
+     - Payment released
+
 ---
 
 ## Test Results

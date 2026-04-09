@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import MapPage from "./pages/MapPage";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import PostJobPage from "./pages/PostJobPage";
+import usePushNotifications from "./hooks/usePushNotifications";
 
 /* ═══════════════════════════════════════════════════════════════
    JOOBCONNECT — Aplicație Completă Unificată
@@ -309,11 +310,23 @@ function PageHome({ gs, update, navigate }) {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showFuelCalc, setShowFuelCalc] = useState(false);
   const [showTransport, setShowTransport] = useState(false);
+  
+  // Push notifications hook
+  const { isSupported, isSubscribed, permission, loading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
 
   const getCatCount = (cat) => allJobs.filter(j => {
     const jc = (j.category||"").toLowerCase();
     return jc === cat.key || jc === cat.label.toLowerCase() || cat.label.toLowerCase().includes(jc) || jc.includes(cat.key);
   }).length;
+  
+  // Handle notification toggle
+  const handleNotificationToggle = async () => {
+    if (isSubscribed) {
+      await unsubscribe();
+    } else {
+      await subscribe();
+    }
+  };
 
   return (
     <div style={{ animation:"fadeIn 0.3s ease" }}>
@@ -404,6 +417,53 @@ function PageHome({ gs, update, navigate }) {
             </div>
           </button>
         </div>
+        
+        {/* Push Notifications Toggle */}
+        {isSupported && (
+          <button
+            data-testid="notifications-toggle-btn"
+            onClick={handleNotificationToggle}
+            disabled={notifLoading}
+            className="jc-notification-btn"
+            style={{
+              marginTop:14,
+              width:"100%",
+              background: isSubscribed 
+                ? "linear-gradient(135deg,#059669 0%,#047857 100%)" 
+                : "linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)",
+              border:"none",borderRadius:14,padding:"16px 20px",cursor: notifLoading ? "wait" : "pointer",
+              display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
+              boxShadow: isSubscribed 
+                ? "0 4px 20px rgba(5,150,105,0.3)" 
+                : "0 4px 20px rgba(99,102,241,0.3)",
+              transition:"all 0.25s ease",
+              opacity: notifLoading ? 0.7 : 1,
+            }}
+            onMouseEnter={e=>{ if(!notifLoading) e.currentTarget.style.transform="translateY(-2px)"; }}
+            onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)"; }}
+          >
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <div style={{fontSize:28}}>{isSubscribed ? "🔔" : "🔕"}</div>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:"#fff"}}>
+                  {isSubscribed ? "Notificări activate" : "Activează notificările"}
+                </div>
+                <div style={{fontSize:12,color:"rgba(255,255,255,0.8)"}}>
+                  {isSubscribed 
+                    ? "Vei primi alerte pentru mesaje și aplicări" 
+                    : "Fii primul care află de joburi noi"}
+                </div>
+              </div>
+            </div>
+            <div style={{
+              background:"rgba(255,255,255,0.2)",
+              borderRadius:8,padding:"8px 14px",
+              fontSize:12,fontWeight:700,color:"#fff",
+            }}>
+              {notifLoading ? "..." : isSubscribed ? "ON" : "OFF"}
+            </div>
+          </button>
+        )}
       </div>
 
       {/* CATEGORY GRID — main feature */}

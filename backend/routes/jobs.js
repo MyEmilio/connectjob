@@ -8,6 +8,8 @@ const {
   mongoIdValidator,
   applyJobValidator,
 } = require("../utils/validators");
+const { sendPushNotification, notifications } = require("../utils/pushService");
+const { sendNewApplicationEmail } = require("../utils/emailService");
 
 const router = express.Router();
 
@@ -228,6 +230,33 @@ router.post("/:id/apply", auth, applyJobValidator, async (req, res) => {
       jobId: req.params.id,
       workerId: req.user.id,
     });
+
+    // Send push notification and email to employer
+    try {
+      const User = require("../models/User");
+      const job = await db.findJobById(req.params.id);
+      const worker = await User.findById(req.user.id).lean();
+      const employer = await User.findById(job.employer_id).lean();
+      
+      if (employer && worker) {
+        // Push notification
+        const notifPayload = notifications.newApplication(worker.name, job.title);
+        await sendPushNotification(employer._id || employer.id, notifPayload);
+        
+        // Email notification
+        if (employer.email) {
+          await sendNewApplicationEmail(employer.email, {
+            employerName: employer.name,
+            workerName: worker.name,
+            jobTitle: job.title,
+            applicationMessage: req.body.message,
+          });
+        }
+      }
+    } catch (notifErr) {
+      logger.error("Application notification error", { error: notifErr.message });
+    }
+
     res.json({ success: true });
   } catch (err) {
     if (err.message === "DUPLICATE")

@@ -127,6 +127,7 @@ app.use("/api/reviews", require("./routes/reviews"));
 app.use("/api/contracts", require("./routes/contracts"));
 app.use("/api/kyc", require("./routes/kyc"));
 app.use("/api/reports", require("./routes/reports"));
+app.use("/api/notifications", require("./routes/notifications"));
 
 // ── Health Check ───────────────────────────────────────────────
 const startTime = Date.now();
