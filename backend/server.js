@@ -32,9 +32,16 @@ mongoose.connection.on("reconnected", () => {
 const ALLOWED_ORIGINS = [
   process.env.CLIENT_URL,
   "http://localhost:3000",
+  // Allow Emergent preview domains
+  /\.preview\.emergentagent\.com$/,
+  /\.preview\.emergentcf\.cloud$/,
 ].filter(Boolean);
 
 const app = express();
+
+// Trust proxy for rate limiting behind reverse proxy (Railway, Vercel, etc.)
+app.set("trust proxy", 1);
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: ALLOWED_ORIGINS, credentials: true },
@@ -56,6 +63,7 @@ const generalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => req.path === "/api/health", // Skip health checks
+  validate: { xForwardedForHeader: false },
 });
 
 const authLimiter = rateLimit({
@@ -64,6 +72,7 @@ const authLimiter = rateLimit({
   message: { error: "Prea multe incercari. Incearca din nou dupa 15 minute." },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
 });
 
 const otpLimiter = rateLimit({
@@ -72,6 +81,7 @@ const otpLimiter = rateLimit({
   message: { error: "Limita de SMS depasita. Incearca din nou dupa o ora." },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
 });
 
 // ── CORS Middleware ────────────────────────────────────────────
@@ -80,7 +90,15 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) return callback(null, true);
-      if (ALLOWED_ORIGINS.includes(origin)) {
+      
+      // Check if origin matches any allowed origin (string or regex)
+      const isAllowed = ALLOWED_ORIGINS.some((allowed) => {
+        if (typeof allowed === "string") return allowed === origin;
+        if (allowed instanceof RegExp) return allowed.test(origin);
+        return false;
+      });
+      
+      if (isAllowed) {
         return callback(null, true);
       }
       logger.warn("CORS blocked origin", { origin });
