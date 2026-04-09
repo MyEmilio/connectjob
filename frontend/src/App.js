@@ -307,6 +307,8 @@ function PageHome({ gs, update, navigate }) {
   const promotedJobs = allJobs.filter(j => j.promoted);
   const recentJobs = allJobs.slice(0, 6);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [showFuelCalc, setShowFuelCalc] = useState(false);
+  const [showTransport, setShowTransport] = useState(false);
 
   const getCatCount = (cat) => allJobs.filter(j => {
     const jc = (j.category||"").toLowerCase();
@@ -316,19 +318,21 @@ function PageHome({ gs, update, navigate }) {
   return (
     <div style={{ animation:"fadeIn 0.3s ease" }}>
       {showHowItWorks && <HowItWorksModal onClose={()=>setShowHowItWorks(false)}/>}
+      {showFuelCalc && <FuelCalculatorModal from="" to="" onClose={()=>setShowFuelCalc(false)}/>}
+      {showTransport && <TransportSchedule from="" to="" onClose={()=>setShowTransport(false)}/>}
 
       {/* Compact hero */}
-      <div style={{ background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`, borderRadius:18, padding:"22px 26px", marginBottom:24, position:"relative", overflow:"hidden" }}>
+      <div className="jc-hero" style={{ background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`, borderRadius:18, padding:"22px 26px", marginBottom:24, position:"relative", overflow:"hidden" }}>
         <div style={{ position:"absolute",top:-40,right:-40,width:180,height:180,borderRadius:"50%",background:"rgba(5,150,105,0.08)" }}/>
         <div style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
           <div>
             <div style={{ fontSize:12,color:"#64748b",marginBottom:4 }}>{new Date().toLocaleDateString("ro",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
-            <h1 style={{ fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:"#f1f5f9",margin:"0 0 6px" }}>{t("home_greeting")}, {gs.user.name.split(" ")[0]}! 👋</h1>
+            <h1 className="jc-hero-title" style={{ fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:"#f1f5f9",margin:"0 0 6px" }}>{t("home_greeting")}, {gs.user.name.split(" ")[0]}! 👋</h1>
             <p style={{ color:"#94a3b8",fontSize:13,margin:0 }}>
               {allJobs.length > 0 ? <><strong style={{color:T.greenLight}}>{allJobs.length} {t("jobs_ads_label")}</strong> {t("home_jobs_available")}</> : t("home_no_jobs_hero")}
             </p>
           </div>
-          <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+          <div className="jc-hero-btns" style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
             <Btn onClick={()=>navigate("map")} color={T.green} size="sm">{t("home_on_map_btn")}</Btn>
             <Btn onClick={()=>{ update({jobsCategory:""}); navigate("jobs"); }} color={T.blue} size="sm">{t("home_search_btn")}</Btn>
             {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>{t("home_verify_btn")}</Btn>}
@@ -342,6 +346,63 @@ function PageHome({ gs, update, navigate }) {
               <span style={{ fontSize:15 }}>💡</span> {t("home_hiw_btn")}
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* ══════ QUICK ACTIONS — Program Transport & Calculator Rută ══════ */}
+      <div className="jc-quick-actions" style={{ marginBottom:28 }}>
+        <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:14 }}>
+          <h2 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:0 }}>🚀 Acțiuni rapide</h2>
+          <div style={{ flex:1,height:1,background:T.border }}/>
+        </div>
+        <div className="jc-quick-btns" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
+          {/* Calculator Rută */}
+          <button
+            data-testid="fuel-calculator-btn"
+            onClick={()=>setShowFuelCalc(true)}
+            className="jc-action-card"
+            style={{
+              background:"linear-gradient(135deg,#f59e0b 0%,#d97706 100%)",
+              border:"none",borderRadius:16,padding:"20px 18px",cursor:"pointer",
+              display:"flex",flexDirection:"column",alignItems:"flex-start",gap:10,
+              boxShadow:"0 6px 24px rgba(245,158,11,0.35)",transition:"all 0.25s ease",
+              textAlign:"left",position:"relative",overflow:"hidden",minHeight:120,
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px) scale(1.02)";e.currentTarget.style.boxShadow="0 12px 32px rgba(245,158,11,0.45)";}}
+            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0) scale(1)";e.currentTarget.style.boxShadow="0 6px 24px rgba(245,158,11,0.35)";}}
+          >
+            <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.12)"}}/>
+            <div style={{position:"absolute",bottom:-30,left:-10,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
+            <div style={{fontSize:36,marginBottom:4,position:"relative"}}>⛽</div>
+            <div style={{position:"relative"}}>
+              <div style={{fontFamily:"Outfit,sans-serif",fontSize:17,fontWeight:800,color:"#fff",marginBottom:4}}>Calculator Rută</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.85)",lineHeight:1.4}}>Distanță, cost carburant și comparație transport</div>
+            </div>
+          </button>
+
+          {/* Program Transport */}
+          <button
+            data-testid="transport-schedule-btn"
+            onClick={()=>setShowTransport(true)}
+            className="jc-action-card"
+            style={{
+              background:"linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%)",
+              border:"none",borderRadius:16,padding:"20px 18px",cursor:"pointer",
+              display:"flex",flexDirection:"column",alignItems:"flex-start",gap:10,
+              boxShadow:"0 6px 24px rgba(37,99,235,0.35)",transition:"all 0.25s ease",
+              textAlign:"left",position:"relative",overflow:"hidden",minHeight:120,
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px) scale(1.02)";e.currentTarget.style.boxShadow="0 12px 32px rgba(37,99,235,0.45)";}}
+            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0) scale(1)";e.currentTarget.style.boxShadow="0 6px 24px rgba(37,99,235,0.35)";}}
+          >
+            <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.12)"}}/>
+            <div style={{position:"absolute",bottom:-30,left:-10,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
+            <div style={{fontSize:36,marginBottom:4,position:"relative"}}>🚇</div>
+            <div style={{position:"relative"}}>
+              <div style={{fontFamily:"Outfit,sans-serif",fontSize:17,fontWeight:800,color:"#fff",marginBottom:4}}>Program Transport</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.85)",lineHeight:1.4}}>Orare autobuze, metrouri și trenuri</div>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -388,8 +449,8 @@ function PageHome({ gs, update, navigate }) {
         </div>
       </div>
 
-      {/* Two columns */}
-      <div style={{ display:"grid",gridTemplateColumns:"1fr 320px",gap:16 }}>
+      {/* Two columns - responsive */}
+      <div className="jc-home-grid" style={{ display:"grid",gridTemplateColumns:"1fr 320px",gap:16 }}>
         <div>
           {promotedJobs.length > 0 && (
             <div style={{ marginBottom:20 }}>
@@ -3275,6 +3336,11 @@ export function FuelButton({ defaultFrom="", defaultTo="" }) {
     </>
   );
 }
+
+// Alias for FuelCalculator to use as modal
+export const FuelCalculatorModal = ({ from, to, onClose }) => (
+  <FuelCalculator defaultFrom={from} defaultTo={to} onClose={onClose} />
+);
 
 // ══════════════════════════════════════════════════════════════
 //  DEMO / PREVIEW

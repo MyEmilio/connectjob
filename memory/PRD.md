@@ -56,8 +56,9 @@ ConnectJob is a job marketplace platform connecting workers with employers in Ro
    - ✅ Added `express-validator` for input validation
    - ✅ Set body size limits: `express.json({ limit: '10mb' })`
    - ✅ Expanded rate limiting to ALL routes (100 req/15min general, 20 req/15min auth)
-   - ✅ Fixed CORS to only allow production domain + localhost
-   - ✅ Replaced all `console.log` with Winston logger
+   - ✅ Fixed CORS to support Emergent preview domains (regex patterns)
+   - ✅ Added `trust proxy` and `xForwardedForHeader: false` for proxy support
+   - ✅ Replaced all `console.log` with Winston structured logging
 
 3. **Structured Logging**
    - ✅ Installed `winston` and `winston-daily-rotate-file`
@@ -120,6 +121,22 @@ ConnectJob is a job marketplace platform connecting workers with employers in Ro
        "uptime": 12345
      }
      ```
+
+### April 2026 - UI/UX Improvements
+
+1. **Quick Actions on Homepage**
+   - ✅ Added "Calculator Rută" (Fuel Calculator) button on main page
+   - ✅ Added "Program Transport" (Transport Schedule) button on main page
+   - ✅ Buttons are large, colorful, and easy to tap
+   - ✅ Located in new "Acțiuni rapide" (Quick Actions) section
+
+2. **Mobile Responsive Design**
+   - ✅ Added CSS media queries for mobile (max-width: 768px)
+   - ✅ Quick action buttons stack vertically on mobile
+   - ✅ Hero section adapts to smaller screens
+   - ✅ Bottom navigation bar visible on mobile
+   - ✅ Sidebar hidden on mobile devices
+   - ✅ Categories grid adapts to screen size
 
 ---
 

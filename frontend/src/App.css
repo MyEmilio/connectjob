@@ -36,3 +36,102 @@
     transform: rotate(360deg);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   CONNECTJOB — Mobile Responsive Styles
+   ══════════════════════════════════════════════════════════════ */
+
+/* Mobile: max-width 768px */
+@media (max-width: 768px) {
+  /* Hide desktop sidebar */
+  .jc-desktop-sidebar {
+    display: none !important;
+  }
+  
+  /* Show bottom navigation */
+  .jc-bottom-nav {
+    display: flex !important;
+  }
+  
+  /* Main content full width */
+  .jc-main-content {
+    padding: 16px 14px 80px !important;
+  }
+  
+  /* Hero section mobile */
+  .jc-hero {
+    padding: 18px 16px !important;
+    border-radius: 14px !important;
+  }
+  
+  .jc-hero-title {
+    font-size: 20px !important;
+  }
+  
+  .jc-hero-btns {
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+  
+  .jc-hero-btns button {
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+  }
+  
+  /* Quick actions - stack on mobile */
+  .jc-quick-btns {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .jc-action-card {
+    min-height: 100px !important;
+    padding: 18px 16px !important;
+  }
+  
+  .jc-action-card > div:last-child > div:first-child {
+    font-size: 16px !important;
+  }
+  
+  /* Home grid - single column */
+  .jc-home-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Category grid mobile */
+  .jc-quick-actions + div .jc-quick-btns,
+  div[style*="gridTemplateColumns"][style*="170px"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* Extra small mobile: max-width 480px */
+@media (max-width: 480px) {
+  .jc-main-content {
+    padding: 12px 10px 80px !important;
+  }
+  
+  .jc-hero {
+    padding: 14px 12px !important;
+  }
+  
+  .jc-hero-title {
+    font-size: 18px !important;
+  }
+  
+  .jc-hero-btns button {
+    padding: 9px 14px !important;
+    font-size: 12px !important;
+  }
+  
+  .jc-action-card {
+    min-height: 90px !important;
+    padding: 16px 14px !important;
+  }
+  
+  /* Single column for categories on very small screens */
+  div[style*="gridTemplateColumns"][style*="170px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
