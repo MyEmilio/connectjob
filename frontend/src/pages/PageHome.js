@@ -238,7 +238,7 @@ export default function PageHome({ gs, update, navigate }) {
       </div>
 
       {/* Two columns */}
-      <div className="jc-home-grid" style={{ display:"grid",gridTemplateColumns:"1fr 320px",gap:16 }}>
+      <div className="jc-home-grid" style={{ display:"grid",gridTemplateColumns:"1fr minmax(0,320px)",gap:16 }}>
         <div>
           {promotedJobs.length>0&&(<div style={{marginBottom:20}}><div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.amber,margin:0}}>{t("home_promoted_section")}</h3><div style={{flex:1,height:1,background:`${T.amber}44`}}/></div><div style={{display:"flex",flexDirection:"column",gap:8}}>{promotedJobs.slice(0,3).map(job=><JobCardRow key={job.id||job._id} job={job} promoted navigate={navigate} update={update} t={t}/>)}</div></div>)}
           <div>

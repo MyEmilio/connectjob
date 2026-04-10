@@ -6,6 +6,7 @@ import api from "./services/api";
 import { T } from "./constants/theme";
 import { Avatar, Loader } from "./components/shared";
 import LanguageSwitcher from "./components/LanguageSwitcher";
+import "./App.css";
 
 // ── Pages ─────────────────────────────────────────────────────
 import Login from "./pages/Login";

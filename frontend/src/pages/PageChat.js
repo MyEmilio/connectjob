@@ -163,7 +163,19 @@ export default function PageChat({ gs, update, navigate }) {
     }
   };
 
-  const LANGS=[{code:"ro-RO",flag:"\u{1F1F7}\u{1F1F4}",name:"Română"},{code:"en-GB",flag:"\u{1F1EC}\u{1F1E7}",name:"English"},{code:"fr-FR",flag:"\u{1F1EB}\u{1F1F7}",name:"Français"},{code:"de-DE",flag:"\u{1F1E9}\u{1F1EA}",name:"Deutsch"}];
+  const LANGS=[
+    {code:"ro-RO",flag:"\u{1F1F7}\u{1F1F4}",name:"Română"},
+    {code:"en-GB",flag:"\u{1F1EC}\u{1F1E7}",name:"English"},
+    {code:"es-ES",flag:"\u{1F1EA}\u{1F1F8}",name:"Español"},
+    {code:"fr-FR",flag:"\u{1F1EB}\u{1F1F7}",name:"Français"},
+    {code:"de-DE",flag:"\u{1F1E9}\u{1F1EA}",name:"Deutsch"},
+    {code:"it-IT",flag:"\u{1F1EE}\u{1F1F9}",name:"Italiano"},
+    {code:"pt-PT",flag:"\u{1F1F5}\u{1F1F9}",name:"Português"},
+    {code:"nl-NL",flag:"\u{1F1F3}\u{1F1F1}",name:"Nederlands"},
+    {code:"ru-RU",flag:"\u{1F1F7}\u{1F1FA}",name:"Русский"},
+    {code:"ar-SA",flag:"\u{1F1F8}\u{1F1E6}",name:"العربية"},
+    {code:"ca-ES",flag:"\u{1F3F4}",name:"Català"},
+  ];
 
   return (
     <div data-testid="page-chat" style={{ display:"flex", gap:0, height:"calc(100vh - 130px)", minHeight:500, borderRadius:18, overflow:"hidden", border:`1.5px solid ${T.border}`, animation:"fadeIn 0.3s ease" }}>
@@ -311,9 +323,9 @@ export default function PageChat({ gs, update, navigate }) {
         </div>
         <div style={{ padding:"10px 12px",borderTop:"1px solid #1e293b" }}>
           <div style={{ fontSize:10,color:"#475569",fontWeight:700,textTransform:"uppercase",marginBottom:6 }}>🎙️ Limbă vocală</div>
-          <div style={{ display:"flex",gap:4 }}>
+          <div style={{ display:"flex",gap:4,flexWrap:"wrap" }}>
             {LANGS.map(l=>(
-              <button key={l.code} onClick={()=>setVoiceLang(l.code)} style={{ flex:1,padding:"5px 4px",borderRadius:7,border:"none",cursor:"pointer",background:voiceLang===l.code?T.green:"#1e293b",color:voiceLang===l.code?"#fff":"#64748b",fontSize:14,transition:"all 0.15s" }} title={l.name}>{l.flag}</button>
+              <button key={l.code} onClick={()=>setVoiceLang(l.code)} style={{ padding:"5px 4px",borderRadius:7,border:"none",cursor:"pointer",background:voiceLang===l.code?T.green:"#1e293b",color:voiceLang===l.code?"#fff":"#64748b",fontSize:14,transition:"all 0.15s",minWidth:30 }} title={l.name}>{l.flag}</button>
             ))}
           </div>
         </div>
