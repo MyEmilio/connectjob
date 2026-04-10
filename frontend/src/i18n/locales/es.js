@@ -72,6 +72,8 @@ const es = {
   pass_upper:      "Necesita al menos una mayúscula",
   pass_number:     "Necesita al menos un número",
   pass_special:    "Necesita un carácter especial (!@#$...)",
+  login_google:"Continuar con Google",
+  register_google:"Registrarse con Google",
   or_google:       "o continúa con",
   register_role:      "Tipo de cuenta",
   register_worker:    "👷 Trabajador",

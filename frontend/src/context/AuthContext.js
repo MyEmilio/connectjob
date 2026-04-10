@@ -9,7 +9,13 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   // Incarca userul din token la pornire
+  // CRITICAL: If returning from OAuth callback, skip the /me check.
+  // AuthCallback will exchange the session_id and establish the session first.
   useEffect(() => {
+    if (window.location.hash?.includes('session_id=')) {
+      setLoading(false);
+      return;
+    }
     const token = localStorage.getItem("jc_token");
     if (!token) { setLoading(false); return; }
     api.get("/auth/me")
@@ -34,6 +40,16 @@ export function AuthProvider({ children }) {
     return res.data;
   }, []);
 
+  // Emergent Auth — exchange session_id for JWT
+  const loginWithGoogleSession = useCallback(async (sessionId) => {
+    const res = await api.post("/auth/google/session", { session_id: sessionId });
+    localStorage.setItem("jc_token", res.data.token);
+    setUser(res.data.user);
+    connectSocket(res.data.token);
+    return res.data;
+  }, []);
+
+  // Legacy Google OAuth (credential-based)
   const loginWithGoogle = useCallback(async (credential) => {
     const res = await api.post("/auth/google", { credential });
     localStorage.setItem("jc_token", res.data.token);
@@ -54,7 +70,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, loginWithGoogleSession, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

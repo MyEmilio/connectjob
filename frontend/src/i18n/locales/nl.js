@@ -68,6 +68,8 @@ const nl = {
   register_pass_hint:"min. 8 tekens, hoofdletter, cijfer, symbool",
   pass_min8:"Minimaal 8 tekens", pass_upper:"Heeft een hoofdletter nodig",
   pass_number:"Heeft een cijfer nodig", pass_special:"Heeft een speciaal teken nodig (!@#...)",
+  login_google:"Doorgaan met Google",
+  register_google:"Registreren met Google",
   or_google:"of doorgaan met",
 
   nav_admin:"Moderatie",

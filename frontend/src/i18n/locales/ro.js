@@ -107,6 +107,8 @@ const ro = {
   register_pass_hint:"min. 8 car., majusculă, cifră, simbol",
   pass_min8:"Minim 8 caractere", pass_upper:"Necesită o literă majusculă",
   pass_number:"Necesită o cifră", pass_special:"Necesită un caracter special (!@#...)",
+  login_google:"Continuă cu Google",
+  register_google:"Înregistrare cu Google",
   or_google:"sau continuă cu",
   nav_admin:"Moderare",
   home_jobs_available:"anunțuri disponibile în zona ta",

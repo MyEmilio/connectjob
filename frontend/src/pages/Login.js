@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
@@ -12,11 +11,12 @@ const T = {
 };
 
 export default function Login() {
-  const { login, loginWithGoogle } = useAuth();
+  const { login } = useAuth();
   const { t } = useTranslation("t");
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm]     = useState({ email:"", password:"" });
-  const [error, setError]   = useState("");
+  const [error, setError]   = useState(location.state?.error || "");
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
@@ -31,14 +31,10 @@ export default function Login() {
     } finally { setLoading(false); }
   };
 
-  const handleGoogle = async (credentialResponse) => {
-    setError(""); setLoading(true);
-    try {
-      await loginWithGoogle(credentialResponse.credential);
-      navigate("/");
-    } catch (err) {
-      setError(err.response?.data?.error || t("error_generic"));
-    } finally { setLoading(false); }
+  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+  const handleGoogleLogin = () => {
+    const redirectUrl = window.location.origin + '/';
+    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
   };
 
   return (
@@ -57,10 +53,10 @@ export default function Login() {
           <p style={{ color:T.text2, fontSize:14, margin:0 }}>{t("login_subtitle")}</p>
         </div>
 
-        <div style={{ background:T.white, borderRadius:20, padding:"28px 28px 24px", boxShadow:"0 8px 32px rgba(0,0,0,0.08)", border:`1px solid ${T.border}` }}>
+        <div data-testid="login-form" style={{ background:T.white, borderRadius:20, padding:"28px 28px 24px", boxShadow:"0 8px 32px rgba(0,0,0,0.08)", border:`1px solid ${T.border}` }}>
 
           {error && (
-            <div style={{ background:"#fef2f2", border:`1px solid ${T.red}33`, borderRadius:10, padding:"10px 14px", marginBottom:16, color:T.red, fontSize:13, display:"flex", alignItems:"center", gap:8 }}>
+            <div data-testid="login-error" style={{ background:"#fef2f2", border:`1px solid ${T.red}33`, borderRadius:10, padding:"10px 14px", marginBottom:16, color:T.red, fontSize:13, display:"flex", alignItems:"center", gap:8 }}>
               <span>⚠️</span> {error}
             </div>
           )}
@@ -70,9 +66,10 @@ export default function Login() {
             <div style={{ marginBottom:14 }}>
               <label style={{ fontSize:12, fontWeight:700, color:T.text2, textTransform:"uppercase", letterSpacing:"0.05em", display:"block", marginBottom:6 }}>{t("login_email")}</label>
               <input
+                data-testid="login-email"
                 type="email" required value={form.email}
                 onChange={e => setForm(f=>({...f, email:e.target.value}))}
-                placeholder="correo@ejemplo.com"
+                placeholder="email@exemplu.com"
                 style={{ width:"100%", padding:"11px 14px", borderRadius:10, border:`1.5px solid ${T.border}`, fontSize:14, outline:"none", boxSizing:"border-box", transition:"border 0.2s" }}
                 onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`}
                 onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}
@@ -84,6 +81,7 @@ export default function Login() {
               <label style={{ fontSize:12, fontWeight:700, color:T.text2, textTransform:"uppercase", letterSpacing:"0.05em", display:"block", marginBottom:6 }}>{t("login_password")}</label>
               <div style={{ position:"relative" }}>
                 <input
+                  data-testid="login-password"
                   type={showPass?"text":"password"} required value={form.password}
                   onChange={e => setForm(f=>({...f, password:e.target.value}))}
                   placeholder="••••••••"
@@ -95,7 +93,7 @@ export default function Login() {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} style={{
+            <button data-testid="login-submit-btn" type="submit" disabled={loading} style={{
               width:"100%", padding:"13px", borderRadius:12, border:"none", cursor:loading?"not-allowed":"pointer",
               background:loading?"#d1d5db":`linear-gradient(135deg,${T.green},${T.greenDark})`,
               color:T.white, fontWeight:700, fontSize:15, fontFamily:"DM Sans,sans-serif",
@@ -109,30 +107,29 @@ export default function Login() {
           {/* Divider */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
             <div style={{ flex:1, height:1, background:T.border }}/>
-            <span style={{ fontSize:12, color:T.text3, whiteSpace:"nowrap" }}>{t("or_google") || "o continúa con"}</span>
+            <span style={{ fontSize:12, color:T.text3, whiteSpace:"nowrap" }}>{t("or_google") || "sau continuă cu"}</span>
             <div style={{ flex:1, height:1, background:T.border }}/>
           </div>
 
-          {/* Google OAuth */}
-          <div style={{ display:"flex", justifyContent:"center", marginBottom:20 }}>
-            {process.env.REACT_APP_GOOGLE_CLIENT_ID ? (
-              <GoogleLogin
-                onSuccess={handleGoogle}
-                onError={() => setError(t("error_generic"))}
-                useOneTap={false}
-                theme="outline"
-                size="large"
-                width="100%"
-                text="signin_with"
-                shape="rectangular"
-                locale={localStorage.getItem("jc_lang") || "es"}
-              />
-            ) : (
-              <div style={{ width:"100%", padding:"11px", borderRadius:10, border:`1.5px dashed ${T.border}`, textAlign:"center", color:T.text3, fontSize:13 }}>
-                🔧 Google OAuth — pendiente de configurar CLIENT_ID
-              </div>
-            )}
-          </div>
+          {/* Google OAuth — Emergent Auth */}
+          <button
+            data-testid="google-login-btn"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            style={{
+              width:"100%", padding:"12px 16px", borderRadius:12, cursor:"pointer",
+              border:`1.5px solid ${T.border}`, background:T.white,
+              display:"flex", alignItems:"center", justifyContent:"center", gap:10,
+              fontFamily:"DM Sans,sans-serif", fontSize:14, fontWeight:600, color:T.text,
+              transition:"all 0.2s", marginBottom:20,
+              boxShadow:"0 1px 4px rgba(0,0,0,0.06)",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#f5f5f4"; e.currentTarget.style.borderColor = T.green; }}
+            onMouseLeave={e => { e.currentTarget.style.background = T.white; e.currentTarget.style.borderColor = T.border; }}
+          >
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+            {t("login_google") || "Continuă cu Google"}
+          </button>
 
           <p style={{ textAlign:"center", margin:0, fontSize:13, color:T.text2 }}>
             {t("login_no_account")}{" "}

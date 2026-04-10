@@ -68,6 +68,8 @@ const ar = {
   register_pass_hint:"8 أحرف على الأقل، حرف كبير، رقم، رمز",
   pass_min8:"8 أحرف على الأقل", pass_upper:"يحتاج حرفاً كبيراً",
   pass_number:"يحتاج رقماً", pass_special:"يحتاج رمزاً خاصاً (!@#...)",
+  login_google:"المتابعة مع Google",
+  register_google:"التسجيل مع Google",
   or_google:"أو تابع مع",
 
   nav_admin:"الإشراف",

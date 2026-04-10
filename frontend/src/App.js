@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./context/AuthContext";
 import api from "./services/api";
@@ -23,6 +23,7 @@ import PageReviews from "./pages/PageReviews";
 import PageAnalytics from "./pages/PageAnalytics";
 import PageAdmin from "./pages/PageAdmin";
 import PageCalendar from "./pages/PageCalendar";
+import AuthCallback from "./pages/AuthCallback";
 
 /* ═══════════════════════════════════════════════════════════════
    JOOBCONNECT — Aplicație Completă Refactorizată
@@ -334,7 +335,13 @@ function ConnectJobApp() {
 }
 
 // Wrapper cu Routes — necesar pentru React Router
-function App() {
+// REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+function AppRouter() {
+  const location = useLocation();
+  // CRITICAL: Check URL fragment synchronously for session_id (prevents race conditions)
+  if (location.hash?.includes('session_id=')) {
+    return <AuthCallback />;
+  }
   return (
     <Routes>
       <Route path="/login"    element={<Login/>}/>
@@ -342,5 +349,9 @@ function App() {
       <Route path="*"         element={<ConnectJobApp/>}/>
     </Routes>
   );
+}
+
+function App() {
+  return <AppRouter />;
 }
 export default App;

@@ -68,6 +68,8 @@ const ru = {
   register_pass_hint:"мин. 8 симв., заглавная, цифра, спецсимвол",
   pass_min8:"Минимум 8 символов", pass_upper:"Нужна заглавная буква",
   pass_number:"Нужна цифра", pass_special:"Нужен спецсимвол (!@#...)",
+  login_google:"Продолжить с Google",
+  register_google:"Регистрация через Google",
   or_google:"или продолжить с",
 
   nav_admin:"Модерация",

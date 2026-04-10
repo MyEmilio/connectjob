@@ -22,7 +22,65 @@ const sign = (user) =>
     { expiresIn: "7d" }
   );
 
-// POST /api/auth/google — OAuth with Google
+// POST /api/auth/google — OAuth with Google (Emergent Auth flow)
+// REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+router.post("/google/session", async (req, res) => {
+  try {
+    const { session_id } = req.body;
+    if (!session_id) return res.status(400).json({ error: "session_id lipsa" });
+
+    // Verify session with Emergent Auth
+    const axios = require("axios");
+    const sessionRes = await axios.get(
+      "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+      { headers: { "X-Session-ID": session_id }, timeout: 10000 }
+    );
+
+    const { email, name, picture, session_token } = sessionRes.data;
+    if (!email) return res.status(401).json({ error: "Email lipsă din sesiunea Google" });
+
+    // Find or create user
+    let user = await db.findUserByEmail(email);
+    if (!user) {
+      const initials = (name || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+      user = await db.createUser({
+        name: name || email.split("@")[0],
+        email,
+        password: "",
+        role: "worker",
+        initials,
+        google_id: email,
+        avatar: picture || "",
+        verified: true,
+      });
+      logger.info("New Google user registered via Emergent Auth", { email });
+    } else if (!user.google_id) {
+      await db.updateUser(user.id || user._id, {
+        google_id: email,
+        avatar: user.avatar || picture || "",
+      });
+    }
+
+    const { password: _, ...safeUser } = user;
+    logger.info("Google login via Emergent Auth successful", { email });
+
+    // Set session_token as httpOnly cookie
+    res.cookie("session_token", session_token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ token: sign(safeUser), user: safeUser });
+  } catch (err) {
+    logger.error("Emergent Google auth error", { error: err.response?.data || err.message });
+    res.status(401).json({ error: "Autentificare Google eșuată: " + (err.response?.data?.detail || err.message) });
+  }
+});
+
+// POST /api/auth/google — OAuth with Google (legacy credential flow)
 router.post("/google", async (req, res) => {
   try {
     const { credential } = req.body;

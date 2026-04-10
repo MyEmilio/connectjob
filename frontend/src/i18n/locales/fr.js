@@ -82,6 +82,8 @@ const fr = {
   register_pass_hint:"min. 8 car., majuscule, chiffre, symbole",
   pass_min8:"Minimum 8 caractères", pass_upper:"Nécessite une majuscule",
   pass_number:"Nécessite un chiffre", pass_special:"Nécessite un caractère spécial (!@#...)",
+  login_google:"Continuer avec Google",
+  register_google:"S'inscrire avec Google",
   or_google:"ou continuer avec",
 
   nav_admin:"Modération",

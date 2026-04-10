@@ -82,6 +82,8 @@ const ca = {
   register_pass_hint:"mín. 8 car., majúscula, número, símbol",
   pass_min8:"Mínim 8 caràcters", pass_upper:"Cal una majúscula",
   pass_number:"Cal un número", pass_special:"Cal un caràcter especial (!@#...)",
+  login_google:"Continua amb Google",
+  register_google:"Registrar-se amb Google",
   or_google:"o continua amb",
 
   nav_admin:"Moderació",

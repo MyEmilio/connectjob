@@ -121,6 +121,8 @@ const en = {
   register_pass_hint:"min. 8 chars, uppercase, number, symbol",
   pass_min8:"Minimum 8 characters", pass_upper:"Needs an uppercase letter",
   pass_number:"Needs a number", pass_special:"Needs a special character (!@#...)",
+  login_google:"Continue with Google",
+  register_google:"Sign up with Google",
   or_google:"or continue with",
   nav_admin:"Moderation",
   home_jobs_available:"listings available in your area",

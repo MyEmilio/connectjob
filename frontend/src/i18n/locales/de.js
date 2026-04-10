@@ -82,6 +82,8 @@ const de = {
   register_pass_hint:"mind. 8 Zeichen, Großbuchstabe, Zahl, Symbol",
   pass_min8:"Mindestens 8 Zeichen", pass_upper:"Benötigt einen Großbuchstaben",
   pass_number:"Benötigt eine Zahl", pass_special:"Benötigt ein Sonderzeichen (!@#...)",
+  login_google:"Weiter mit Google",
+  register_google:"Registrieren mit Google",
   or_google:"oder weiter mit",
 
   nav_admin:"Moderation",
