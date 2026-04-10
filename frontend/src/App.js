@@ -11,6 +11,9 @@ import LanguageSwitcher from "./components/LanguageSwitcher";
 import PostJobPage from "./pages/PostJobPage";
 import usePushNotifications from "./hooks/usePushNotifications";
 import useNotificationPreferences from "./hooks/useNotificationPreferences";
+import DashboardStats from "./components/DashboardStats";
+import AdvancedSearch from "./components/AdvancedSearch";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 /* ═══════════════════════════════════════════════════════════════
    JOOBCONNECT — Aplicație Completă Unificată
@@ -504,6 +507,9 @@ function PageHome({ gs, update, navigate }) {
   const [showFuelCalc, setShowFuelCalc] = useState(false);
   const [showTransport, setShowTransport] = useState(false);
   const [showNotifPrefs, setShowNotifPrefs] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [searchFilters, setSearchFilters] = useState({});
   
   // Push notifications hook
   const { isSupported, isSubscribed, permission, loading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
@@ -532,6 +538,8 @@ function PageHome({ gs, update, navigate }) {
       {showFuelCalc && <FuelCalculatorModal from="" to="" onClose={()=>setShowFuelCalc(false)}/>}
       {showTransport && <TransportSchedule from="" to="" onClose={()=>setShowTransport(false)}/>}
       {showNotifPrefs && <NotificationPreferencesModal onClose={()=>setShowNotifPrefs(false)}/>}
+      {showDashboard && <DashboardStats onClose={()=>setShowDashboard(false)}/>}
+      {showAdvancedSearch && <AdvancedSearch filters={searchFilters} onFilterChange={setSearchFilters} onClose={()=>setShowAdvancedSearch(false)}/>}
 
       {/* Compact hero */}
       <div className="jc-hero" style={{ background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`, borderRadius:18, padding:"22px 26px", marginBottom:24, position:"relative", overflow:"hidden" }}>
@@ -613,6 +621,54 @@ function PageHome({ gs, update, navigate }) {
             <div style={{position:"relative"}}>
               <div style={{fontFamily:"Outfit,sans-serif",fontSize:17,fontWeight:800,color:"#fff",marginBottom:4}}>Program Transport</div>
               <div style={{fontSize:12,color:"rgba(255,255,255,0.85)",lineHeight:1.4}}>Orare autobuze, metrouri și trenuri</div>
+            </div>
+          </button>
+
+          {/* Dashboard Statistici */}
+          <button
+            data-testid="dashboard-stats-btn"
+            onClick={()=>setShowDashboard(true)}
+            className="jc-action-card"
+            style={{
+              background:"linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)",
+              border:"none",borderRadius:16,padding:"20px 18px",cursor:"pointer",
+              display:"flex",flexDirection:"column",alignItems:"flex-start",gap:10,
+              boxShadow:"0 6px 24px rgba(139,92,246,0.35)",transition:"all 0.25s ease",
+              textAlign:"left",position:"relative",overflow:"hidden",minHeight:120,
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px) scale(1.02)";e.currentTarget.style.boxShadow="0 12px 32px rgba(139,92,246,0.45)";}}
+            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0) scale(1)";e.currentTarget.style.boxShadow="0 6px 24px rgba(139,92,246,0.35)";}}
+          >
+            <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.12)"}}/>
+            <div style={{position:"absolute",bottom:-30,left:-10,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
+            <div style={{fontSize:36,marginBottom:4,position:"relative"}}>📊</div>
+            <div style={{position:"relative"}}>
+              <div style={{fontFamily:"Outfit,sans-serif",fontSize:17,fontWeight:800,color:"#fff",marginBottom:4}}>Dashboard</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.85)",lineHeight:1.4}}>Statistici, grafice și activitate</div>
+            </div>
+          </button>
+
+          {/* Căutare Avansată */}
+          <button
+            data-testid="advanced-search-btn"
+            onClick={()=>setShowAdvancedSearch(true)}
+            className="jc-action-card"
+            style={{
+              background:"linear-gradient(135deg,#059669 0%,#047857 100%)",
+              border:"none",borderRadius:16,padding:"20px 18px",cursor:"pointer",
+              display:"flex",flexDirection:"column",alignItems:"flex-start",gap:10,
+              boxShadow:"0 6px 24px rgba(5,150,105,0.35)",transition:"all 0.25s ease",
+              textAlign:"left",position:"relative",overflow:"hidden",minHeight:120,
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px) scale(1.02)";e.currentTarget.style.boxShadow="0 12px 32px rgba(5,150,105,0.45)";}}
+            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0) scale(1)";e.currentTarget.style.boxShadow="0 6px 24px rgba(5,150,105,0.35)";}}
+          >
+            <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.12)"}}/>
+            <div style={{position:"absolute",bottom:-30,left:-10,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
+            <div style={{fontSize:36,marginBottom:4,position:"relative"}}>🔍</div>
+            <div style={{position:"relative"}}>
+              <div style={{fontFamily:"Outfit,sans-serif",fontSize:17,fontWeight:800,color:"#fff",marginBottom:4}}>Căutare Avansată</div>
+              <div style={{fontSize:12,color:"rgba(255,255,255,0.85)",lineHeight:1.4}}>Filtre salariu, distanță, categorie</div>
             </div>
           </button>
         </div>

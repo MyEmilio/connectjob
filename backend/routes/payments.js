@@ -310,4 +310,72 @@ router.get("/my", auth, async (req, res) => {
   }
 });
 
+// GET /api/payments/:id/status
+// Get payment status for polling
+router.get("/:id/status", auth, mongoIdValidator(), async (req, res) => {
+  try {
+    const payment = await db.findPaymentById(req.params.id);
+    if (!payment) return res.status(404).json({ error: "Plata negăsită" });
+
+    // Check if user is payer or payee
+    if (
+      String(payment.payer_id) !== String(req.user.id) &&
+      String(payment.payee_id) !== String(req.user.id)
+    ) {
+      return res.status(403).json({ error: "Acces interzis" });
+    }
+
+    // If stripe is configured and we have a real payment intent, check status
+    if (stripe && payment.stripe_pi_id && !payment.stripe_pi_id.startsWith("sim_")) {
+      try {
+        const pi = await stripe.paymentIntents.retrieve(payment.stripe_pi_id);
+        
+        // Update local status if changed
+        let newStatus = payment.status;
+        if (pi.status === "succeeded" && payment.status === "pending") {
+          newStatus = "held";
+          await db.updatePayment(payment.id, { status: newStatus });
+        } else if (pi.status === "canceled") {
+          newStatus = "failed";
+          await db.updatePayment(payment.id, { status: newStatus });
+        }
+
+        return res.json({
+          id: payment.id,
+          status: newStatus,
+          stripe_status: pi.status,
+          amount: payment.amount,
+          commission: payment.commission,
+          created_at: payment.created_at,
+        });
+      } catch (stripeErr) {
+        logger.error("Stripe status check error", { error: stripeErr.message });
+      }
+    }
+
+    res.json({
+      id: payment.id,
+      status: payment.status,
+      amount: payment.amount,
+      commission: payment.commission,
+      created_at: payment.created_at,
+    });
+  } catch (err) {
+    logger.error("Get payment status error", {
+      paymentId: req.params.id,
+      error: err.message,
+    });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/payments/stripe-config
+// Get Stripe publishable key for frontend
+router.get("/stripe-config", (req, res) => {
+  res.json({
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+    configured: !!stripe,
+  });
+});
+
 module.exports = router;
