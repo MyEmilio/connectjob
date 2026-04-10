@@ -145,6 +145,38 @@ app.get("/api/health", (_, res) => {
   });
 });
 
+// ── Production Config Status ──────────────────────────────────
+app.get("/api/config/status", (_, res) => {
+  const { isEmailConfigured } = require("./utils/emailService");
+  const { isCloudinaryConfigured } = require("./utils/cloudinary");
+  const { getVapidPublicKey } = require("./utils/pushService");
+
+  const stripeConfigured = !!(process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes("ADAUGA"));
+  const emailConfigured = isEmailConfigured();
+  const cloudinaryConfigured = isCloudinaryConfigured();
+  const vapidConfigured = !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
+  const jwtConfigured = !!(process.env.JWT_SECRET && process.env.JWT_SECRET.length > 32);
+
+  const services = {
+    database: { status: mongoose.connection.readyState === 1 ? "active" : "inactive", details: "MongoDB" },
+    stripe: { status: stripeConfigured ? "active" : "simulated", details: stripeConfigured ? "Stripe live/test" : "Mod simulat — adaugă STRIPE_SECRET_KEY în .env" },
+    email: { status: emailConfigured ? "active" : "inactive", details: emailConfigured ? "SMTP configurat" : "Adaugă EMAIL_USER + EMAIL_PASS în .env" },
+    cloudinary: { status: cloudinaryConfigured ? "active" : "local", details: cloudinaryConfigured ? "Cloud uploads" : "Fallback local — adaugă CLOUDINARY_* în .env" },
+    push_notifications: { status: vapidConfigured ? "active" : "inactive", details: vapidConfigured ? "VAPID configurat" : "Adaugă VAPID_* în .env" },
+    jwt: { status: jwtConfigured ? "secure" : "weak", details: jwtConfigured ? "JWT secret puternic" : "JWT secret prea scurt" },
+  };
+
+  const activeCount = Object.values(services).filter(s => s.status === "active" || s.status === "secure").length;
+  const totalCount = Object.keys(services).length;
+
+  res.json({
+    production_ready: activeCount === totalCount,
+    active_services: `${activeCount}/${totalCount}`,
+    services,
+    vapid_public_key: getVapidPublicKey(),
+  });
+});
+
 // ── Error Handling Middleware ──────────────────────────────────
 app.use((err, req, res, next) => {
   logger.error("Unhandled error", {

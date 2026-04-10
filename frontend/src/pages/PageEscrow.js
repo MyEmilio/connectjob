@@ -15,10 +15,12 @@ export default function PageEscrow({ gs, update, navigate }) {
   const [disputed, setDisputed] = useState(false);
   const [paymentId, setPaymentId] = useState(null);
   const [apiMsg, setApiMsg] = useState("");
+  const [stripeMode, setStripeMode] = useState(null);
   const fee=job?Math.round(job.salary*0.05):0;
   const total=job?(job.salary+fee):0;
   const fmt=s=>`${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
   useEffect(()=>{if(step===2){const iv=setInterval(()=>setTimer(tc=>tc+1),1000);return()=>clearInterval(iv);}},[step]);
+  useEffect(()=>{api.get("/payments/stripe-config").then(r=>setStripeMode(r.data.configured?"live":"demo")).catch(()=>setStripeMode("demo"));},[]);
   if(!job) return (
     <div data-testid="page-escrow" style={{textAlign:"center",padding:"60px 24px",color:T.text2}}>
       <div style={{fontSize:52,marginBottom:14}}>🔒</div>
@@ -53,6 +55,7 @@ export default function PageEscrow({ gs, update, navigate }) {
             <div style={{fontSize:48,marginBottom:10}}>🔒</div>
             <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:22,fontWeight:800,color:T.text,margin:"0 0 6px"}}>Plată Escrow</h3>
             <p style={{fontSize:13,color:T.text2,lineHeight:1.7}}>Banii sunt <strong>blocați în siguranță</strong> și eliberați doar după confirmarea taskului.</p>
+            {stripeMode==="demo"&&<div data-testid="stripe-demo-badge" style={{display:"inline-block",marginTop:8,padding:"4px 12px",borderRadius:99,background:"#fef3c7",border:"1px solid #fde68a",fontSize:11,fontWeight:700,color:"#92400e"}}>⚡ Mod Demo — Stripe neconfigurat</div>}
           </div>
           <div style={{background:"#f0fdf4",borderRadius:14,padding:"14px 16px",marginBottom:18,border:"1px solid #bbf7d0"}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>

@@ -4,6 +4,59 @@ import { T } from "../constants/theme";
 import { Card, Badge, Loader } from "../components/shared";
 import api from "../services/api";
 
+function ProductionConfigPanel() {
+  const [config, setConfig] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    api.get("/config/status").then(r => setConfig(r.data)).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <Loader text="Verificare configurare..."/>;
+  if (!config) return null;
+
+  const statusColors = { active: T.green, secure: T.green, simulated: T.amber, local: T.amber, inactive: T.red, weak: T.red };
+  const statusIcons = { active: "●", secure: "●", simulated: "◐", local: "◐", inactive: "○", weak: "○" };
+
+  return (
+    <Card style={{ padding: "18px 22px", marginBottom: 22, border: `1.5px solid ${config.production_ready ? T.green : T.amber}33` }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: expanded ? 16 : 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 42, height: 42, borderRadius: 12, background: config.production_ready ? `${T.green}15` : `${T.amber}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
+            {config.production_ready ? "✅" : "⚙️"}
+          </div>
+          <div>
+            <div style={{ fontFamily: "Outfit,sans-serif", fontSize: 16, fontWeight: 800, color: T.text }}>Configurare Producție</div>
+            <div style={{ fontSize: 12, color: config.production_ready ? T.green : T.amber, fontWeight: 600 }}>
+              {config.production_ready ? "Toate serviciile active" : `${config.active_services} servicii configurate`}
+            </div>
+          </div>
+        </div>
+        <button onClick={() => setExpanded(!expanded)} data-testid="config-toggle-btn" style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fafaf9", cursor: "pointer", fontSize: 12, fontWeight: 600, color: T.text2 }}>
+          {expanded ? "▲ Ascunde" : "▼ Detalii"}
+        </button>
+      </div>
+
+      {expanded && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12, animation: "fadeIn 0.2s ease" }}>
+          {Object.entries(config.services).map(([key, svc]) => (
+            <div key={key} data-testid={`config-service-${key}`} style={{ background: "#fafaf9", borderRadius: 10, padding: "12px 16px", border: `1px solid ${statusColors[svc.status]}22` }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: T.text, textTransform: "capitalize" }}>{key.replace(/_/g, " ")}</span>
+                <span style={{ color: statusColors[svc.status], fontSize: 12, fontWeight: 700 }}>
+                  {statusIcons[svc.status]} {svc.status}
+                </span>
+              </div>
+              <div style={{ fontSize: 11, color: T.text3, lineHeight: 1.5 }}>{svc.details}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 export default function PageAdmin({ gs }) {
   const { t } = useTranslation("t");
   const [reports, setReports]   = useState([]);
@@ -48,6 +101,9 @@ export default function PageAdmin({ gs }) {
   return (
     <div data-testid="page-admin" style={{ animation:"fadeIn 0.3s ease" }}>
       <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text, margin:"0 0 20px" }}>{t("admin_title")}</h2>
+
+      {/* Production Config Panel */}
+      <ProductionConfigPanel />
 
       {stats && (
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))", gap:12, marginBottom:22 }}>
