@@ -76,7 +76,7 @@ router.post("/google/session", async (req, res) => {
     res.json({ token: sign(safeUser), user: safeUser });
   } catch (err) {
     logger.error("Emergent Google auth error", { error: err.response?.data || err.message });
-    res.status(401).json({ error: "Autentificare Google eșuată: " + (err.response?.data?.detail || err.message) });
+    res.status(401).json({ error: "Autentificare Google eșuată: " + (err.response?.data?.detail || err.response?.data?.message || err.message) });
   }
 });
 
