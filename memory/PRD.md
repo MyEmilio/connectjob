@@ -215,77 +215,64 @@ ConnectJob is a job marketplace platform connecting workers with employers in Ro
      - Escrow confirmation UI
      - Demo mode warning when Stripe not configured
 
+9. **Map Clustering & Filtrare Geografică** (April 2026)
+   - ✅ Installed `react-leaflet-cluster` for marker clustering with react-leaflet v5
+   - ✅ Updated `/app/frontend/src/pages/MapPage.js`:
+     - MarkerClusterGroup wraps all job markers
+     - Custom cluster icons color-coded by count (green 1-4, purple 5-9, blue 10-19, amber 20+)
+     - `chunkedLoading` for performance with many markers
+     - `spiderfyOnMaxZoom` and `zoomToBoundsOnClick` for UX
+   - ✅ Added geographical radius filter (5/10/25/50/100 km) visible after geolocation
+   - ✅ Added Circle overlay showing search radius on map
+   - ✅ Added FlyToJob component to animate to selected job
+   - ✅ Added cluster legend in bottom-left corner
+   - ✅ Job count badge in sidebar header
+   - ✅ Close button on job detail panel
+   - ✅ All interactive elements have `data-testid` attributes
+
 ---
 
 ## Test Results
 
-- **Backend Tests**: 100% passed (8/8)
-  - Health check endpoint
-  - Input validation (email format, password length, required fields)
-  - Rate limiting on auth routes
-  - Stripe webhook endpoint
-  - Server startup
-  - CORS headers
+- **Backend Tests**: 100% passed (14/14) - iteration_2
+  - All jobs API endpoints with geo filtering
+  - Stripe simulated payment flow
+  - Stats dashboard API
+  - Auth endpoints
+  - Health check
+- **Frontend Tests**: 100% passed
+  - Map page with Leaflet clustering
+  - Category filter chips
+  - Job detail panel
+  - Escrow flow
+  - Dashboard Stats
+  - PWA Install Prompt
 
 ---
 
 ## Prioritized Backlog
 
-### P0 - Critical (Next)
-- [ ] Add frontend .env configuration
-- [ ] Test full user registration flow
-- [ ] Test job posting flow
-
 ### P1 - High Priority
-- [ ] Add password reset flow
-- [ ] Add email verification on registration
-- [ ] Add pagination to job listings
-- [ ] Add search functionality
+- [ ] Refactorizare `App.js` (~4300 linii) - separare în componente individuale
+- [ ] Google OAuth Integration (Emergent-managed)
 
 ### P2 - Medium Priority
+- [ ] Add password reset flow
+- [ ] Add email verification on registration
+- [ ] Configure real Stripe keys for production
+- [ ] Configure real email (Gmail SMTP) for production
 - [ ] Add profile image uploads to Cloudinary
-- [ ] Add notification preferences
-- [ ] Add advanced job filters (salary range, distance)
-- [ ] Add job bookmarks/favorites
 
 ### P3 - Nice to Have
-- [ ] Add push notifications
 - [ ] Add PDF contract generation
-- [ ] Add analytics dashboard
 - [ ] Add A/B testing framework
+- [ ] Add job bookmarks/favorites
 
 ---
 
 ## Next Tasks
 
-1. Configure frontend `.env` file with `REACT_APP_API_URL`
-2. Test frontend-backend integration
-3. Add user registration/login flow testing
+1. Refactorizare App.js - extract page components into separate files
+2. Google OAuth Integration
+3. Configure production environment variables (Stripe, Email, Cloudinary)
 4. Deploy to Railway (backend) and Vercel (frontend)
-5. Configure production environment variables
-
----
-
-## Files Created/Modified
-
-### New Files
-- `/app/backend/utils/logger.js` - Winston logging setup
-- `/app/backend/utils/validators.js` - Express-validator schemas
-- `/app/backend/utils/cloudinary.js` - Cloudinary configuration
-- `/app/backend/utils/emailService.js` - Email service with templates
-- `/app/backend/.env.example` - Environment template
-- `/app/frontend/.env.example` - Environment template
-
-### Modified Files
-- `/app/backend/server.js` - Security hardening, logging, rate limiting
-- `/app/backend/routes/auth.js` - Input validation
-- `/app/backend/routes/jobs.js` - Input validation
-- `/app/backend/routes/messages.js` - Input validation
-- `/app/backend/routes/reviews.js` - Input validation
-- `/app/backend/routes/reports.js` - Input validation
-- `/app/backend/routes/payments.js` - Webhook endpoint, email notifications
-- `/app/backend/routes/contracts.js` - Input validation, email notifications
-- `/app/backend/routes/kyc.js` - Cloudinary integration
-- `/app/backend/models/*.js` - Indexes and validation
-- `/app/.gitignore` - Exclude .env files
-- `/app/README.md` - Updated documentation
