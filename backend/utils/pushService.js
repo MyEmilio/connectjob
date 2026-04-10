@@ -10,37 +10,38 @@ const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:contact@connectjob.ro
 // Configure web-push
 webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
-// In-memory subscription store (in production, use MongoDB)
-const subscriptions = new Map(); // userId -> subscription
-
 /**
- * Save a push subscription for a user
+ * Save a push subscription for a user (MongoDB)
  */
-const saveSubscription = (userId, subscription) => {
-  subscriptions.set(String(userId), subscription);
-  logger.info("Push subscription saved", { userId });
+const saveSubscription = async (userId, subscription) => {
+  const User = require("../models/User");
+  await User.findByIdAndUpdate(userId, { push_subscription: subscription });
+  logger.info("Push subscription saved to DB", { userId });
 };
 
 /**
  * Remove a push subscription
  */
-const removeSubscription = (userId) => {
-  subscriptions.delete(String(userId));
-  logger.info("Push subscription removed", { userId });
+const removeSubscription = async (userId) => {
+  const User = require("../models/User");
+  await User.findByIdAndUpdate(userId, { push_subscription: null });
+  logger.info("Push subscription removed from DB", { userId });
 };
 
 /**
  * Get subscription for a user
  */
-const getSubscription = (userId) => {
-  return subscriptions.get(String(userId));
+const getSubscription = async (userId) => {
+  const User = require("../models/User");
+  const user = await User.findById(userId).lean();
+  return user?.push_subscription;
 };
 
 /**
  * Send a push notification to a user
  */
 const sendPushNotification = async (userId, payload) => {
-  const subscription = getSubscription(userId);
+  const subscription = await getSubscription(userId);
   
   if (!subscription) {
     logger.debug("No push subscription for user", { userId });
@@ -70,10 +71,47 @@ const sendPushNotification = async (userId, payload) => {
     
     // Remove invalid subscriptions
     if (error.statusCode === 410 || error.statusCode === 404) {
-      removeSubscription(userId);
+      await removeSubscription(userId);
     }
     
     return { sent: false, error: error.message };
+  }
+};
+
+/**
+ * Send notifications to users who have a category in their favorites
+ */
+const notifyUsersAboutNewJob = async (job) => {
+  const User = require("../models/User");
+  
+  try {
+    // Find users who have this job's category in their favorites and have notifications enabled
+    const category = (job.category || "").toLowerCase();
+    const users = await User.find({
+      push_subscription: { $ne: null },
+      notify_new_jobs: true,
+      $or: [
+        { favorite_categories: category },
+        { favorite_categories: job.category },
+      ],
+    }).lean();
+
+    logger.info("Notifying users about new job", { 
+      jobId: job.id || job._id, 
+      category, 
+      usersCount: users.length 
+    });
+
+    const results = await Promise.all(
+      users.map(user => 
+        sendPushNotification(user._id || user.id, notifications.newJobInCategory(job.title, job.category, job.salary))
+      )
+    );
+
+    return { notified: results.filter(r => r.sent).length, total: users.length };
+  } catch (error) {
+    logger.error("Error notifying users about new job", { error: error.message });
+    return { notified: 0, error: error.message };
   }
 };
 
@@ -147,6 +185,20 @@ const notifications = {
     url: "/escrow",
     requireInteraction: true,
   }),
+
+  // New job in favorite category
+  newJobInCategory: (jobTitle, category, salary) => ({
+    title: "🆕 Job nou în categoria ta!",
+    body: `"${jobTitle}" - ${salary} RON${category ? ` în ${category}` : ""}`,
+    icon: "/logo192.png",
+    tag: "new-job-category",
+    url: "/jobs",
+    requireInteraction: true,
+    actions: [
+      { action: "view_job", title: "👀 Vezi jobul" },
+      { action: "view_all", title: "📋 Toate joburile" },
+    ],
+  }),
 };
 
 /**
@@ -159,6 +211,7 @@ module.exports = {
   removeSubscription,
   getSubscription,
   sendPushNotification,
+  notifyUsersAboutNewJob,
   notifications,
   getVapidPublicKey,
 };

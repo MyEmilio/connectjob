@@ -64,6 +64,12 @@ const userSchema = new mongoose.Schema(
     },
     warnings_count: { type: Number, default: 0, min: 0 },
     blocked_users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    // Notification preferences
+    favorite_categories: { type: [String], default: [] },
+    push_subscription: { type: mongoose.Schema.Types.Mixed, default: null },
+    notify_new_jobs: { type: Boolean, default: true },
+    notify_messages: { type: Boolean, default: true },
+    notify_applications: { type: Boolean, default: true },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );

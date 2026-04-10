@@ -10,6 +10,7 @@ import MapPage from "./pages/MapPage";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import PostJobPage from "./pages/PostJobPage";
 import usePushNotifications from "./hooks/usePushNotifications";
+import useNotificationPreferences from "./hooks/useNotificationPreferences";
 
 /* ═══════════════════════════════════════════════════════════════
    JOOBCONNECT — Aplicație Completă Unificată
@@ -302,6 +303,198 @@ function HowItWorksModal({ onClose }) {
   );
 }
 
+// ══════════════════════════════════════════════════════════════
+//  NOTIFICATION PREFERENCES MODAL
+// ══════════════════════════════════════════════════════════════
+function NotificationPreferencesModal({ onClose }) {
+  const { 
+    preferences, 
+    loading, 
+    saving, 
+    toggleFavoriteCategory, 
+    updatePreferences 
+  } = useNotificationPreferences();
+  
+  const [localPrefs, setLocalPrefs] = useState({
+    notify_new_jobs: true,
+    notify_messages: true,
+    notify_applications: true,
+  });
+
+  useEffect(() => {
+    if (!loading) {
+      setLocalPrefs({
+        notify_new_jobs: preferences.notify_new_jobs,
+        notify_messages: preferences.notify_messages,
+        notify_applications: preferences.notify_applications,
+      });
+    }
+  }, [loading, preferences]);
+
+  const handleToggle = async (category) => {
+    await toggleFavoriteCategory(category);
+  };
+
+  const handleSaveSettings = async () => {
+    await updatePreferences(localPrefs);
+    onClose();
+  };
+
+  const isCategorySelected = (catKey) => {
+    return preferences.favorite_categories.includes(catKey.toLowerCase());
+  };
+
+  return (
+    <div 
+      style={{
+        position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(8px)",
+        zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16
+      }}
+      onClick={onClose}
+    >
+      <div 
+        onClick={e=>e.stopPropagation()}
+        style={{
+          background:T.card,borderRadius:20,width:"100%",maxWidth:520,maxHeight:"90vh",
+          overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.4)",
+          display:"flex",flexDirection:"column"
+        }}
+      >
+        {/* Header */}
+        <div style={{padding:"20px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 4px"}}>
+              ⚙️ Preferințe Notificări
+            </h2>
+            <p style={{fontSize:13,color:T.text3,margin:0}}>
+              Alege categoriile pentru alerte joburi noi
+            </p>
+          </div>
+          <button 
+            onClick={onClose}
+            style={{background:"transparent",border:"none",fontSize:24,color:T.text3,cursor:"pointer",padding:4}}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{padding:"20px 24px",overflowY:"auto",flex:1}}>
+          {loading ? (
+            <div style={{textAlign:"center",padding:40,color:T.text3}}>
+              Se încarcă...
+            </div>
+          ) : (
+            <>
+              {/* Notification Types */}
+              <div style={{marginBottom:24}}>
+                <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,margin:"0 0 12px",textTransform:"uppercase",letterSpacing:1}}>
+                  Tipuri de notificări
+                </h3>
+                <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                  {[
+                    { key: "notify_new_jobs", label: "Joburi noi în categoriile favorite", icon: "🆕" },
+                    { key: "notify_messages", label: "Mesaje primite", icon: "💬" },
+                    { key: "notify_applications", label: "Actualizări aplicări", icon: "📩" },
+                  ].map(item => (
+                    <label 
+                      key={item.key}
+                      style={{
+                        display:"flex",alignItems:"center",gap:12,padding:"12px 14px",
+                        background:T.dark3,borderRadius:12,cursor:"pointer",
+                        border: localPrefs[item.key] ? `2px solid ${T.green}` : "2px solid transparent",
+                        transition:"all 0.2s"
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={localPrefs[item.key]}
+                        onChange={e => setLocalPrefs(prev => ({...prev, [item.key]: e.target.checked}))}
+                        style={{width:18,height:18,accentColor:T.green}}
+                      />
+                      <span style={{fontSize:20}}>{item.icon}</span>
+                      <span style={{fontSize:14,color:T.text,fontWeight:500}}>{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Favorite Categories */}
+              <div>
+                <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,margin:"0 0 4px",textTransform:"uppercase",letterSpacing:1}}>
+                  Categorii favorite ({preferences.favorite_categories.length}/10)
+                </h3>
+                <p style={{fontSize:12,color:T.text3,margin:"0 0 12px"}}>
+                  Selectează categoriile pentru care vrei să primești alerte
+                </p>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:8}}>
+                  {CATEGORIES.map(cat => {
+                    const isSelected = isCategorySelected(cat.key);
+                    return (
+                      <button
+                        key={cat.key}
+                        onClick={() => handleToggle(cat.key)}
+                        disabled={saving}
+                        style={{
+                          display:"flex",alignItems:"center",gap:8,padding:"10px 12px",
+                          background: isSelected ? `${cat.color}22` : T.dark3,
+                          border: isSelected ? `2px solid ${cat.color}` : "2px solid transparent",
+                          borderRadius:10,cursor: saving ? "wait" : "pointer",
+                          transition:"all 0.2s",opacity: saving ? 0.6 : 1,
+                        }}
+                      >
+                        <span style={{fontSize:18}}>{cat.icon}</span>
+                        <span style={{
+                          fontSize:12,fontWeight:600,
+                          color: isSelected ? cat.color : T.text2,
+                          textAlign:"left",flex:1,
+                        }}>
+                          {cat.label.split(" ")[0]}
+                        </span>
+                        {isSelected && (
+                          <span style={{color:cat.color,fontSize:14}}>✓</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{padding:"16px 24px",borderTop:`1px solid ${T.border}`,display:"flex",gap:12}}>
+          <button
+            onClick={onClose}
+            style={{
+              flex:1,padding:"12px",borderRadius:12,
+              border:`1px solid ${T.border}`,background:"transparent",
+              color:T.text2,fontWeight:600,fontSize:14,cursor:"pointer",
+              fontFamily:"DM Sans,sans-serif"
+            }}
+          >
+            Anulează
+          </button>
+          <button
+            onClick={handleSaveSettings}
+            disabled={saving}
+            style={{
+              flex:1,padding:"12px",borderRadius:12,border:"none",
+              background:`linear-gradient(135deg,${T.green},${T.greenDark})`,
+              color:"#fff",fontWeight:700,fontSize:14,cursor: saving ? "wait" : "pointer",
+              fontFamily:"DM Sans,sans-serif",boxShadow:`0 4px 16px ${T.green}44`,
+              opacity: saving ? 0.7 : 1,
+            }}
+          >
+            {saving ? "Se salvează..." : "Salvează"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PageHome({ gs, update, navigate }) {
   const { t } = useTranslation("t");
   const allJobs = gs.jobs || [];
@@ -310,6 +503,7 @@ function PageHome({ gs, update, navigate }) {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showFuelCalc, setShowFuelCalc] = useState(false);
   const [showTransport, setShowTransport] = useState(false);
+  const [showNotifPrefs, setShowNotifPrefs] = useState(false);
   
   // Push notifications hook
   const { isSupported, isSubscribed, permission, loading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
@@ -324,7 +518,11 @@ function PageHome({ gs, update, navigate }) {
     if (isSubscribed) {
       await unsubscribe();
     } else {
-      await subscribe();
+      const success = await subscribe();
+      if (success) {
+        // Show preferences modal after successful subscription
+        setShowNotifPrefs(true);
+      }
     }
   };
 
@@ -333,6 +531,7 @@ function PageHome({ gs, update, navigate }) {
       {showHowItWorks && <HowItWorksModal onClose={()=>setShowHowItWorks(false)}/>}
       {showFuelCalc && <FuelCalculatorModal from="" to="" onClose={()=>setShowFuelCalc(false)}/>}
       {showTransport && <TransportSchedule from="" to="" onClose={()=>setShowTransport(false)}/>}
+      {showNotifPrefs && <NotificationPreferencesModal onClose={()=>setShowNotifPrefs(false)}/>}
 
       {/* Compact hero */}
       <div className="jc-hero" style={{ background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`, borderRadius:18, padding:"22px 26px", marginBottom:24, position:"relative", overflow:"hidden" }}>
@@ -462,6 +661,38 @@ function PageHome({ gs, update, navigate }) {
             }}>
               {notifLoading ? "..." : isSubscribed ? "ON" : "OFF"}
             </div>
+          </button>
+        )}
+        
+        {/* Notification Preferences Button - only show when subscribed */}
+        {isSupported && isSubscribed && (
+          <button
+            data-testid="notification-preferences-btn"
+            onClick={() => setShowNotifPrefs(true)}
+            style={{
+              marginTop:10,
+              width:"100%",
+              background:"linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)",
+              border:"none",borderRadius:14,padding:"14px 18px",cursor:"pointer",
+              display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
+              boxShadow:"0 4px 16px rgba(139,92,246,0.25)",
+              transition:"all 0.25s ease",
+            }}
+            onMouseEnter={e=>{ e.currentTarget.style.transform="translateY(-2px)"; }}
+            onMouseLeave={e=>{ e.currentTarget.style.transform="translateY(0)"; }}
+          >
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{fontSize:22}}>⚙️</div>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:"#fff"}}>
+                  Setări categorii favorite
+                </div>
+                <div style={{fontSize:11,color:"rgba(255,255,255,0.75)"}}>
+                  Alege categoriile pentru alerte joburi noi
+                </div>
+              </div>
+            </div>
+            <div style={{fontSize:18,color:"rgba(255,255,255,0.8)"}}>→</div>
           </button>
         )}
       </div>

@@ -151,6 +151,22 @@ ConnectJob is a job marketplace platform connecting workers with employers in Ro
      - New message received (notify recipient)
      - Contract signed by both parties
      - Payment released
+     - **NEW: Job posted in favorite category (notify subscribed users)**
+
+4. **Favorite Categories System**
+   - ✅ Added `favorite_categories` field to User model (max 10)
+   - ✅ Added notification preferences fields: `notify_new_jobs`, `notify_messages`, `notify_applications`
+   - ✅ Created `/app/frontend/src/hooks/useNotificationPreferences.js` hook
+   - ✅ Created NotificationPreferencesModal component with:
+     - Toggle switches for notification types
+     - Grid of categories to select favorites
+     - Persistent storage in MongoDB
+   - ✅ API endpoints:
+     - `GET /api/notifications/preferences` - get user preferences
+     - `PUT /api/notifications/preferences` - update preferences
+     - `POST /api/notifications/favorite-category` - add favorite
+     - `DELETE /api/notifications/favorite-category/:category` - remove favorite
+   - ✅ When new job is created, all users with that category in favorites get notified
 
 ---
 

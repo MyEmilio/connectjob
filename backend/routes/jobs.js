@@ -8,7 +8,7 @@ const {
   mongoIdValidator,
   applyJobValidator,
 } = require("../utils/validators");
-const { sendPushNotification, notifications } = require("../utils/pushService");
+const { sendPushNotification, notifications, notifyUsersAboutNewJob } = require("../utils/pushService");
 const { sendNewApplicationEmail } = require("../utils/emailService");
 
 const router = express.Router();
@@ -121,6 +121,24 @@ router.post("/", auth, createJobValidator, async (req, res) => {
       color: color || "#059669",
     });
     logger.info("Job created", { jobId: job.id, userId: req.user.id });
+
+    // Notify users who have this category in their favorites
+    try {
+      const notifResult = await notifyUsersAboutNewJob({
+        id: job.id,
+        title,
+        category,
+        salary,
+      });
+      logger.info("New job notifications sent", { 
+        jobId: job.id, 
+        notified: notifResult.notified,
+        total: notifResult.total 
+      });
+    } catch (notifErr) {
+      logger.error("New job notification error", { error: notifErr.message });
+    }
+
     res.json({ id: job.id, success: true });
   } catch (err) {
     logger.error("Create job error", {
