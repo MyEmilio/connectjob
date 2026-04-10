@@ -5,16 +5,17 @@
 - Password: Parola123!
 - Role: admin
 
+## Google OAuth
+- Google Client ID: 155290976556-lc51rl66fae9lt4ihhepal0l3atr1cjm.apps.googleusercontent.com
+- Auth flow: Emergent Auth (auth.emergentagent.com)
+- Session endpoint: POST /api/auth/google/session
+
 ## Regular User Accounts
 - Email: test@example.com / Password: varies (seeded)
 - Email: mihai.test123@test.com / Password: varies
-- Email: user_nou@test.com / Password: varies
-
-## Employer Account
-- Email: limeuragod@gmail.com / Password: varies
-- Role: employer
+- Email: limeuragod@gmail.com / Role: employer
 
 ## Notes
-- Seed data includes 15 jobs across various categories (Construccion, Limpieza, etc.)
-- Jobs are located in the Timisoara area with various categories and lat/lng coordinates
-- Admin panel is accessible at the "Moderación" nav item (only visible for admin role)
+- 15 seeded jobs in Timisoara area
+- Admin panel visible only for admin role
+- Google OAuth creates user automatically on first login
