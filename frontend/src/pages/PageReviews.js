@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { T } from "../constants/theme";
-import { Card, Btn, Badge, Avatar, Stars } from "../components/shared";
+import { Card, Btn, Avatar, Stars } from "../components/shared";
 import api from "../services/api";
 
 export default function PageReviews({ gs, update }) {

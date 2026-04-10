@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { T, CATEGORIES } from "../constants/theme";
-import { Btn, Card, Badge, JobCardRow } from "../components/shared";
+import { Btn, Card, JobCardRow } from "../components/shared";
 import usePushNotifications from "../hooks/usePushNotifications";
 import useNotificationPreferences from "../hooks/useNotificationPreferences";
 import DashboardStats from "../components/DashboardStats";

@@ -14,7 +14,6 @@ export default function PageVerify({ gs, update, navigate }) {
   const [docType,setDocType]=useState("");
   const [docOk,setDocOk]=useState(false);
   const [loading,setLoading]=useState(false);
-  const [score,setScore]=useState(0);
   const fileRef=useRef(null);
   const videoRef=useRef(null);
   const timerRef=useRef(null);

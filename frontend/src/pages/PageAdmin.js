@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { T } from "../constants/theme";
-import { Card, Badge, Btn, Loader, Avatar } from "../components/shared";
+import { Card, Badge, Loader } from "../components/shared";
 import api from "../services/api";
 
 export default function PageAdmin({ gs }) {
