@@ -47,3 +47,7 @@ backend/uploads/*
 
 # Testing
 .cache/
+-e 
+# Environment files
+*.env
+*.env.*
