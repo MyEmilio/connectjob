@@ -97,6 +97,16 @@
   .jc-home-grid {
     grid-template-columns: 1fr !important;
   }
+
+  /* Map sidebar - hidden on mobile */
+  .jc-map-sidebar {
+    display: none !important;
+  }
+
+  /* Chat sidebar - hidden on mobile, show chat area full width */
+  .jc-chat-sidebar {
+    display: none !important;
+  }
   
   /* Category grid mobile */
   .jc-quick-actions + div .jc-quick-btns,

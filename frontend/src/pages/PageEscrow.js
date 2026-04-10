@@ -62,7 +62,7 @@ export default function PageEscrow({ gs, update, navigate }) {
               <span style={{fontSize:26}}>{job.icon}</span>
               <div><div style={{fontWeight:700,fontSize:14,color:T.text}}>{job.title}</div><div style={{fontSize:12,color:"#057a55"}}>👤 {job.employer}</div></div>
             </div>
-            {[{l:"Salariu",v:`${job.salary} RON`},{l:"Comision 5%",v:`${fee} RON`},{l:"Total escrow",v:`${total} RON`,bold:true,color:T.green}].map(r=>(
+            {[{l:"Salariu",v:`${job.salary} RON`},{l:"Comision 3%",v:`${fee} RON`},{l:"Total escrow",v:`${total} RON`,bold:true,color:T.green}].map(r=>(
               <div key={r.l} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:13}}>
                 <span style={{color:T.text2}}>{r.l}</span>
                 <span style={{fontWeight:r.bold?800:600,color:r.color||T.text,fontSize:r.bold?15:13}}>{r.v}</span>

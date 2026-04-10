@@ -12,7 +12,7 @@ const {
 } = require("../utils/emailService");
 
 const router = express.Router();
-const COMMISSION = 0.05;
+const COMMISSION = 0.03;
 
 let stripe;
 try {

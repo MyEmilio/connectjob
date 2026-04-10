@@ -23,7 +23,6 @@ import PageReviews from "./pages/PageReviews";
 import PageAnalytics from "./pages/PageAnalytics";
 import PageAdmin from "./pages/PageAdmin";
 import PageCalendar from "./pages/PageCalendar";
-import { FuelButton, TransportButton } from "./pages/FuelCalculator";
 
 /* ═══════════════════════════════════════════════════════════════
    JOOBCONNECT — Aplicație Completă Refactorizată
@@ -330,16 +329,6 @@ function ConnectJobApp() {
           </button>
         ))}
       </nav>
-
-      {/* Floating buttons: Calculator Rută + Transport */}
-      <FuelButton
-        defaultFrom={gs.selectedJob ? gs.selectedJob.employer : "Madrid"}
-        defaultTo={gs.selectedJob ? gs.selectedJob.title : "Barcelona"}
-      />
-      <TransportButton
-        from={gs.selectedJob ? gs.selectedJob.employer : "Madrid"}
-        to={gs.selectedJob ? gs.selectedJob.title : "Barcelona"}
-      />
     </div>
   );
 }
