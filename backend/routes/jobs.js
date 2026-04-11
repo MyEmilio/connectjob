@@ -261,13 +261,17 @@ router.post("/:id/apply", auth, applyJobValidator, async (req, res) => {
         const notifPayload = notifications.newApplication(worker.name, job.title);
         await sendPushNotification(employer._id || employer.id, notifPayload);
         
-        // Email notification
+        // Email notification with full details
+        const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
         if (employer.email) {
           await sendNewApplicationEmail(employer.email, {
             employerName: employer.name,
             workerName: worker.name,
+            workerEmail: worker.email,
+            workerSkills: worker.skills || [],
             jobTitle: job.title,
             applicationMessage: req.body.message,
+            appUrl: clientUrl,
           });
         }
       }

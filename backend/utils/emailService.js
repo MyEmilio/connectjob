@@ -60,36 +60,78 @@ const sendEmail = async ({ to, subject, html, text }) => {
 // Email templates
 const templates = {
   // New application received (notify employer)
-  newApplication: ({ employerName, workerName, jobTitle, applicationMessage }) => ({
-    subject: `[ConnectJob] Aplicare noua pentru "${jobTitle}"`,
+  newApplication: ({ employerName, workerName, jobTitle, applicationMessage, workerEmail, workerSkills, appUrl }) => ({
+    subject: `[ConnectJob] Aplicare nouă pentru "${jobTitle}"`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #059669;">Aplicare noua primita!</h2>
-        <p>Buna ${employerName},</p>
-        <p><strong>${workerName}</strong> a aplicat pentru jobul tau: <strong>${jobTitle}</strong></p>
-        ${applicationMessage ? `<p><em>Mesaj: "${applicationMessage}"</em></p>` : ""}
-        <p>Intra in aplicatie pentru a vedea detalii si a raspunde aplicantului.</p>
-        <hr style="border: 1px solid #eee; margin: 20px 0;">
-        <p style="color: #666; font-size: 12px;">Echipa ConnectJob</p>
+      <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#fafaf9;padding:0;">
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#059669,#047857);padding:28px 24px;border-radius:12px 12px 0 0;text-align:center;">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.2);display:inline-flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:10px;">⚡</div>
+          <h1 style="color:#fff;font-size:20px;margin:0;">Aplicare Nouă!</h1>
+          <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:6px 0 0;">Cineva vrea să lucreze pentru tine</p>
+        </div>
+        <!-- Body -->
+        <div style="background:#fff;padding:24px;border:1px solid #e7e5e4;">
+          <p style="color:#1c1917;font-size:15px;margin:0 0 16px;">Bună <strong>${employerName}</strong>,</p>
+          
+          <!-- Applicant Card -->
+          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;margin-bottom:10px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:#059669;color:#fff;font-size:16px;font-weight:700;text-align:center;line-height:40px;margin-right:12px;">${workerName.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2)}</div>
+              <div>
+                <div style="font-weight:700;color:#1c1917;font-size:15px;">${workerName}</div>
+                ${workerEmail ? `<div style="font-size:12px;color:#57534e;">${workerEmail}</div>` : ""}
+              </div>
+            </div>
+            <div style="font-size:13px;color:#1c1917;margin-bottom:6px;">A aplicat pentru: <strong style="color:#059669;">${jobTitle}</strong></div>
+            ${workerSkills?.length ? `<div style="margin-top:8px;">${workerSkills.map(s=>`<span style="display:inline-block;background:#059669;color:#fff;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:600;margin:2px 3px 2px 0;">${s}</span>`).join("")}</div>` : ""}
+          </div>
+          
+          ${applicationMessage ? `
+          <div style="background:#f5f5f4;border-radius:8px;padding:12px 16px;margin-bottom:16px;border-left:3px solid #059669;">
+            <div style="font-size:11px;color:#a8a29e;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Mesaj de la aplicant</div>
+            <p style="color:#1c1917;font-size:14px;margin:0;line-height:1.6;font-style:italic;">"${applicationMessage}"</p>
+          </div>
+          ` : ""}
+          
+          <!-- Action Buttons -->
+          <div style="text-align:center;margin:24px 0 16px;">
+            <a href="${appUrl || '#'}" style="display:inline-block;padding:14px 36px;background:#059669;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;margin:0 6px 8px;">✅ Vezi și Acceptă</a>
+            <a href="${appUrl || '#'}" style="display:inline-block;padding:14px 24px;background:#f5f5f4;color:#57534e;text-decoration:none;border-radius:10px;font-weight:600;font-size:14px;border:1px solid #e7e5e4;margin:0 6px 8px;">💬 Trimite Mesaj</a>
+          </div>
+          
+          <p style="font-size:12px;color:#a8a29e;text-align:center;margin:0;">Răspunde rapid pentru a nu pierde candidatul!</p>
+        </div>
+        <!-- Footer -->
+        <div style="padding:16px 24px;text-align:center;border-radius:0 0 12px 12px;">
+          <p style="font-size:11px;color:#a8a29e;margin:0;">ConnectJob — Platformă de joburi România | <a href="${appUrl || '#'}" style="color:#059669;text-decoration:none;">Deschide aplicația</a></p>
+        </div>
       </div>
     `,
-    text: `Buna ${employerName},\n\n${workerName} a aplicat pentru jobul tau: ${jobTitle}.\n${applicationMessage ? `Mesaj: "${applicationMessage}"\n` : ""}\nIntra in aplicatie pentru a vedea detalii.\n\nEchipa ConnectJob`,
+    text: `Bună ${employerName},\n\n${workerName} a aplicat pentru jobul tău: ${jobTitle}.\n${applicationMessage ? `Mesaj: "${applicationMessage}"\n` : ""}\nIntră în aplicație pentru a accepta sau trimite un mesaj.\n\nEchipa ConnectJob`,
   }),
 
   // Application accepted (notify worker)
-  applicationAccepted: ({ workerName, employerName, jobTitle }) => ({
-    subject: `[ConnectJob] Aplicarea ta a fost acceptata!`,
+  applicationAccepted: ({ workerName, employerName, jobTitle, appUrl }) => ({
+    subject: `[ConnectJob] Felicitări! Ai fost acceptat pentru "${jobTitle}"`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #059669;">Felicitari! Ai fost acceptat!</h2>
-        <p>Buna ${workerName},</p>
-        <p><strong>${employerName}</strong> ti-a acceptat aplicarea pentru jobul: <strong>${jobTitle}</strong></p>
-        <p>Contacteaza angajatorul pentru detalii despre urmatoarele etape.</p>
-        <hr style="border: 1px solid #eee; margin: 20px 0;">
-        <p style="color: #666; font-size: 12px;">Echipa ConnectJob</p>
+      <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg,#059669,#047857);padding:28px 24px;border-radius:12px 12px 0 0;text-align:center;">
+          <div style="font-size:48px;margin-bottom:8px;">🎉</div>
+          <h1 style="color:#fff;font-size:20px;margin:0;">Ai Fost Acceptat!</h1>
+        </div>
+        <div style="background:#fff;padding:24px;border:1px solid #e7e5e4;">
+          <p style="color:#1c1917;font-size:15px;">Bună <strong>${workerName}</strong>,</p>
+          <p style="color:#1c1917;font-size:14px;line-height:1.6;"><strong>${employerName}</strong> ți-a acceptat aplicarea pentru jobul: <strong style="color:#059669;">${jobTitle}</strong></p>
+          <div style="text-align:center;margin:24px 0;">
+            <a href="${appUrl || '#'}" style="display:inline-block;padding:14px 36px;background:#059669;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;">💬 Contactează Angajatorul</a>
+          </div>
+          <p style="font-size:12px;color:#a8a29e;text-align:center;">Contactează angajatorul cât mai curând pentru detalii!</p>
+        </div>
+        <div style="padding:12px;text-align:center;"><p style="font-size:11px;color:#a8a29e;margin:0;">ConnectJob — Platformă de joburi România</p></div>
       </div>
     `,
-    text: `Buna ${workerName},\n\nFelicitari! ${employerName} ti-a acceptat aplicarea pentru jobul: ${jobTitle}.\n\nContacteaza angajatorul pentru detalii.\n\nEchipa ConnectJob`,
+    text: `Bună ${workerName},\n\nFelicitări! ${employerName} ți-a acceptat aplicarea pentru jobul: ${jobTitle}.\nContactează angajatorul pentru detalii.\n\nEchipa ConnectJob`,
   }),
 
   // Application rejected (notify worker)
@@ -126,18 +168,26 @@ const templates = {
 
   // Payment released (notify worker)
   paymentReleased: ({ workerName, amount, jobTitle }) => ({
-    subject: `[ConnectJob] Plata primita: ${amount} RON`,
+    subject: `[ConnectJob] Ai primit ${amount} RON!`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #059669;">Ai primit plata!</h2>
-        <p>Buna ${workerName},</p>
-        <p>Plata de <strong>${amount} RON</strong> pentru jobul <strong>${jobTitle}</strong> a fost eliberata.</p>
-        <p>Fondurile vor fi transferate in contul tau in curand.</p>
-        <hr style="border: 1px solid #eee; margin: 20px 0;">
-        <p style="color: #666; font-size: 12px;">Echipa ConnectJob</p>
+      <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg,#059669,#047857);padding:28px 24px;border-radius:12px 12px 0 0;text-align:center;">
+          <div style="font-size:48px;margin-bottom:8px;">💰</div>
+          <h1 style="color:#fff;font-size:20px;margin:0;">${amount} RON Primiți!</h1>
+        </div>
+        <div style="background:#fff;padding:24px;border:1px solid #e7e5e4;">
+          <p style="color:#1c1917;font-size:15px;">Bună <strong>${workerName}</strong>,</p>
+          <p style="color:#1c1917;font-size:14px;line-height:1.6;">Plata de <strong style="color:#059669;font-size:18px;">${amount} RON</strong> pentru jobul <strong>${jobTitle}</strong> a fost eliberată din escrow.</p>
+          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
+            <div style="font-size:12px;color:#57534e;margin-bottom:4px;">Sumă transferată</div>
+            <div style="font-size:24px;font-weight:800;color:#059669;">${amount} RON</div>
+          </div>
+          <p style="font-size:12px;color:#a8a29e;text-align:center;">Fondurile vor fi transferate în contul tău bancar în 2-3 zile lucrătoare.</p>
+        </div>
+        <div style="padding:12px;text-align:center;"><p style="font-size:11px;color:#a8a29e;margin:0;">ConnectJob — Platformă de joburi România</p></div>
       </div>
     `,
-    text: `Buna ${workerName},\n\nAi primit plata de ${amount} RON pentru jobul ${jobTitle}.\nFondurile vor fi transferate in curand.\n\nEchipa ConnectJob`,
+    text: `Bună ${workerName},\n\nAi primit plata de ${amount} RON pentru jobul ${jobTitle}.\nFondurile vor fi transferate în curând.\n\nEchipa ConnectJob`,
   }),
 
   // Payment disputed (notify both parties)

@@ -1,38 +1,35 @@
-# ConnectJob - PRD
+# ConnectJob — PRD
 
-## Tech Stack
-- Frontend: React 19, React Router v7, Socket.io, Leaflet, i18next (11 limbi)
-- Backend: Express.js, MongoDB/Mongoose, Socket.io, Stripe, Zod, GPT-4o-mini
-- Auth: JWT + Google OAuth (Emergent Auth) + Email verification + Password reset
-- Commission: 3% per contract
+## Production Readiness: ~85%
 
-## Completed Phases
+### Ce funcționează (✅)
+| Feature | Status | Real/Mock |
+|---------|--------|-----------|
+| MongoDB Database | ✅ | REAL |
+| JWT Auth (login/register) | ✅ | REAL |
+| Google OAuth (Emergent Auth) | ✅ | REAL |
+| Email Verification | ✅ | REAL (Gmail SMTP) |
+| Password Reset | ✅ | REAL (Gmail SMTP) |
+| Email Notificări (aplicare, acceptare, plată) | ✅ | REAL |
+| Zod Input Validation | ✅ | REAL |
+| Push Notifications (VAPID) | ✅ | REAL |
+| Auto-translate Chat (GPT-4o-mini) | ✅ | REAL |
+| Job CRUD + Geo search | ✅ | REAL |
+| Map Clustering | ✅ | REAL |
+| Contracts | ✅ | REAL |
+| Reviews | ✅ | REAL |
+| Reports + Admin | ✅ | REAL |
+| Mobile-first responsive | ✅ | REAL |
+| i18n (11 limbi) | ✅ | REAL |
+| Comision 3% | ✅ | REAL |
 
-### Phase 1-3: Security, Backend, UI/UX (ALL DONE)
-### Phase 4: App.js Refactoring (DONE) — 4367→356 lines
-### Phase 5: Production Config (DONE) — VAPID, JWT, config panel
-### Phase 6: Features (DONE) — Auto-translate, contextual route calc, resize windows, 3% commission, mobile-first
-### Phase 7: Google OAuth (DONE) — Emergent Auth, buttons on Login/Register
-### Phase 8: Production Readiness (DONE - April 2026)
-- **lowdb completely removed** — 100% MongoDB
-- **Zod validation** on all auth routes + payments + translate (23 tests passed)
-- **Email verification** flow: register → verify token → activate
-- **Password reset** flow: forgot → email with link → reset → login
-- **Token model** with TTL auto-expiry
-- Frontend pages: VerifyEmail, ForgotPassword, ResetPassword
-- "Am uitat parola" link on Login
+### Ce necesită chei externe (⚡)
+| Feature | Status | Ce trebuie |
+|---------|--------|-----------|
+| Stripe Payments | ⚡ Simulat | sk_test_... + pk_test_... |
+| Cloudinary Uploads | 🟡 Local | CLOUDINARY_* keys |
 
-## Production Status (4/7)
-- ✅ Database (MongoDB), JWT, Push (VAPID), Translation (GPT-4o-mini), Google OAuth
-- ⚡ Stripe (simulated), ❌ Email (console only), 🟡 Cloudinary (local)
-
-## Backlog
-### P1
-- [ ] Configure real Stripe keys
-- [ ] Configure Gmail SMTP (limeuragod@gmail.com + App Password)
-- [ ] Deploy to Railway + Vercel
-### P2
-- [ ] Profile image uploads (Cloudinary)
-- [ ] PDF contracts
-### P3
-- [ ] Job bookmarks, A/B testing
+### Backlog (P2-P3)
+- [ ] Profile image uploads
+- [ ] PDF contract generation
+- [ ] Job bookmarks
