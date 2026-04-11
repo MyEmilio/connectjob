@@ -1,159 +1,102 @@
-# ConnectJob — Ghid Configurare Producție
+# ConnectJob — Ghid Deploy Production
 
-## Stare Curentă: 3/6 Servicii Active
+## 1. Backend → Railway
 
-| Serviciu | Stare | Ce trebuie făcut |
-|----------|-------|-------------------|
-| MongoDB | ✅ Active | Configurat |
-| JWT | ✅ Secure | Secret puternic generat |
-| Push Notifications | ✅ Active | Chei VAPID generate |
-| Stripe | ⚡ Simulat | Necesită chei Stripe |
-| Email | ❌ Inactiv | Necesită Gmail/SendGrid |
-| Cloudinary | 🟡 Local | Necesită cont Cloudinary |
+### Pași:
+1. **Push codul pe GitHub** (folosește butonul "Save to Github" din Emergent)
+2. **Pe Railway (railway.app)**:
+   - New Project → Deploy from GitHub repo
+   - Selectează repo-ul → folder: `/backend`
+   - Railway detectează automat Node.js
 
----
+3. **Variabile de mediu (Railway Settings → Variables)**:
+   ```
+   PORT=8001
+   NODE_ENV=production
+   MONGO_URI=mongodb+srv://...  (MongoDB Atlas connection string)
+   JWT_SECRET=<genereaza unul lung, 64+ caractere>
+   CLIENT_URL=https://connectjob.vercel.app  (domeniul Vercel)
+   
+   STRIPE_SECRET_KEY=sk_live_...  (sau sk_test_...)
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   
+   EMAIL_USER=limeuragod@gmail.com
+   EMAIL_PASS=dnzrkjkoayjtvdxu
+   EMAIL_FROM=ConnectJob <limeuragod@gmail.com>
+   
+   EMERGENT_LLM_KEY=sk-emergent-cEa76Ea57933c45D62
+   GOOGLE_CLIENT_ID=155290976556-lc51rl66fae9lt4ihhepal0l3atr1cjm.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=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
+   
+   CLOUDINARY_CLOUD_NAME=docmrwnwm
+   CLOUDINARY_API_KEY=968167958896813
+   CLOUDINARY_API_SECRET=<secretul tau Cloudinary>
+   
+   VAPID_PUBLIC_KEY=BLrzBc2Cf8yYWmnBOU2YnC0l33Eys0M00wLG910mbd0RPcei2PTG-7Cx1Y_giI-zD91iKCuyciBc79JgQ2sktHw
+   VAPID_PRIVATE_KEY=nxOH-qNsJoqmPH5z8TgXcTz8gNDylCSebxLY3cK0aeI
+   VAPID_SUBJECT=mailto:contact@connectjob.ro
+   ```
 
-## 1. Configurare Stripe (Plăți Escrow)
+4. **MongoDB Atlas** (obligatoriu pentru producție):
+   - Creează cluster gratuit pe mongodb.com/atlas
+   - Obține connection string: `mongodb+srv://user:pass@cluster.xxx.mongodb.net/connectjob`
+   - Setează ca `MONGO_URI` pe Railway
 
-### Obține cheile:
-1. Creează cont la https://dashboard.stripe.com
-2. Mergi la **Developers → API Keys**
-3. Copiază: **Secret Key** (`sk_test_...`) și **Publishable Key** (`pk_test_...`)
-4. Pentru webhooks: **Developers → Webhooks → Add endpoint**
-   - URL: `https://YOUR_DOMAIN/api/payments/webhook`
-   - Evenimente: `payment_intent.succeeded`, `payment_intent.canceled`
-   - Copiază **Signing Secret** (`whsec_...`)
-
-### Adaugă în `/app/backend/.env`:
-```
-STRIPE_SECRET_KEY=sk_test_XXXXXXXXXXXXX
-STRIPE_PUBLISHABLE_KEY=pk_test_XXXXXXXXXXXXX
-STRIPE_WEBHOOK_SECRET=whsec_XXXXXXXXXXXXX
-```
-
-### Testare:
-```bash
-# Verifică Stripe config
-curl https://YOUR_DOMAIN/api/payments/stripe-config
-# Ar trebui să returneze: {"configured": true, "publishableKey": "pk_test_..."}
-```
-
----
-
-## 2. Configurare Email (Notificări)
-
-### Opțiunea A: Gmail SMTP
-1. Activează 2FA pe contul Google: https://myaccount.google.com/security
-2. Generează **App Password**: https://myaccount.google.com/apppasswords
-   - Selectează "Mail" → "Other" → "ConnectJob"
-3. Copiază parola generată (16 caractere, fără spații)
-
-### Adaugă în `/app/backend/.env`:
-```
-EMAIL_USER=your.email@gmail.com
-EMAIL_PASS=abcdefghijklmnop
-EMAIL_FROM=ConnectJob <your.email@gmail.com>
-```
-
-### Opțiunea B: SendGrid
-1. Creează cont la https://app.sendgrid.com
-2. **Settings → API Keys → Create API Key** (Full Access)
-
-### Adaugă în `/app/backend/.env`:
-```
-SENDGRID_API_KEY=SG.XXXXXXXXXXXXX
-EMAIL_FROM=ConnectJob <no-reply@connectjob.ro>
-```
+### Health Check:
+- Railway verifică automat `/api/health`
+- Configurat în `railway.json`
 
 ---
 
-## 3. Configurare Cloudinary (Upload Fișiere)
+## 2. Frontend → Vercel
 
-### Obține cheile:
-1. Creează cont gratuit la https://cloudinary.com
-2. Mergi la **Settings → API Keys** (sau Dashboard-ul principal)
-3. Copiază: **Cloud Name**, **API Key**, **API Secret**
+### Pași:
+1. **Push codul pe GitHub**
+2. **Pe Vercel (vercel.com)**:
+   - Import Project → selectează repo GitHub
+   - Framework: Create React App
+   - Root Directory: `frontend`
+   - Build Command: `yarn build`
+   - Output Directory: `build`
 
-### Adaugă în `/app/backend/.env`:
-```
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=123456789012345
-CLOUDINARY_API_SECRET=XXXXXXXXXXXXX
-```
+3. **Variabile de mediu (Vercel Settings → Environment Variables)**:
+   ```
+   REACT_APP_API_URL=https://<backend-railway-url>/api
+   ```
+   (Railway îți dă un URL gen: `connectjob-backend-production.up.railway.app`)
 
----
+4. **Domeniu custom** (opțional):
+   - Settings → Domains → Adaugă `connectjob.ro` sau similar
+   - Actualizează `CLIENT_URL` pe Railway cu noul domeniu
 
-## 4. Fișierul `.env` Complet de Producție
-
-```env
-PORT=8001
-NODE_ENV=production
-LOG_LEVEL=info
-MONGO_URI=mongodb+srv://USER:PASS@cluster.mongodb.net/connectjob
-JWT_SECRET=<generat_automat_64_bytes>
-CLIENT_URL=https://connectjob.ro
-
-# Stripe
-STRIPE_SECRET_KEY=sk_live_XXXXX
-STRIPE_PUBLISHABLE_KEY=pk_live_XXXXX
-STRIPE_WEBHOOK_SECRET=whsec_XXXXX
-
-# Email
-EMAIL_USER=contact@connectjob.ro
-EMAIL_PASS=XXXXX
-EMAIL_FROM=ConnectJob <contact@connectjob.ro>
-
-# Cloudinary
-CLOUDINARY_CLOUD_NAME=connectjob
-CLOUDINARY_API_KEY=XXXXX
-CLOUDINARY_API_SECRET=XXXXX
-
-# Push Notifications (VAPID)
-VAPID_PUBLIC_KEY=<generat_automat>
-VAPID_PRIVATE_KEY=<generat_automat>
-VAPID_SUBJECT=mailto:contact@connectjob.ro
-```
+### Configurare vercel.json:
+Deja configurat în `/app/vercel.json` cu SPA rewrites.
 
 ---
 
-## 5. Verificare Configurare
+## 3. Post-Deploy Checklist
 
-### Din Admin Panel:
-Navighează la **Moderare** → Panoul **Configurare Producție** → **▼ Detalii**
-
-### Din API:
-```bash
-curl https://YOUR_DOMAIN/api/config/status
-```
-
-### Rezultat așteptat (toate active):
-```json
-{
-  "production_ready": true,
-  "active_services": "6/6",
-  "services": {
-    "database": { "status": "active" },
-    "stripe": { "status": "active" },
-    "email": { "status": "active" },
-    "cloudinary": { "status": "active" },
-    "push_notifications": { "status": "active" },
-    "jwt": { "status": "secure" }
-  }
-}
-```
+- [ ] Verifică `/api/health` pe Railway URL
+- [ ] Verifică frontend pe Vercel URL
+- [ ] Testează login/register
+- [ ] Testează Google OAuth (actualizează redirect URI pe Google Console)
+- [ ] Testează email verification
+- [ ] Testează plăți Stripe (cu chei de test mai întâi)
+- [ ] Configurează Stripe Webhook pe Dashboard → endpoint: `https://<railway-url>/api/payments/webhook`
 
 ---
 
-## 6. Deploy
+## 4. Credentiale necesare
 
-### Backend (Railway):
-1. Push codul la GitHub
-2. Conectează repo-ul la Railway
-3. Adaugă variabilele din `.env` în Railway Dashboard
-4. Deploy automat
+| Serviciu | Ce trebuie | Unde obții |
+|----------|-----------|------------|
+| MongoDB Atlas | Connection string | mongodb.com/atlas |
+| Stripe | sk_test/sk_live + pk_test/pk_live | dashboard.stripe.com |
+| Cloudinary | API Secret | cloudinary.com/console |
+| Google OAuth | Redirect URI update | console.cloud.google.com |
 
-### Frontend (Vercel):
-1. Push codul la GitHub
-2. Conectează repo-ul la Vercel
-3. Adaugă `REACT_APP_API_URL=https://api.connectjob.ro/api` în Vercel Environment Variables
-4. Deploy automat
+---
+
+## Deploy Accounts
+- **Vercel**: MyEmilios (limeuragod-3698)
+- **Railway**: myemilio's Projects

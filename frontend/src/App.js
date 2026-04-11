@@ -62,6 +62,7 @@ function ConnectJobApp() {
   const [loadingPage, setLoadingPage] = useState(false);
   const [pwaShow, setPwaShow] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [trialInfo, setTrialInfo] = useState(null);
   const prevPage = useRef("home");
 
   useEffect(() => {
@@ -91,6 +92,8 @@ function ConnectJobApp() {
   useEffect(() => {
     if (!user) return;
     api.get("/jobs").then(r => updateGs({ jobs: r.data.jobs || r.data })).catch(()=>{});
+    // Load trial info
+    api.get("/subscriptions/my").then(r => setTrialInfo(r.data)).catch(()=>{});
   }, [user]);
 
   const navigate = useCallback((to) => {
@@ -288,6 +291,29 @@ function ConnectJobApp() {
               </div>
             ))}
           </div>
+
+          {/* Trial countdown widget */}
+          {trialInfo?.trial?.active && (
+            <div data-testid="sidebar-trial-widget" onClick={()=>navigate("pricing")} style={{marginTop:10,padding:"10px",background:`linear-gradient(135deg,${T.green}10,${T.blue}08)`,borderRadius:10,border:`1.5px solid ${T.green}22`,cursor:"pointer",transition:"all 0.15s"}}>
+              <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
+                <div style={{width:24,height:24,borderRadius:7,background:`linear-gradient(135deg,${T.green},${T.greenDark})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#fff",fontWeight:900}}>{trialInfo.trial.days_remaining}</div>
+                <div style={{fontSize:10,fontWeight:700,color:T.green,textTransform:"uppercase",letterSpacing:"0.05em"}}>Pro Trial</div>
+              </div>
+              <div style={{fontSize:10,color:T.text2,lineHeight:1.4}}>
+                {trialInfo.trial.days_remaining} {trialInfo.trial.days_remaining===1?"zi":"zile"} ramase
+              </div>
+              <div style={{marginTop:6,padding:"4px 8px",borderRadius:6,background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontSize:9,fontWeight:700,textAlign:"center"}}>Upgrade acum</div>
+            </div>
+          )}
+
+          {/* Trial eligible CTA */}
+          {trialInfo?.trial_eligible && !trialInfo?.trial?.active && trialInfo?.plan === "free" && (
+            <div data-testid="sidebar-trial-cta" onClick={()=>navigate("pricing")} style={{marginTop:10,padding:"10px",background:`${T.green}06`,borderRadius:10,border:`1.5px dashed ${T.green}33`,cursor:"pointer",textAlign:"center",transition:"all 0.15s"}}>
+              <div style={{fontSize:16,marginBottom:3}}>⚡</div>
+              <div style={{fontSize:10,fontWeight:700,color:T.green}}>Pro gratuit 7 zile</div>
+              <div style={{fontSize:9,color:T.text3,marginTop:2}}>Incearca acum</div>
+            </div>
+          )}
 
           {/* Job selected indicator */}
           {gs.selectedJob&&(

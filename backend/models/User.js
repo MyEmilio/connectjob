@@ -74,6 +74,9 @@ const userSchema = new mongoose.Schema(
     stripe_customer_id: { type: String, default: "" },
     stripe_connect_account_id: { type: String, default: "" },
     connect_onboarding_complete: { type: Boolean, default: false },
+    // Trial
+    trial_used: { type: Boolean, default: false },
+    trial_expires_at: { type: Date, default: null },
     daily_applications: { type: Number, default: 0, min: 0 },
     daily_applications_reset: { type: Date, default: Date.now },
     // Notification preferences

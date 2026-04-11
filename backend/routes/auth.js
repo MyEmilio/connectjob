@@ -43,12 +43,22 @@ router.post("/google/session", async (req, res) => {
     let user = await db.findUserByEmail(email);
     if (!user) {
       const initials = (name || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+      const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       user = await db.createUser({
         name: name || email.split("@")[0], email, password: "", role: "worker",
         initials, google_id: email, avatar: picture || "",
         verified: true, email_verified: true,
+        subscription_plan: "pro", trial_used: true, trial_expires_at: trialEnd,
       });
-      logger.info("New Google user via Emergent Auth", { email });
+      // Create trial subscription
+      const Subscription = require("../models/Subscription");
+      await Subscription.create({
+        user_id: user.id, plan: "pro", status: "active",
+        checkout_session_id: `trial_${user.id}`,
+        current_period_start: new Date(),
+        current_period_end: trialEnd,
+      });
+      logger.info("New Google user via Emergent Auth (with Pro trial)", { email });
     } else if (!user.google_id) {
       await db.updateUser(user.id || user._id, { google_id: email, avatar: user.avatar || picture || "", email_verified: true });
     }
@@ -101,7 +111,22 @@ router.post("/register", validate(registerSchema), async (req, res) => {
 
     const hash = bcrypt.hashSync(password, 10);
     const initials = name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-    const user = await db.createUser({ name, email, password: hash, role, initials, email_verified: false });
+    const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const user = await db.createUser({
+      name, email, password: hash, role, initials, email_verified: false,
+      subscription_plan: "pro", trial_used: true, trial_expires_at: trialEnd,
+    });
+
+    // Create trial subscription record
+    const Subscription = require("../models/Subscription");
+    await Subscription.create({
+      user_id: user.id,
+      plan: "pro",
+      status: "active",
+      checkout_session_id: `trial_${user.id}`,
+      current_period_start: new Date(),
+      current_period_end: trialEnd,
+    });
 
     // Generate verification token
     const verifyToken = generateToken();

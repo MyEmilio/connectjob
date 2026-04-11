@@ -75,6 +75,29 @@ router.get("/plans", (req, res) => {
 router.get("/my", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).lean();
+    let plan = user.subscription_plan || "free";
+
+    // Auto-downgrade if trial expired
+    const isTrial = user.trial_used && user.trial_expires_at;
+    const trialExpired = isTrial && new Date(user.trial_expires_at) < new Date();
+    if (trialExpired && plan !== "free") {
+      // Check if user has a paid (non-trial) subscription active
+      const paidSub = await Subscription.findOne({
+        user_id: req.user.id,
+        status: "active",
+        checkout_session_id: { $not: /^trial_/ },
+      });
+      if (!paidSub) {
+        plan = "free";
+        await User.findByIdAndUpdate(req.user.id, { subscription_plan: "free" });
+        await Subscription.updateMany(
+          { user_id: req.user.id, checkout_session_id: /^trial_/, status: "active" },
+          { status: "expired" }
+        );
+        logger.info("Trial expired, downgraded to free", { userId: req.user.id });
+      }
+    }
+
     const subscription = await Subscription.findOne({
       user_id: req.user.id,
       status: { $in: ["active", "pending"] },
@@ -82,7 +105,6 @@ router.get("/my", auth, async (req, res) => {
       .sort({ created_at: -1 })
       .lean({ virtuals: true });
 
-    const plan = user.subscription_plan || "free";
     const planDetails = PLANS[plan] || PLANS.free;
 
     // Check daily application reset
@@ -91,15 +113,24 @@ router.get("/my", auth, async (req, res) => {
       ? new Date(user.daily_applications_reset)
       : new Date(0);
     const now = new Date();
-    if (
-      resetDate.toDateString() !== now.toDateString()
-    ) {
+    if (resetDate.toDateString() !== now.toDateString()) {
       dailyApps = 0;
       await User.findByIdAndUpdate(req.user.id, {
         daily_applications: 0,
         daily_applications_reset: now,
       });
     }
+
+    // Trial info
+    const trialInfo = isTrial
+      ? {
+          active: !trialExpired && plan !== "free",
+          expires_at: user.trial_expires_at,
+          days_remaining: trialExpired
+            ? 0
+            : Math.max(0, Math.ceil((new Date(user.trial_expires_at) - now) / (1000 * 60 * 60 * 24))),
+        }
+      : null;
 
     res.json({
       plan,
@@ -109,13 +140,59 @@ router.get("/my", auth, async (req, res) => {
             id: subscription.id,
             status: subscription.status,
             current_period_end: subscription.current_period_end,
+            is_trial: subscription.checkout_session_id?.startsWith("trial_") || false,
           }
         : null,
+      trial: trialInfo,
+      trial_eligible: !user.trial_used,
       daily_applications_used: dailyApps,
       daily_applications_limit: planDetails.limits.daily_applications,
     });
   } catch (err) {
     logger.error("Get subscription error", { userId: req.user.id, error: err.message });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/subscriptions/start-trial — start 7-day Pro trial for existing users
+router.post("/start-trial", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (user.trial_used) {
+      return res.status(400).json({ error: "Ai folosit deja perioada de proba gratuita." });
+    }
+
+    if (user.subscription_plan !== "free") {
+      return res.status(400).json({ error: "Ai deja un abonament activ." });
+    }
+
+    const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    user.subscription_plan = "pro";
+    user.trial_used = true;
+    user.trial_expires_at = trialEnd;
+    await user.save();
+
+    await Subscription.create({
+      user_id: req.user.id,
+      plan: "pro",
+      status: "active",
+      checkout_session_id: `trial_${req.user.id}`,
+      current_period_start: new Date(),
+      current_period_end: trialEnd,
+    });
+
+    logger.info("Pro trial started", { userId: req.user.id, expiresAt: trialEnd });
+    res.json({
+      success: true,
+      plan: "pro",
+      trial_expires_at: trialEnd,
+      days_remaining: 7,
+      message: "Perioada de proba Pro (7 zile) activata cu succes!",
+    });
+  } catch (err) {
+    logger.error("Start trial error", { userId: req.user.id, error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
