@@ -65,6 +65,17 @@ const userSchema = new mongoose.Schema(
     },
     warnings_count: { type: Number, default: 0, min: 0 },
     blocked_users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    // Subscription & Stripe
+    subscription_plan: {
+      type: String,
+      enum: ["free", "pro", "premium"],
+      default: "free",
+    },
+    stripe_customer_id: { type: String, default: "" },
+    stripe_connect_account_id: { type: String, default: "" },
+    connect_onboarding_complete: { type: Boolean, default: false },
+    daily_applications: { type: Number, default: 0, min: 0 },
+    daily_applications_reset: { type: Date, default: Date.now },
     // Notification preferences
     favorite_categories: { type: [String], default: [] },
     push_subscription: { type: mongoose.Schema.Types.Mixed, default: null },

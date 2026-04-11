@@ -130,6 +130,7 @@ app.use("/api/reports", require("./routes/reports"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/stats", require("./routes/stats"));
 app.use("/api/translate", require("./routes/translate"));
+app.use("/api/subscriptions", require("./routes/subscriptions"));
 
 // ── Health Check ───────────────────────────────────────────────
 const startTime = Date.now();
@@ -152,7 +153,7 @@ app.get("/api/config/status", (_, res) => {
   const { isCloudinaryConfigured } = require("./utils/cloudinary");
   const { getVapidPublicKey } = require("./utils/pushService");
 
-  const stripeConfigured = !!(process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes("ADAUGA"));
+  const stripeConfigured = !!((process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY) && !(process.env.STRIPE_SECRET_KEY || "").includes("ADAUGA") && (process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY) !== "sk_test_emergent");
   const emailConfigured = isEmailConfigured();
   const cloudinaryConfigured = isCloudinaryConfigured();
   const vapidConfigured = !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
@@ -227,6 +228,20 @@ io.on("connection", (socket) => {
           String(conv.user2_id) !== String(userId))
       )
         return;
+
+      // Chat moderation
+      const { moderateMessage } = require("./utils/chatModerationService");
+      const User = require("./models/User");
+      const sender = await User.findById(userId).lean();
+      const modResult = moderateMessage(text.trim(), sender?.subscription_plan || "free");
+      if (!modResult.allowed) {
+        socket.emit("message_blocked", {
+          conversation_id,
+          reason: modResult.reason,
+          category: modResult.category,
+        });
+        return;
+      }
 
       const msg = await db.createMessage({
         conversation_id,

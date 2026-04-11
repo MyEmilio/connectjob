@@ -13,11 +13,9 @@ const COMMISSION = 0.03;
 
 let stripe;
 try {
-  if (
-    process.env.STRIPE_SECRET_KEY &&
-    !process.env.STRIPE_SECRET_KEY.includes("ADAUGA")
-  ) {
-    stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const key = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
+  if (key && !key.includes("ADAUGA") && key !== "sk_test_emergent") {
+    stripe = require("stripe")(key);
   }
 } catch {}
 
@@ -105,6 +103,53 @@ router.post(
           break;
         }
 
+        // Subscription lifecycle events
+        case "customer.subscription.updated":
+        case "customer.subscription.deleted": {
+          const sub = event.data.object;
+          const Subscription = require("../models/Subscription");
+          const existingSub = await Subscription.findOne({
+            stripe_subscription_id: sub.id,
+          });
+          if (existingSub) {
+            if (sub.status === "canceled" || event.type === "customer.subscription.deleted") {
+              existingSub.status = "cancelled";
+              existingSub.cancelled_at = new Date();
+              await existingSub.save();
+              const UserModel = require("../models/User");
+              await UserModel.findByIdAndUpdate(existingSub.user_id, { subscription_plan: "free" });
+              logger.info("Subscription cancelled via webhook", { subId: sub.id });
+            } else if (sub.status === "past_due") {
+              existingSub.status = "past_due";
+              await existingSub.save();
+              logger.warn("Subscription past due", { subId: sub.id });
+            }
+          }
+          break;
+        }
+
+        case "checkout.session.completed": {
+          const session = event.data.object;
+          const PaymentTransaction = require("../models/PaymentTransaction");
+          const tx = await PaymentTransaction.findOne({ session_id: session.id });
+          if (tx && tx.payment_status !== "paid") {
+            tx.payment_status = "paid";
+            await tx.save();
+
+            if (tx.type === "subscription" && tx.plan) {
+              const Subscription = require("../models/Subscription");
+              const UserModel = require("../models/User");
+              await Subscription.findOneAndUpdate(
+                { checkout_session_id: session.id },
+                { status: "active", stripe_subscription_id: session.subscription || "" },
+              );
+              await UserModel.findByIdAndUpdate(tx.user_id, { subscription_plan: tx.plan });
+              logger.info("Subscription activated via webhook", { plan: tx.plan, userId: tx.user_id });
+            }
+          }
+          break;
+        }
+
         default:
           logger.debug("Unhandled webhook event", { type: event.type });
       }
@@ -149,7 +194,13 @@ router.post("/create-intent", auth, validate(createPaymentSchema), async (req, r
       });
     }
 
-    const pi = await stripe.paymentIntents.create({
+    // Check if payee has Stripe Connect account for direct payouts
+    const User = require("../models/User");
+    const payee = await User.findById(payee_id).lean();
+    const connectAccountId = payee?.stripe_connect_account_id;
+    const hasConnect = connectAccountId && payee?.connect_onboarding_complete;
+
+    const piParams = {
       amount: Math.round(total * 100),
       currency: "ron",
       capture_method: "manual",
@@ -158,7 +209,15 @@ router.post("/create-intent", auth, validate(createPaymentSchema), async (req, r
         payer_id: String(req.user.id),
         payee_id: String(payee_id),
       },
-    });
+    };
+
+    // If payee has Connect, use application_fee for 3% platform commission
+    if (hasConnect) {
+      piParams.application_fee_amount = Math.round(commission * 100);
+      piParams.transfer_data = { destination: connectAccountId };
+    }
+
+    const pi = await stripe.paymentIntents.create(piParams);
     const payment = await db.createPayment({
       job_id,
       payer_id: req.user.id,

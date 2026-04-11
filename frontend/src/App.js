@@ -23,6 +23,7 @@ import PageReviews from "./pages/PageReviews";
 import PageAnalytics from "./pages/PageAnalytics";
 import PageAdmin from "./pages/PageAdmin";
 import PageCalendar from "./pages/PageCalendar";
+import PagePricing from "./pages/PagePricing";
 import AuthCallback from "./pages/AuthCallback";
 import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -80,6 +81,7 @@ function ConnectJobApp() {
           verified: !!user.verified,
           rating: user.rating || 0,
           role: user.role,
+          subscription_plan: user.subscription_plan || "free",
         }
       });
     }
@@ -110,6 +112,7 @@ function ConnectJobApp() {
     { key:"contract",  icon:"📝", label:t("nav_contract") },
     { key:"reviews",   icon:"⭐", label:t("nav_reviews") },
     { key:"analytics", icon:"📊", label:t("nav_analytics") },
+    { key:"pricing",  icon:"💎", label:"Planuri" },
     { key:"post_job",  icon:"➕", label:t("nav_post_job"),  hidden: gs.user.role !== "employer" },
     { key:"verify",    icon: gs.user.verified?"✅":"🛡️", label: gs.user.verified?t("nav_verified"):t("nav_verify"), badge: gs.user.verified?null:"!" },
     { key:"admin",     icon:"🛡️", label:t("nav_admin"),         hidden: gs.user.role !== "admin" },
@@ -125,6 +128,7 @@ function ConnectJobApp() {
     contract:  t("nav_contract"),
     reviews:   t("nav_reviews"),
     analytics: t("nav_analytics"),
+    pricing:   "💎 Planuri & Preturi",
     post_job:  t("nav_post_job"),
     verify:    t("nav_verify"),
     admin:     `🛡️ ${t("nav_admin")}`,
@@ -144,6 +148,7 @@ function ConnectJobApp() {
       case "contract":  return <PageContract  {...props}/>;
       case "reviews":   return <PageReviews   {...props}/>;
       case "analytics": return <PageAnalytics {...props}/>;
+      case "pricing":   return <PagePricing   {...props}/>;
       case "verify":    return <PageVerify    {...props}/>;
       case "admin":     return <PageAdmin     {...props}/>;
       default:          return <PageHome      {...props}/>;
@@ -238,6 +243,9 @@ function ConnectJobApp() {
             <div style={{display:"flex",flexDirection:"column"}}>
               <span style={{fontSize:12,fontWeight:700,color:T.text,lineHeight:1}}>{gs.user.name.split(" ")[0]}</span>
               {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>✓ Verificat</span>}
+              {gs.user.subscription_plan && gs.user.subscription_plan !== "free" && (
+                <span data-testid="plan-badge-nav" style={{fontSize:8,fontWeight:700,color:"#fff",background:gs.user.subscription_plan==="premium"?`linear-gradient(135deg,${T.amber},${T.amberDark})`:`linear-gradient(135deg,${T.green},${T.greenDark})`,borderRadius:999,padding:"1px 6px",display:"inline-block",marginTop:1,textTransform:"uppercase"}}>{gs.user.subscription_plan}</span>
+              )}
             </div>
           </div>
           {/* Selector de limba */}

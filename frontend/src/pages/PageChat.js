@@ -40,6 +40,7 @@ export default function PageChat({ gs, update, navigate }) {
   const [translations, setTranslations] = useState({});
   const [translating, setTranslating] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  const [moderationAlert, setModerationAlert] = useState(null);
   const recRef = useRef(null);
   const timerRef = useRef(null);
   const bottomRef = useRef(null);
@@ -130,7 +131,12 @@ export default function PageChat({ gs, update, navigate }) {
     };
     socket.on("new_message", onMsg);
     socket.on("typing", onTyping);
-    return () => { socket.off("new_message", onMsg); socket.off("typing", onTyping); };
+    const onBlocked = ({ reason }) => {
+      setModerationAlert(reason);
+      setTimeout(() => setModerationAlert(null), 6000);
+    };
+    socket.on("message_blocked", onBlocked);
+    return () => { socket.off("new_message", onMsg); socket.off("typing", onTyping); socket.off("message_blocked", onBlocked); };
   }, [activeId]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, typing]);
@@ -182,7 +188,12 @@ export default function PageChat({ gs, update, navigate }) {
 
     const socket = getSocket();
     if (socket) socket.emit("send_message", { conversation_id: activeId, text: txt });
-    else api.post(`/messages/conversations/${activeId}/send`, { text: txt }).then(r => setMessages(p => [...p, r.data])).catch(() => {});
+    else api.post(`/messages/conversations/${activeId}/send`, { text: txt }).then(r => setMessages(p => [...p, r.data])).catch((err) => {
+      if (err.response?.data?.moderation) {
+        setModerationAlert(err.response.data.error);
+        setTimeout(() => setModerationAlert(null), 6000);
+      }
+    });
   };
 
   return (
@@ -410,6 +421,17 @@ export default function PageChat({ gs, update, navigate }) {
 
           {/* Input area */}
           <div style={{ padding: "8px 12px 12px", background: T.white, borderTop: `1.5px solid ${T.border}` }}>
+            {/* Moderation alert */}
+            {moderationAlert && (
+              <div data-testid="moderation-alert" style={{ marginBottom: 8, padding: "8px 12px", borderRadius: 10, background: "#fef2f2", border: "1px solid #fecaca", display: "flex", alignItems: "center", gap: 8, animation: "fadeIn 0.2s ease" }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>🛡️</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#991b1b", marginBottom: 2 }}>Mesaj blocat</div>
+                  <div style={{ fontSize: 10, color: "#b91c1c", lineHeight: 1.4 }}>{moderationAlert}</div>
+                </div>
+                <button onClick={() => setModerationAlert(null)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#b91c1c", padding: 2 }}>✕</button>
+              </div>
+            )}
             {interim && <div style={{ marginBottom: 7, padding: "6px 12px", borderRadius: 8, background: "#f0fdf4", border: "1px solid #86efac", fontSize: 12, color: "#166534", fontStyle: "italic" }}>🎙️ "{interim}"</div>}
             {isListening && (
               <div style={{ marginBottom: 8, background: T.dark2, borderRadius: 12, padding: "8px 12px", display: "flex", alignItems: "center", gap: 10, border: `1px solid ${T.dark3}` }}>

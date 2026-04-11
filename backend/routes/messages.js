@@ -8,6 +8,8 @@ const {
   mongoIdValidator,
 } = require("../utils/validators");
 const { sendPushNotification, notifications } = require("../utils/pushService");
+const { moderateMessage } = require("../utils/chatModerationService");
+const User = require("../models/User");
 
 const router = express.Router();
 
@@ -93,7 +95,18 @@ router.post(
         String(conv.user2_id) !== String(req.user.id)
       )
         return res.status(403).json({ error: "Acces interzis" });
-      
+
+      // Chat moderation — check for contact info sharing
+      const sender = await User.findById(req.user.id).lean();
+      const modResult = moderateMessage(text.trim(), sender?.subscription_plan || "free");
+      if (!modResult.allowed) {
+        return res.status(403).json({
+          error: modResult.reason,
+          moderation: true,
+          category: modResult.category,
+        });
+      }
+
       const msg = await db.createMessage({
         conversation_id: req.params.id,
         sender_id: req.user.id,
@@ -102,14 +115,13 @@ router.post(
 
       // Send push notification to recipient
       try {
-        const User = require("../models/User");
-        const sender = await User.findById(req.user.id).lean();
+        const senderUser = await User.findById(req.user.id).lean();
         const recipientId = String(conv.user1_id) === String(req.user.id)
           ? conv.user2_id
           : conv.user1_id;
 
         const notifPayload = notifications.newMessage(
-          sender.name,
+          senderUser.name,
           text.trim(),
           req.params.id
         );
