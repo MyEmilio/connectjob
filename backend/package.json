@@ -17,7 +17,6 @@
     "google-auth-library": "^10.6.2",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "lowdb": "^7.0.1",
     "mongoose": "^9.3.3",
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
@@ -28,7 +27,8 @@
     "uuid": "^9.0.1",
     "web-push": "^3.6.7",
     "winston": "^3.19.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

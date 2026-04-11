@@ -188,6 +188,54 @@ const sendPaymentDisputedEmail = async (email, data) => {
   return sendEmail({ to: email, subject, html, text });
 };
 
+// ── Verification Email ──────────────────────────────────────
+const sendVerificationEmail = async (email, name, verifyUrl) => {
+  return sendEmail({
+    to: email,
+    subject: "ConnectJob — Verifică-ți email-ul",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:#059669;display:inline-flex;align-items:center;justify-content:center;font-size:24px;">⚡</div>
+          <h2 style="margin:12px 0 0;color:#1c1917;">ConnectJob</h2>
+        </div>
+        <p>Salut <strong>${name}</strong>,</p>
+        <p>Mulțumim că te-ai înregistrat pe ConnectJob! Click pe butonul de mai jos pentru a-ți verifica email-ul:</p>
+        <div style="text-align:center;margin:28px 0;">
+          <a href="${verifyUrl}" style="display:inline-block;padding:14px 32px;background:#059669;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;">✅ Verifică Email-ul</a>
+        </div>
+        <p style="font-size:13px;color:#78716c;">Sau copiază acest link: <a href="${verifyUrl}">${verifyUrl}</a></p>
+        <p style="font-size:12px;color:#a8a29e;margin-top:24px;">Link-ul expiră în 24 de ore.</p>
+      </div>
+    `,
+    text: `Salut ${name}, verifică email-ul la: ${verifyUrl}`,
+  });
+};
+
+// ── Password Reset Email ────────────────────────────────────
+const sendPasswordResetEmail = async (email, name, resetUrl) => {
+  return sendEmail({
+    to: email,
+    subject: "ConnectJob — Resetare parolă",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:#059669;display:inline-flex;align-items:center;justify-content:center;font-size:24px;">⚡</div>
+          <h2 style="margin:12px 0 0;color:#1c1917;">ConnectJob</h2>
+        </div>
+        <p>Salut <strong>${name}</strong>,</p>
+        <p>Am primit o cerere de resetare a parolei pentru contul tău. Click pe butonul de mai jos:</p>
+        <div style="text-align:center;margin:28px 0;">
+          <a href="${resetUrl}" style="display:inline-block;padding:14px 32px;background:#dc2626;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;">🔑 Resetează Parola</a>
+        </div>
+        <p style="font-size:13px;color:#78716c;">Sau copiază acest link: <a href="${resetUrl}">${resetUrl}</a></p>
+        <p style="font-size:12px;color:#a8a29e;margin-top:24px;">Link-ul expiră în 1 oră. Dacă nu ai solicitat resetarea, ignoră acest email.</p>
+      </div>
+    `,
+    text: `Salut ${name}, resetează parola la: ${resetUrl}`,
+  });
+};
+
 module.exports = {
   sendEmail,
   isEmailConfigured,
@@ -197,4 +245,6 @@ module.exports = {
   sendContractSignedEmail,
   sendPaymentReleasedEmail,
   sendPaymentDisputedEmail,
+  sendVerificationEmail,
+  sendPasswordResetEmail,
 };

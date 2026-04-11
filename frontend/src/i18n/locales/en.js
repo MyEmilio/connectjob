@@ -8,6 +8,7 @@ const en = {
   login_email:"Email address", login_password:"Password",
   login_btn:"Sign in", login_loading:"Signing in...",
   login_no_account:"Don't have an account?", login_register:"Register",
+  login_forgot:"Forgot password",
 
   register_title:"Create account", register_subtitle:"Sign up for ConnectJob",
   register_name:"Full name", register_email:"Email address",

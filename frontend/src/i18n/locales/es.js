@@ -61,6 +61,7 @@ const es = {
   login_loading:   "Iniciando sesión...",
   login_no_account:"¿No tienes cuenta?",
   login_register:  "Regístrate",
+  login_forgot:    "Olvidé mi contraseña",
 
   register_title:     "Crear cuenta",
   register_subtitle:  "Regístrate en ConnectJob",

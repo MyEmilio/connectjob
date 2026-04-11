@@ -53,6 +53,7 @@ const userSchema = new mongoose.Schema(
     },
     reviews_count: { type: Number, default: 0, min: 0 },
     verified: { type: Boolean, default: false },
+    email_verified: { type: Boolean, default: false },
     avatar: { type: String, default: "", maxlength: 500 },
     status: {
       type: String,

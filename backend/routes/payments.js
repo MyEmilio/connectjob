@@ -3,13 +3,10 @@ const db = require("../db/database");
 const auth = require("../middleware/auth");
 const logger = require("../utils/logger");
 const {
-  paymentIntentValidator,
-  mongoIdValidator,
-} = require("../utils/validators");
-const {
   sendPaymentReleasedEmail,
   sendPaymentDisputedEmail,
 } = require("../utils/emailService");
+const { validate, createPaymentSchema, releasePaymentSchema } = require("../utils/validation");
 
 const router = express.Router();
 const COMMISSION = 0.03;
@@ -123,9 +120,9 @@ router.post(
 );
 
 // POST /api/payments/create-intent
-router.post("/create-intent", auth, paymentIntentValidator, async (req, res) => {
+router.post("/create-intent", auth, validate(createPaymentSchema), async (req, res) => {
   try {
-    const { job_id, payee_id, amount } = req.body;
+    const { job_id, payee_id, amount } = req.validated;
 
     const commission = parseFloat((amount * COMMISSION).toFixed(2));
     const total = parseFloat((amount + commission).toFixed(2));
@@ -192,7 +189,7 @@ router.post("/create-intent", auth, paymentIntentValidator, async (req, res) => 
 });
 
 // POST /api/payments/:id/release
-router.post("/:id/release", auth, mongoIdValidator(), async (req, res) => {
+router.post("/:id/release", auth, async (req, res) => {
   try {
     const payment = await db.findPaymentById(req.params.id);
     if (!payment) return res.status(404).json({ error: "Plata negasita" });
@@ -244,7 +241,7 @@ router.post("/:id/release", auth, mongoIdValidator(), async (req, res) => {
 });
 
 // POST /api/payments/:id/dispute
-router.post("/:id/dispute", auth, mongoIdValidator(), async (req, res) => {
+router.post("/:id/dispute", auth, async (req, res) => {
   try {
     const payment = await db.findPaymentById(req.params.id);
     if (!payment) return res.status(404).json({ error: "Plata negasita" });
@@ -312,7 +309,7 @@ router.get("/my", auth, async (req, res) => {
 
 // GET /api/payments/:id/status
 // Get payment status for polling
-router.get("/:id/status", auth, mongoIdValidator(), async (req, res) => {
+router.get("/:id/status", auth, async (req, res) => {
   try {
     const payment = await db.findPaymentById(req.params.id);
     if (!payment) return res.status(404).json({ error: "Plata negăsită" });

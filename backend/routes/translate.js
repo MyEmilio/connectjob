@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 const { translateText, detectLanguage, isTranslationConfigured } = require("../utils/translationService");
 const authMiddleware = require("../middleware/auth");
+const { validate, translateSchema, translateBatchSchema } = require("../utils/validation");
 
 // POST /api/translate — traduce text în limba utilizatorului
-router.post("/", authMiddleware, async (req, res) => {
-  const { text, target_lang, source_lang } = req.body;
+router.post("/", authMiddleware, validate(translateSchema), async (req, res) => {
+  const { text, target_lang, source_lang } = req.validated;
   if (!text || !target_lang) return res.status(400).json({ error: "text and target_lang required" });
 
   const detected = source_lang || detectLanguage(text);
@@ -18,8 +19,8 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 // POST /api/translate/batch — traduce mai multe mesaje
-router.post("/batch", authMiddleware, async (req, res) => {
-  const { messages, target_lang } = req.body;
+router.post("/batch", authMiddleware, validate(translateBatchSchema), async (req, res) => {
+  const { messages, target_lang } = req.validated;
   if (!messages?.length || !target_lang) return res.status(400).json({ error: "messages and target_lang required" });
 
   const results = await Promise.all(

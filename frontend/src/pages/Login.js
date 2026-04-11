@@ -98,10 +98,15 @@ export default function Login() {
               background:loading?"#d1d5db":`linear-gradient(135deg,${T.green},${T.greenDark})`,
               color:T.white, fontWeight:700, fontSize:15, fontFamily:"DM Sans,sans-serif",
               boxShadow:loading?"none":`0 4px 16px ${T.green}44`, transition:"all 0.2s",
-              marginBottom:16,
+              marginBottom:10,
             }}>
               {loading ? <span>⏳ {t("login_loading")}</span> : `🔑 ${t("login_btn")}`}
             </button>
+            <div style={{ textAlign:"right", marginBottom:16 }}>
+              <Link to="/forgot-password" data-testid="forgot-password-link" style={{ fontSize:12, color:T.green, fontWeight:600, textDecoration:"none" }}>
+                {t("login_forgot") || "Am uitat parola"}
+              </Link>
+            </div>
           </form>
 
           {/* Divider */}
