@@ -2,3 +2,7 @@ node_modules
 frontend/node_modules
 build
 frontend/build
+
+# Environment files with secrets
+backend/.env
+frontend/.env
