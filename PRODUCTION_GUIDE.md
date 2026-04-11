@@ -21,47 +21,47 @@
 
 ## Pas 2: Backend → Railway
 
-1. Mergi la [railway.app](https://railway.app) → Login (myemilio's Projects)
+1. Mergi la [railway.app](https://railway.app) → Login
 2. **New Project** → **Deploy from GitHub repo**
 3. Selectează repository-ul ConnectJob
 4. **Settings** → **Root Directory**: `/backend`
 5. Railway detectează automat Node.js
 
 ### Variabile de mediu (Settings → Variables):
-Copiază și lipește toate acestea:
+Copiază valorile din fișierul `.env` local (backend/.env). Cheile necesare:
 
 ```
 PORT=8001
 NODE_ENV=production
-MONGO_URI=mongodb+srv://connectjob:<PAROLA_TA>@cluster0.xxxxx.mongodb.net/connectjob
-JWT_SECRET=f407a48a36dfb0fd17efa779df79d349d4de1956f2d17b257c92db13650a9cc1527422e8c010625bc4698ca9f2aa1f68f0acc09d437bc051225161492e9c48d7
-CLIENT_URL=https://<DOMENIUL-VERCEL>.vercel.app
-EMAIL_USER=limeuragod@gmail.com
-EMAIL_PASS=dnzrkjkoayjtvdxu
-EMAIL_FROM=ConnectJob <limeuragod@gmail.com>
-EMERGENT_LLM_KEY=sk-emergent-cEa76Ea57933c45D62
-GOOGLE_CLIENT_ID=155290976556-lc51rl66fae9lt4ihhepal0l3atr1cjm.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
-CLOUDINARY_CLOUD_NAME=docmrwnwm
-CLOUDINARY_API_KEY=968167958896813
-CLOUDINARY_API_SECRET=q3zSXvYfFvwtw03O2JD6dQuhO4E
-VAPID_PUBLIC_KEY=BLrzBc2Cf8yYWmnBOU2YnC0l33Eys0M00wLG910mbd0RPcei2PTG-7Cx1Y_giI-zD91iKCuyciBc79JgQ2sktHw
-VAPID_PRIVATE_KEY=nxOH-qNsJoqmPH5z8TgXcTz8gNDylCSebxLY3cK0aeI
+MONGO_URI=<CONNECTION_STRING_ATLAS>
+JWT_SECRET=<CHEIE_LUNGA_64_CARACTERE>
+CLIENT_URL=<URL_VERCEL_FRONTEND>
+EMAIL_USER=<GMAIL_ADDRESS>
+EMAIL_PASS=<GMAIL_APP_PASSWORD>
+EMAIL_FROM=ConnectJob <email@gmail.com>
+EMERGENT_LLM_KEY=<CHEIA_TA_EMERGENT>
+GOOGLE_CLIENT_ID=<GOOGLE_CLIENT_ID>
+GOOGLE_CLIENT_SECRET=<GOOGLE_CLIENT_SECRET>
+CLOUDINARY_CLOUD_NAME=<CLOUD_NAME>
+CLOUDINARY_API_KEY=<API_KEY>
+CLOUDINARY_API_SECRET=<API_SECRET>
+VAPID_PUBLIC_KEY=<VAPID_PUBLIC>
+VAPID_PRIVATE_KEY=<VAPID_PRIVATE>
 VAPID_SUBJECT=mailto:contact@connectjob.ro
-STRIPE_SECRET_KEY=sk_test_emergent
-STRIPE_API_KEY=sk_test_emergent
+STRIPE_SECRET_KEY=<STRIPE_KEY>
+STRIPE_API_KEY=<STRIPE_KEY>
 ```
 
-> **IMPORTANT**: Înlocuiește `<PAROLA_TA>` cu parola MongoDB Atlas și `<DOMENIUL-VERCEL>` cu URL-ul real după deploy Vercel.
+> **IMPORTANT**: Toate valorile reale sunt în `backend/.env` local. NU le pune în cod!
 
-6. Railway va face deploy automat → vei primi un URL gen: `connectjob-backend-production.up.railway.app`
-7. Verifică: `https://<railway-url>/api/health` trebuie să returneze `{"status":"ok"}`
+6. Railway va face deploy automat → primești un URL gen: `connectjob-backend.up.railway.app`
+7. Verifică: `https://<railway-url>/api/health` → `{"status":"ok"}`
 
 ---
 
 ## Pas 3: Frontend → Vercel
 
-1. Mergi la [vercel.com](https://vercel.com) → Login (MyEmilios / limeuragod-3698)
+1. Mergi la [vercel.com](https://vercel.com) → Login
 2. **Add New** → **Project** → Import din GitHub
 3. Selectează repository-ul ConnectJob
 4. **Framework Preset**: Create React App
@@ -74,8 +74,6 @@ STRIPE_API_KEY=sk_test_emergent
 REACT_APP_API_URL=https://<RAILWAY-URL>/api
 ```
 
-> Înlocuiește `<RAILWAY-URL>` cu URL-ul Railway din pasul anterior.
-
 8. Click **Deploy** → gata!
 
 ---
@@ -85,29 +83,22 @@ REACT_APP_API_URL=https://<RAILWAY-URL>/api
 După ce ai ambele URL-uri:
 
 ### Pe Railway (backend):
-- Actualizează `CLIENT_URL` cu URL-ul Vercel: `https://connectjob.vercel.app`
+- Actualizează `CLIENT_URL` cu URL-ul Vercel
 
 ### Pe Vercel (frontend):
-- Verifică `REACT_APP_API_URL` pointează la Railway: `https://<railway-url>/api`
+- Verifică `REACT_APP_API_URL` pointează la Railway
 
 ### Pe Google Cloud Console:
-- Settings → OAuth → Authorized redirect URIs → Adaugă: `https://connectjob.vercel.app`
+- OAuth → Authorized redirect URIs → Adaugă URL-ul Vercel
 
 ---
 
 ## Pas 5: Stripe Real (când ești pregătit)
 
-1. Mergi la [dashboard.stripe.com](https://dashboard.stripe.com)
-2. Developers → API Keys → Copiază:
-   - `sk_test_...` (Secret Key)
-   - `pk_test_...` (Publishable Key)
-3. Pe Railway, actualizează:
-   ```
-   STRIPE_SECRET_KEY=sk_test_xxxxxxxxx
-   ```
-4. Configurează webhook: Developers → Webhooks → Add endpoint:
-   - URL: `https://<railway-url>/api/payments/webhook`
-   - Events: `payment_intent.succeeded`, `payment_intent.payment_failed`, `checkout.session.completed`, `customer.subscription.*`
+1. [dashboard.stripe.com](https://dashboard.stripe.com) → API Keys
+2. Copiază `sk_test_...` și `pk_test_...`
+3. Pe Railway, actualizează `STRIPE_SECRET_KEY`
+4. Webhooks → Add endpoint: `https://<railway-url>/api/payments/webhook`
 
 ---
 
@@ -119,7 +110,6 @@ După ce ai ambele URL-uri:
 - [ ] Google OAuth funcționează
 - [ ] Email verification se trimite
 - [ ] Chat funcționează
-- [ ] Cloudinary uploads funcționează
 - [ ] Planuri / Pricing page se încarcă
 
 ---
@@ -128,7 +118,7 @@ După ce ai ambele URL-uri:
 
 | Problemă | Soluție |
 |----------|---------|
-| CORS error | Verifică `CLIENT_URL` pe Railway include URL-ul Vercel |
-| MongoDB connection | Verifică IP whitelist pe Atlas (0.0.0.0/0) |
+| CORS error | Verifică `CLIENT_URL` pe Railway |
+| MongoDB connection | Verifică IP whitelist pe Atlas |
 | Google OAuth redirect | Adaugă URL-ul Vercel în Google Console |
-| Email nu se trimite | Verifică `EMAIL_PASS` este App Password, nu parola normală |
+| Email nu se trimite | Verifică `EMAIL_PASS` e App Password |
