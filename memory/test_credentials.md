@@ -8,14 +8,16 @@
 ## Google OAuth
 - Google Client ID: 155290976556-lc51rl66fae9lt4ihhepal0l3atr1cjm.apps.googleusercontent.com
 - Auth flow: Emergent Auth (auth.emergentagent.com)
-- Session endpoint: POST /api/auth/google/session
 
-## Regular User Accounts
-- Email: test@example.com / Password: varies (seeded)
-- Email: mihai.test123@test.com / Password: varies
-- Email: limeuragod@gmail.com / Role: employer
+## Auth Endpoints
+- POST /api/auth/register — Zod validated (name 2+, email, password 8+ with uppercase+digit)
+- POST /api/auth/login — Zod validated
+- POST /api/auth/forgot-password — returns reset_url in response
+- POST /api/auth/reset-password — Zod validated (token + strong password)
+- GET /api/auth/verify-email/:token
+- POST /api/auth/resend-verification (auth required)
 
 ## Notes
+- Email is MOCKED (console only) — verify_url and reset_url returned in API response
 - 15 seeded jobs in Timisoara area
-- Admin panel visible only for admin role
-- Google OAuth creates user automatically on first login
+- Test users created during testing: test_iter7_*, test_reset_*, test_verify_*
