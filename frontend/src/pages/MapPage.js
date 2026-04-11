@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -53,6 +53,23 @@ export default function MapPage({ navigate, update }) {
   const [filter, setFilter]     = useState("all");
   const [userPos, setUserPos]   = useState(null);
   const [loading, setLoading]   = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const dragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartW = useRef(0);
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (!dragging.current) return;
+      const delta = e.clientX - dragStartX.current;
+      const newW = Math.min(520, Math.max(200, dragStartW.current + delta));
+      setSidebarWidth(newW);
+    };
+    const onMouseUp = () => { dragging.current = false; document.body.style.cursor = ""; document.body.style.userSelect = ""; };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => { window.removeEventListener("mousemove", onMouseMove); window.removeEventListener("mouseup", onMouseUp); };
+  }, []);
 
   const cats = ["all", ...new Set(jobs.map(j => j.category).filter(Boolean))];
   const filtered = filter === "all" ? jobs : jobs.filter(j => j.category === filter);
@@ -66,13 +83,13 @@ export default function MapPage({ navigate, update }) {
       .finally(() => setLoading(false));
   }, [userPos]);
 
-  // Center default: Cluj-Napoca
-  const center = userPos || [46.7712, 23.6236];
+  // Center default: Alicante
+  const center = userPos || [38.3452, -0.4815];
 
   return (
     <div style={{ display:"flex", height:"calc(100vh - 58px)" }}>
       {/* Sidebar */}
-      <div style={{ width:320, background:"#fff", borderRight:`1px solid ${T.border}`, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+      <div style={{ width:sidebarWidth, minWidth:200, maxWidth:520, background:"#fff", borderRight:`1px solid ${T.border}`, display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", flexShrink:0 }}>
         {/* Filtre categorii */}
         <div style={{ padding:"14px 14px 10px", borderBottom:`1px solid ${T.border}` }}>
           <div style={{ fontSize:12, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:8 }}>{t("map_filter","Filtrează")}</div>
@@ -124,6 +141,16 @@ export default function MapPage({ navigate, update }) {
             </div>
             <div style={{ fontSize:12, color:T.text3, marginBottom:4 }}>{selected.employer} · {selected.category}</div>
             <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:8 }}>{selected.salary} {t("job_per_day","€/zi")}</div>
+
+            {/* Galerie foto job */}
+            {selected.images?.length > 0 && (
+              <div style={{ display:"flex", gap:6, marginBottom:10, overflowX:"auto" }}>
+                {selected.images.map((img, i) => (
+                  <img key={i} src={img} alt="" style={{ height:72, minWidth:90, borderRadius:8, objectFit:"cover", border:`1.5px solid ${T.border}`, cursor:"pointer", flexShrink:0 }} onClick={() => window.open(img,"_blank")}/>
+                ))}
+              </div>
+            )}
+
             {selected.description && <div style={{ fontSize:12, color:T.text2, marginBottom:10, lineHeight:1.5 }}>{selected.description}</div>}
             {selected.skills?.length > 0 && (
               <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:10 }}>
@@ -168,6 +195,26 @@ export default function MapPage({ navigate, update }) {
             </div>
           </div>
         )}
+        {/* Drag handle */}
+        <div
+          onMouseDown={(e) => {
+            dragging.current = true;
+            dragStartX.current = e.clientX;
+            dragStartW.current = sidebarWidth;
+            document.body.style.cursor = "col-resize";
+            document.body.style.userSelect = "none";
+            e.preventDefault();
+          }}
+          style={{
+            position:"absolute", top:0, right:0, width:6, height:"100%",
+            cursor:"col-resize", zIndex:10,
+            background:"transparent",
+            transition:"background 0.15s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = `${T.green}40`}
+          onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+          title="Drag pentru a redimensiona"
+        />
       </div>
 
       {/* Harta */}
@@ -185,10 +232,16 @@ export default function MapPage({ navigate, update }) {
               eventHandlers={{ click: () => setSelected(job) }}
             >
               <Popup>
-                <div style={{ minWidth:160 }}>
-                  <strong>{job.title}</strong><br/>
-                  <span style={{ color:T.text3, fontSize:12 }}>{job.employer}</span><br/>
-                  <span style={{ color:job.color||T.green, fontWeight:700 }}>{job.salary} RON</span>
+                <div style={{ minWidth:180, fontFamily:"DM Sans,sans-serif" }}>
+                  {job.images?.[0] && (
+                    <img src={job.images[0]} alt="" style={{ width:"100%", height:100, objectFit:"cover", borderRadius:8, marginBottom:6, display:"block" }}/>
+                  )}
+                  <strong style={{ fontSize:13 }}>{job.title}</strong><br/>
+                  <span style={{ color:T.text3, fontSize:11 }}>{job.employer}</span><br/>
+                  <span style={{ color:job.color||T.green, fontWeight:700, fontSize:13 }}>{job.salary} RON</span>
+                  {job.images?.length > 1 && (
+                    <div style={{ fontSize:10, color:T.text3, marginTop:3 }}>🖼️ +{job.images.length - 1} {job.images.length === 2 ? "poză" : "poze"}</div>
+                  )}
                 </div>
               </Popup>
             </Marker>

@@ -92,11 +92,22 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/auth/logout
+router.post("/logout", (req, res) => {
+  res.json({ success: true });
+});
+
 // PUT /api/auth/profile
 router.put("/profile", authMiddleware, async (req, res) => {
   try {
-    const { name, phone, bio, skills } = req.body;
-    await db.updateUser(req.user.id, { name, phone, bio, skills: skills || [] });
+    const { name, phone, bio, skills, avatar } = req.body;
+    const patch = { name, phone, bio, skills: skills || [] };
+    // avatar = base64 data URL (compressed client-side, max ~300KB)
+    if (avatar !== undefined) {
+      if (avatar && avatar.length > 400000) return res.status(413).json({ error: "Poza prea mare. Max ~300KB." });
+      patch.avatar = avatar;
+    }
+    await db.updateUser(req.user.id, patch);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

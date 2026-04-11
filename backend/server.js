@@ -17,9 +17,13 @@ mongoose.connect(process.env.MONGO_URI)
 const ALLOWED_ORIGINS = [
   process.env.CLIENT_URL || "http://localhost:3000",
   "http://localhost:3000",
+  "http://localhost:3001",
+  "https://frontend-delta-five-76.vercel.app",
+  /\.vercel\.app$/,
 ];
 
 const app    = express();
+app.set("trust proxy", 1);
 const server = http.createServer(app);
 const io     = new Server(server, {
   cors: { origin: ALLOWED_ORIGINS, credentials: true }

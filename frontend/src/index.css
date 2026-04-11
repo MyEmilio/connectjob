@@ -24,7 +24,8 @@ body {
   /* Content padding bottom pentru bottom nav */
   .jc-main-content { padding-bottom: 72px !important; }
   /* Floating buttons repoziționare */
-  .jc-float-left { bottom: 76px !important; }
+  .jc-float-left      { bottom: 76px !important; }
+  .jc-float-transport { bottom: 130px !important; }
 }
 
 /* ── Desktop: bottom nav se ascunde ─────────── */

@@ -60,7 +60,7 @@ router.post("/block/:userId", auth, async (req, res) => {
 router.post("/unblock/:userId", auth, async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.user.id, {
-      $pull: { blocked_users: mongoose.Types.ObjectId(req.params.userId) },
+      $pull: { blocked_users: new mongoose.Types.ObjectId(req.params.userId) },
     });
     res.json({ success: true });
   } catch (err) {

@@ -16,6 +16,7 @@ const jobSchema = new mongoose.Schema({
   skills:      { type: [String], default: [] },
   icon:        { type: String, default: "💼" },
   color:       { type: String, default: "#059669" },
+  images:      { type: [String], default: [] },
   employer_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 }, { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } });
 

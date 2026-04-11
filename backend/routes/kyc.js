@@ -48,7 +48,8 @@ router.post("/send-otp", otpLimiter, auth, async (req, res) => {
       });
       res.json({ success: true });
     } else {
-      res.json({ success: true, demo_code: code, message: "Mod demo — configureaza Twilio pentru SMS real" });
+      console.log(`[KYC DEMO] OTP pentru ${phone}: ${code}`);
+      res.json({ success: true, message: "Mod demo — codul a fost logat in consola serverului" });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -61,6 +62,7 @@ router.post("/verify-otp", auth, async (req, res) => {
     const { phone, code } = req.body;
     const ok = await db.verifyOtp(phone, code);
     if (!ok) return res.status(400).json({ error: "Cod invalid sau expirat" });
+    await db.updateUser(req.user.id, { phone_verified: true });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -79,6 +81,9 @@ router.post("/upload-document", auth, (req, res) => {
 // POST /api/kyc/complete
 router.post("/complete", auth, async (req, res) => {
   try {
+    const user = await db.findUserById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User negasit" });
+    if (!user.phone_verified) return res.status(400).json({ error: "Trebuie sa verifici numarul de telefon inainte de a finaliza KYC." });
     await db.updateUser(req.user.id, { verified: true });
     res.json({ success: true, message: "Identitate verificata!" });
   } catch (err) {

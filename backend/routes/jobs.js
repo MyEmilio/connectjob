@@ -28,6 +28,15 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /api/jobs/my/applications — aplicatiile proprii ale unui worker
+router.get("/my/applications", auth, async (req, res) => {
+  try {
+    res.json(await db.getApplicationsByWorker(req.user.id));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/jobs/:id
 router.get("/:id", async (req, res) => {
   try {
@@ -42,17 +51,22 @@ router.get("/:id", async (req, res) => {
 // POST /api/jobs
 router.post("/", auth, async (req, res) => {
   try {
-    const { title, description, category, salary, type, urgent, lat, lng, skills, icon, color } = req.body;
+    const { title, description, category, salary, type, urgent, second_job, work_duration, lat, lng, skills, icon, color, images } = req.body;
     if (!title || !salary) return res.status(400).json({ error: "Titlu si salariu obligatorii" });
+    // Validate images: max 5, each max ~500KB base64
+    const safeImages = Array.isArray(images) ? images.slice(0, 5).filter(img => typeof img === "string" && img.length < 700000) : [];
     const job = await db.createJob({
       title, description, category, salary,
       type: type || "part-time",
       urgent: !!urgent,
+      second_job: !!second_job,
+      work_duration: work_duration || "zile",
       lat, lng,
       employer_id: req.user.id,
       skills: skills || [],
       icon: icon || "💼",
       color: color || "#059669",
+      images: safeImages,
     });
     res.json({ id: job.id, success: true });
   } catch (err) {
@@ -66,8 +80,8 @@ router.put("/:id", auth, async (req, res) => {
     const job = await db.findJobById(req.params.id);
     if (!job) return res.status(404).json({ error: "Job negasit" });
     if (String(job.employer_id) !== String(req.user.id)) return res.status(403).json({ error: "Nu esti proprietarul" });
-    const { title, description, category, salary, type, urgent, lat, lng, skills, active } = req.body;
-    await db.updateJob(req.params.id, { title, description, category, salary, type, urgent: !!urgent, lat, lng, skills: skills || [], active: active !== undefined ? active : true });
+    const { title, description, category, salary, type, urgent, second_job, work_duration, lat, lng, skills, active } = req.body;
+    await db.updateJob(req.params.id, { title, description, category, salary, type, urgent: !!urgent, second_job: !!second_job, work_duration: work_duration || "zile", lat, lng, skills: skills || [], active: active !== undefined ? active : true });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

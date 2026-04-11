@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MapPage from "./pages/MapPage";
 import LanguageSwitcher from "./components/LanguageSwitcher";
+import { AvatarUploader, ChatImagePicker } from "./components/ImageUploader";
 import PostJobPage from "./pages/PostJobPage";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -194,7 +195,10 @@ function JobCardRow({ job, promoted=false, navigate, update, t }) {
       onMouseLeave={e=>{ e.currentTarget.style.borderColor=promoted?T.amber:T.border; e.currentTarget.style.background=T.white; e.currentTarget.style.boxShadow=promoted?`0 4px 16px ${T.amber}22`:"none"; }}
     >
       {promoted && <div style={{ position:"absolute",top:-7,left:12,background:`linear-gradient(135deg,${T.amber},${T.amberDark})`,color:"#fff",borderRadius:999,padding:"2px 9px",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.08em" }}>⭐ {tr("home_stats_promoted")}</div>}
-      <div style={{ width:46,height:46,borderRadius:12,background:`${job.color||T.green}15`,border:`1.5px solid ${job.color||T.green}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0 }}>{job.icon||"💼"}</div>
+      {job.images?.[0]
+        ? <img src={job.images[0]} alt="" style={{width:46,height:46,borderRadius:12,objectFit:"cover",border:`1.5px solid ${job.color||T.green}33`,flexShrink:0}}/>
+        : <div style={{ width:46,height:46,borderRadius:12,background:`${job.color||T.green}15`,border:`1.5px solid ${job.color||T.green}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0 }}>{job.icon||"💼"}</div>
+      }
       <div style={{ flex:1,minWidth:0 }}>
         <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:2 }}>
           <div style={{ fontWeight:700,fontSize:14,color:T.text }}>{job.title}</div>
@@ -871,27 +875,27 @@ function PageChat({ gs, update, navigate }) {
 
   // Date demo pentru cand nu exista conversatii reale
   const DEMO_CONVS = [
-    { id:"demo1", user1_id:"me", user2_id:"other1", user2_name:"SC CleanPro SRL", user2_initials:"CP", job_title:"Curățare piscinã", last_msg:"Ești disponibil mâine?", unread:2 },
-    { id:"demo2", user1_id:"me", user2_id:"other2", user2_name:"Maria Constantin", user2_initials:"MC", job_title:"Plimbare câini", last_msg:"Câinii sunt doi labradors 🐕", unread:0 },
-    { id:"demo3", user1_id:"me", user2_id:"other3", user2_name:"Andrei Electricul", user2_initials:"AE", job_title:"Reparații electrice", last_msg:"Pot începe luni.", unread:1 },
+    { id:"demo1", user1_id:"me", user2_id:"other1", user2_name:"SC CleanPro SRL", user2_initials:"CP", job_title:t("chat_demo1_job"), last_msg:t("chat_demo1_m5"), unread:2 },
+    { id:"demo2", user1_id:"me", user2_id:"other2", user2_name:"Maria Constantin", user2_initials:"MC", job_title:t("chat_demo2_job"), last_msg:t("chat_demo2_m3"), unread:0 },
+    { id:"demo3", user1_id:"me", user2_id:"other3", user2_name:"Andrei Electricul", user2_initials:"AE", job_title:t("chat_demo3_job"), last_msg:t("chat_demo3_m3"), unread:1 },
   ];
   const DEMO_MESSAGES = {
     demo1:[
-      {id:1,sender_id:"other1",sender_initials:"CP",text:"Bună ziua! Am văzut că ai aplicat pentru curățare piscinã.",created_at:new Date().toISOString()},
-      {id:2,sender_id:"me",sender_initials:"AI",text:"Da! Sunt interesat. Am 3 ani experiență.",created_at:new Date().toISOString()},
-      {id:3,sender_id:"other1",sender_initials:"CP",text:"Excelent! Ce program preferi?",created_at:new Date().toISOString()},
-      {id:4,sender_id:"me",sender_initials:"AI",text:"Prefer dimineața, 8-12.",created_at:new Date().toISOString()},
-      {id:5,sender_id:"other1",sender_initials:"CP",text:"Ești disponibil mâine?",created_at:new Date().toISOString()},
+      {id:1,sender_id:"other1",sender_initials:"CP",text:t("chat_demo1_m1"),created_at:new Date().toISOString()},
+      {id:2,sender_id:"me",sender_initials:"AI",text:t("chat_demo1_m2"),created_at:new Date().toISOString()},
+      {id:3,sender_id:"other1",sender_initials:"CP",text:t("chat_demo1_m3"),created_at:new Date().toISOString()},
+      {id:4,sender_id:"me",sender_initials:"AI",text:t("chat_demo1_m4"),created_at:new Date().toISOString()},
+      {id:5,sender_id:"other1",sender_initials:"CP",text:t("chat_demo1_m5"),created_at:new Date().toISOString()},
     ],
     demo2:[
-      {id:1,sender_id:"other2",sender_initials:"MC",text:"Salut! Ai experiență cu câini mari?",created_at:new Date().toISOString()},
-      {id:2,sender_id:"me",sender_initials:"AI",text:"Da, am crescut cu câini mari!",created_at:new Date().toISOString()},
-      {id:3,sender_id:"other2",sender_initials:"MC",text:"Câinii mei sunt doi labradors 🐕",created_at:new Date().toISOString()},
+      {id:1,sender_id:"other2",sender_initials:"MC",text:t("chat_demo2_m1"),created_at:new Date().toISOString()},
+      {id:2,sender_id:"me",sender_initials:"AI",text:t("chat_demo2_m2"),created_at:new Date().toISOString()},
+      {id:3,sender_id:"other2",sender_initials:"MC",text:t("chat_demo2_m3"),created_at:new Date().toISOString()},
     ],
     demo3:[
-      {id:1,sender_id:"me",sender_initials:"AI",text:"Bună ziua! Ai autorizație ANRE?",created_at:new Date().toISOString()},
-      {id:2,sender_id:"other3",sender_initials:"AE",text:"Da, 5 ani experiență. Am autorizație.",created_at:new Date().toISOString()},
-      {id:3,sender_id:"other3",sender_initials:"AE",text:"Pot începe luni, am toate sculele.",created_at:new Date().toISOString()},
+      {id:1,sender_id:"me",sender_initials:"AI",text:t("chat_demo3_m1"),created_at:new Date().toISOString()},
+      {id:2,sender_id:"other3",sender_initials:"AE",text:t("chat_demo3_m2"),created_at:new Date().toISOString()},
+      {id:3,sender_id:"other3",sender_initials:"AE",text:t("chat_demo3_m3"),created_at:new Date().toISOString()},
     ],
   };
 
@@ -991,7 +995,7 @@ function PageChat({ gs, update, navigate }) {
       setTyping(true);
       setTimeout(()=>{
         setTyping(false);
-        const rep=["Mulțumesc! Revin curând.","Perfect, vorbim mâine!","Înțeles, te sun.","Excelent!"][Math.floor(Math.random()*4)];
+        const rep=[t("chat_autoreply1","Mulțumesc! Revin curând."),t("chat_autoreply2","Perfect, vorbim mâine!"),t("chat_autoreply3","Înțeles, te sun."),t("chat_autoreply4","Excelent!")][Math.floor(Math.random()*4)];
         const repMsg={id:Date.now()+1,sender_id:"other",sender_initials:"??",text:rep,created_at:new Date().toISOString()};
         setMessages(p=>[...p, repMsg]);
       },1000+Math.random()*800);
@@ -1194,7 +1198,7 @@ function PageChat({ gs, update, navigate }) {
         {isDemo && (
           <div style={{ margin:"6px 12px 0",background:"#fef3c7",borderRadius:8,padding:"5px 12px",display:"flex",alignItems:"center",gap:8,border:"1px solid #fde68a",fontSize:11,color:"#92400e" }}>
             <span>⚡</span>
-            <span><strong>Mod demonstratie</strong> — Aplică la un job pentru a porni o conversație reală.</span>
+            <span dangerouslySetInnerHTML={{ __html: t("chat_demo_banner") }}/>
           </div>
         )}
 
@@ -1215,7 +1219,12 @@ function PageChat({ gs, update, navigate }) {
               <div key={msg.id} style={{ display:"flex",flexDirection:isMe?"row-reverse":"row",alignItems:"flex-end",gap:6,animation:"fadeIn 0.2s ease" }}>
                 {!isMe&&<Avatar initials={msg.sender_initials||"??"} color={T.green} size={24}/>}
                 <div style={{ maxWidth:"65%" }}>
-                  <div style={{ background:isMe?`linear-gradient(135deg,${T.green},${T.greenDark})`:T.white,color:isMe?"#fff":T.text,borderRadius:isMe?"16px 16px 4px 16px":"16px 16px 16px 4px",padding:"8px 12px",fontSize:13,lineHeight:1.5,boxShadow:isMe?`0 2px 8px ${T.green}33`:"0 1px 4px rgba(0,0,0,0.06)",border:isMe?"none":`1.5px solid ${T.border}` }}>{msg.text}</div>
+                  <div style={{ background:isMe?`linear-gradient(135deg,${T.green},${T.greenDark})`:T.white,color:isMe?"#fff":T.text,borderRadius:isMe?"16px 16px 4px 16px":"16px 16px 16px 4px",padding:msg.image?"4px":"8px 12px",fontSize:13,lineHeight:1.5,boxShadow:isMe?`0 2px 8px ${T.green}33`:"0 1px 4px rgba(0,0,0,0.06)",border:isMe?"none":`1.5px solid ${T.border}`,overflow:"hidden" }}>
+                    {msg.image
+                      ? <img src={msg.image} alt="" style={{display:"block",maxWidth:220,maxHeight:200,borderRadius:12,cursor:"pointer"}} onClick={()=>window.open(msg.image,"_blank")}/>
+                      : msg.text
+                    }
+                  </div>
                   <div style={{ fontSize:10,marginTop:2,textAlign:isMe?"right":"left",color:T.text3,paddingLeft:isMe?0:4,paddingRight:isMe?4:0 }}>
                     {timeStr}{isMe&&<span style={{color:T.green}}> ✓✓</span>}
                   </div>
@@ -1251,6 +1260,14 @@ function PageChat({ gs, update, navigate }) {
             <div style={{ flex:1,background:"#f5f5f4",borderRadius:12,border:isListening?`1.5px solid #ef4444`:`1.5px solid ${T.border}`,padding:"8px 12px",transition:"border 0.2s" }}>
               <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}} placeholder={isListening?t("chat_speaking"):t("chat_placeholder")} rows={1} style={{ width:"100%",background:"transparent",border:"none",outline:"none",fontSize:13,fontFamily:"DM Sans,sans-serif",color:T.text,resize:"none",lineHeight:1.5,maxHeight:72 }}/>
             </div>
+            <ChatImagePicker onImage={(base64) => {
+              const imgMsg={id:Date.now(),sender_id:"me",sender_initials:gs.user?.initials||"EU",text:"",image:base64,created_at:new Date().toISOString()};
+              setMessages(p=>[...p, imgMsg]);
+              if(isDemo){setConvs(p=>p.map(c=>c.id===activeId?{...c,last_msg:"🖼️"}:c));return;}
+              const socket=getSocket();
+              if(socket) socket.emit("send_message",{conversation_id:activeId,text:"[image]",image:base64});
+              else api.post("/messages",{conversation_id:activeId,text:"[image]",image:base64}).catch(()=>{});
+            }}/>
             <button onClick={isListening?stopVoice:startVoice} style={{ width:38,height:38,borderRadius:10,border:"none",cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",background:isListening?"linear-gradient(135deg,#ef4444,#dc2626)":`linear-gradient(135deg,${T.dark},${T.dark3})`,boxShadow:isListening?"0 0 0 3px rgba(239,68,68,0.3)":"none",transition:"all 0.2s" }}>{isListening?"⏹":"🎤"}</button>
             <button onClick={send} disabled={!input.trim()&&!interim.trim()} style={{ width:38,height:38,borderRadius:10,border:"none",cursor:(input.trim()||interim.trim())?"pointer":"not-allowed",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",background:(input.trim()||interim.trim())?`linear-gradient(135deg,${T.green},${T.greenDark})`:"#e7e5e4",boxShadow:(input.trim()||interim.trim())?`0 4px 12px ${T.green}44`:"none",transition:"all 0.2s" }}>➤</button>
           </div>
@@ -1292,7 +1309,7 @@ function PageEscrow({ gs, update, navigate }) {
   const fmtCard=v=>v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
   const fmtExp=v=>{const c=v.replace(/\D/g,"").slice(0,4);return c.length>2?c.slice(0,2)+"/"+c.slice(2):c;};
 
-  const steps=["Configurare","Plată","Task activ","Finalizat"];
+  const steps=[t("escrow_step1","Configurare"),t("escrow_step2","Plată"),t("escrow_step3","Task activ"),t("escrow_step4","Finalizat")];
 
   return (
     <div style={{ maxWidth:520, margin:"0 auto", animation:"fadeIn 0.3s ease" }}>
@@ -1328,19 +1345,19 @@ function PageEscrow({ gs, update, navigate }) {
               </div>
             ))}
           </div>
-          {[{i:"🔒",t:"Angajatorul blochează banii"},{i:"⚡",t:"Lucrătorul execută taskul"},{i:"✅",t:"Ambii confirmă finalizarea"},{i:"💸",t:"Banii eliberați automat"}].map(s=>(
+          {[{i:"🔒",t:t("escrow_flow1","Angajatorul blochează banii")},{i:"⚡",t:t("escrow_flow2","Lucrătorul execută taskul")},{i:"✅",t:t("escrow_flow3","Ambii confirmă finalizarea")},{i:"💸",t:t("escrow_flow4","Banii eliberați automat")}].map(s=>(
             <div key={s.t} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:`1px solid ${T.border}`}}>
               <div style={{width:28,height:28,borderRadius:"50%",background:"#f0fdf4",border:"1px solid #bbf7d0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>{s.i}</div>
               <span style={{fontSize:13,color:T.text2}}>{s.t}</span>
             </div>
           ))}
-          <Btn onClick={()=>setStep(1)} color={T.green} style={{width:"100%",justifyContent:"center",marginTop:18}} size="lg">💳 Continuă la plată</Btn>
+          <Btn onClick={()=>setStep(1)} color={T.green} style={{width:"100%",justifyContent:"center",marginTop:18}} size="lg">💳 {t("escrow_continue_payment","Continuă la plată")}</Btn>
         </Card>
       )}
 
       {step===1&&(
         <Card style={{padding:"24px"}}>
-          <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 18px"}}>💳 Metodă de plată</h3>
+          <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 18px"}}>💳 {t("escrow_payment_method","Metodă de plată")}</h3>
           <div style={{display:"flex",gap:8,marginBottom:18}}>
             {[{k:"card",l:"💳 Card"},{k:"bank",l:"🏦 Transfer"},{k:"paypal",l:"🔵 PayPal"}].map(m=>(
               <button key={m.k} onClick={()=>setMethod(m.k)} style={{flex:1,padding:"10px 6px",borderRadius:11,cursor:"pointer",border:method===m.k?`2px solid ${T.green}`:`1.5px solid ${T.border}`,background:method===m.k?"#f0fdf4":"#fafaf9",fontSize:13,fontWeight:700,color:method===m.k?T.green:T.text2,transition:"all 0.2s"}}>{m.l}</button>
@@ -1350,14 +1367,14 @@ function PageEscrow({ gs, update, navigate }) {
             <div style={{marginBottom:18}}>
               <div style={{background:`linear-gradient(135deg,${T.dark},${T.dark2})`,borderRadius:14,padding:"18px",marginBottom:14,height:90,position:"relative",overflow:"hidden"}}>
                 <div style={{position:"absolute",top:-16,right:-16,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.05)"}}/>
-                <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",marginBottom:6,textTransform:"uppercase",letterSpacing:"0.1em"}}>Număr card</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",marginBottom:6,textTransform:"uppercase",letterSpacing:"0.1em"}}>{t("escrow_card_number","Număr card")}</div>
                 <div style={{fontSize:17,fontFamily:"monospace",color:"#fff",letterSpacing:"0.12em",fontWeight:700}}>{card.num||"•••• •••• •••• ••••"}</div>
                 <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:11}}>
-                  <span style={{color:"rgba(255,255,255,0.4)"}}>Expiră: <span style={{color:"#fff"}}>{card.exp||"MM/YY"}</span></span>
+                  <span style={{color:"rgba(255,255,255,0.4)"}}>{t("escrow_card_expires","Expiră")}: <span style={{color:"#fff"}}>{card.exp||"MM/YY"}</span></span>
                   <span style={{color:"rgba(255,255,255,0.6)",fontWeight:700}}>VISA</span>
                 </div>
               </div>
-              {[{l:"Număr card",v:card.num,set:v=>setCard(c=>({...c,num:fmtCard(v)})),ph:"1234 5678 9012 3456"},{l:"Expiră",v:card.exp,set:v=>setCard(c=>({...c,exp:fmtExp(v)})),ph:"MM/YY"},{l:"CVV",v:card.cvv,set:v=>setCard(c=>({...c,cvv:v.slice(0,3)})),ph:"•••",type:"password"}].map(f=>(
+              {[{l:t("escrow_card_number","Număr card"),v:card.num,set:v=>setCard(c=>({...c,num:fmtCard(v)})),ph:"1234 5678 9012 3456"},{l:t("escrow_card_expires","Expiră"),v:card.exp,set:v=>setCard(c=>({...c,exp:fmtExp(v)})),ph:"MM/YY"},{l:"CVV",v:card.cvv,set:v=>setCard(c=>({...c,cvv:v.slice(0,3)})),ph:"•••",type:"password"}].map(f=>(
                 <div key={f.l} style={{marginBottom:10}}>
                   <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:4}}>{f.l}</label>
                   <input value={f.v} onChange={e=>f.set(e.target.value)} placeholder={f.ph} type={f.type||"text"} style={{width:"100%",height:42,borderRadius:9,border:`1.5px solid ${T.border}`,padding:"0 12px",fontSize:14,fontFamily:"DM Sans,sans-serif",outline:"none",boxSizing:"border-box"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
@@ -1367,7 +1384,7 @@ function PageEscrow({ gs, update, navigate }) {
           )}
           {method==="bank"&&(
             <div style={{background:"#fafaf9",borderRadius:12,padding:"14px",marginBottom:18,border:`1px solid ${T.border}`}}>
-              {[{l:"IBAN",v:"RO49 AAAA 1B31 0075 9384 0000"},{l:"Beneficiar",v:"ConnectJob SRL"},{l:"Referință",v:"ESC-2025-001234"},{l:"Sumă",v:`${total} RON`}].map(r=>(
+              {[{l:"IBAN",v:"RO49 AAAA 1B31 0075 9384 0000"},{l:t("escrow_beneficiary","Beneficiar"),v:"ConnectJob SRL"},{l:t("escrow_reference","Referință"),v:"ESC-2025-001234"},{l:t("escrow_amount","Sumă"),v:`${total} RON`}].map(r=>(
                 <div key={r.l} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:`1px solid ${T.border}`,fontSize:13}}>
                   <span style={{color:T.text3}}>{r.l}</span><span style={{fontWeight:600,color:T.text}}>{r.v}</span>
                 </div>
@@ -1412,7 +1429,7 @@ function PageEscrow({ gs, update, navigate }) {
               <div style={{height:"100%",background:T.green,borderRadius:999,width:`${Math.min((timer/3600)*100,100)}%`,transition:"width 1s"}}/>
             </div>
           </div>
-          {[{l:"Plată blocată",d:true},{l:"Lucrătorul a confirmat",d:true},{l:"Task în execuție",d:timer>0},{l:"Confirmare finalizare",d:false},{l:"Bani eliberați",d:false}].map(s=>(
+          {[{l:t("escrow_status1","Plată blocată"),d:true},{l:t("escrow_status2","Lucrătorul a confirmat"),d:true},{l:t("escrow_status3","Task în execuție"),d:timer>0},{l:t("escrow_status4","Confirmare finalizare"),d:false},{l:t("escrow_status5","Bani eliberați"),d:false}].map(s=>(
             <div key={s.l} style={{display:"flex",alignItems:"center",gap:9,padding:"7px 0",borderBottom:`1px solid ${T.border}`}}>
               <div style={{width:20,height:20,borderRadius:"50%",background:s.d?T.green:"#f5f5f4",border:s.d?"none":`2px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#fff",flexShrink:0}}>{s.d?"✓":""}</div>
               <span style={{fontSize:13,color:s.d?T.green:T.text3,fontWeight:s.d?600:400}}>{s.l}</span>
@@ -1444,7 +1461,7 @@ function PageEscrow({ gs, update, navigate }) {
           <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 8px"}}>{t("escrow_task_done_title")}</h2>
           <p style={{fontSize:14,color:T.text2,marginBottom:20}}>{t("escrow_task_done_msg")}</p>
           <div style={{display:"flex",gap:10}}>
-            <Btn onClick={()=>navigate("reviews")} color={T.amber} style={{flex:1,justifyContent:"center"}}>⭐ Lasă recenzie</Btn>
+            <Btn onClick={()=>navigate("reviews")} color={T.amber} style={{flex:1,justifyContent:"center"}}>⭐ {t("reviews_leave_btn","Lasă recenzie")}</Btn>
             <Btn onClick={()=>navigate("home")} variant="outline" style={{flex:1,justifyContent:"center"}}>🏠 Acasă</Btn>
           </div>
         </Card>
@@ -1468,9 +1485,9 @@ function PageContract({ gs, update, navigate }) {
   if(!job) return (
     <div style={{textAlign:"center",padding:"60px 24px",color:T.text2}}>
       <div style={{fontSize:52,marginBottom:14}}>📝</div>
-      <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:700,color:T.text,marginBottom:8}}>Niciun job selectat</div>
-      <div style={{fontSize:14,marginBottom:24,color:T.text2}}>Selectează un job din lista de locuri de muncă pentru a genera contractul.</div>
-      <Btn onClick={()=>navigate("jobs")} color={T.green} style={{margin:"0 auto"}}>🗂️ Caută joburi</Btn>
+      <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:700,color:T.text,marginBottom:8}}>{t("contract_no_job_title","Niciun job selectat")}</div>
+      <div style={{fontSize:14,marginBottom:24,color:T.text2}}>{t("contract_no_job_desc","Selectează un job din lista de locuri de muncă pentru a genera contractul.")}</div>
+      <Btn onClick={()=>navigate("jobs")} color={T.green} style={{margin:"0 auto"}}>🗂️ {t("contract_search_jobs","Caută joburi")}</Btn>
     </div>
   );
   const date=new Date().toLocaleDateString("ro",{year:"numeric",month:"long",day:"numeric"});
@@ -1595,15 +1612,25 @@ function PageVerify({ gs, update, navigate }) {
       <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:28,fontWeight:800,color:T.text,margin:"0 0 10px"}}>{t("verify_success_title")}</h2>
       <p style={{fontSize:15,color:T.text2,marginBottom:24}}>{t("verify_success_msg")}</p>
       <div style={{display:"inline-flex",alignItems:"center",gap:12,background:"linear-gradient(135deg,#f0fdf4,#dcfce7)",border:`2px solid ${T.green}`,borderRadius:14,padding:"14px 22px",marginBottom:24}}>
-        <Avatar initials={gs.user.initials} color={T.green} size={46}/>
+        <AvatarUploader
+          current={gs.user.avatar}
+          size={56}
+          onSave={async (base64) => {
+            try {
+              await api.put("/auth/profile", { avatar: base64 });
+              update({ user: { ...gs.user, avatar: base64 } });
+            } catch {}
+          }}
+        />
         <div style={{textAlign:"left"}}>
           <div style={{fontWeight:700,fontSize:16,color:T.text,fontFamily:"Outfit,sans-serif"}}>{gs.user.name}</div>
           <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3}}>
-            <span style={{background:T.green,color:"#fff",borderRadius:999,padding:"1px 9px",fontSize:11,fontWeight:700}}>✓ Verificat</span>
+            <span style={{background:T.green,color:"#fff",borderRadius:999,padding:"1px 9px",fontSize:11,fontWeight:700}}>✓ {t("nav_verified","Verificat")}</span>
           </div>
+          <div style={{fontSize:11,color:T.text3,marginTop:4}}>📷 {t("upload_click_avatar","Click pe poză pentru a schimba")}</div>
         </div>
       </div>
-      <Btn onClick={()=>navigate("home")} color={T.green} size="lg" style={{width:"100%",justifyContent:"center"}}>🏠 Înapoi acasă</Btn>
+      <Btn onClick={()=>navigate("home")} color={T.green} size="lg" style={{width:"100%",justifyContent:"center"}}>🏠 {t("btn_back_home","Înapoi acasă")}</Btn>
     </div>
   );
 
@@ -1785,7 +1812,7 @@ function PageReviews({ gs, update }) {
         <Card style={{padding:"24px",textAlign:"center"}}>
           <div style={{fontFamily:"Outfit,sans-serif",fontSize:52,fontWeight:800,color:T.text,lineHeight:1}}>{avg}</div>
           <Stars rating={parseFloat(avg)} size={20}/>
-          <div style={{fontSize:13,color:T.text3,marginTop:8}}>{reviews.length} recenzii</div>
+          <div style={{fontSize:13,color:T.text3,marginTop:8}}>{reviews.length} {t("reviews_total","recenzii")}</div>
           <div style={{marginTop:12}}>
             {[5,4,3,2,1].map(s=>{
               const count=reviews.filter(r=>r.rating===s).length;
@@ -1807,19 +1834,19 @@ function PageReviews({ gs, update }) {
           {/* Write review */}
           {!submitted?(
             <Card style={{padding:"20px",marginBottom:14}}>
-              <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:"0 0 14px"}}>✍️ Lasă o recenzie</h3>
+              <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:"0 0 14px"}}>✍️ {t("reviews_leave_title","Lasă o recenzie")}</h3>
               <div style={{display:"flex",gap:6,marginBottom:12}}>
                 {[1,2,3,4,5].map(s=>(
                   <button key={s} onClick={()=>setMyRating(s)} style={{width:36,height:36,borderRadius:8,border:`1.5px solid ${s<=myRating?T.amber:T.border}`,background:s<=myRating?"#fef3c7":"#fafaf9",fontSize:18,cursor:"pointer",transition:"all 0.15s"}}>★</button>
                 ))}
               </div>
-              <textarea value={myText} onChange={e=>setMyText(e.target.value)} placeholder="Descrie experiența ta..." rows={3} style={{width:"100%",borderRadius:10,border:`1.5px solid ${T.border}`,padding:"9px 12px",fontSize:13,fontFamily:"DM Sans,sans-serif",resize:"none",outline:"none",boxSizing:"border-box"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
-              <Btn onClick={submit} disabled={!myRating||!myText.trim()} color={T.green} style={{width:"100%",justifyContent:"center",marginTop:10}}>⭐ Publică recenzia</Btn>
+              <textarea value={myText} onChange={e=>setMyText(e.target.value)} placeholder={t("reviews_placeholder","Descrie experiența ta...")} rows={3} style={{width:"100%",borderRadius:10,border:`1.5px solid ${T.border}`,padding:"9px 12px",fontSize:13,fontFamily:"DM Sans,sans-serif",resize:"none",outline:"none",boxSizing:"border-box"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
+              <Btn onClick={submit} disabled={!myRating||!myText.trim()} color={T.green} style={{width:"100%",justifyContent:"center",marginTop:10}}>⭐ {t("reviews_publish_btn","Publică recenzia")}</Btn>
             </Card>
           ):(
             <Card style={{padding:"20px",marginBottom:14,border:`2px solid ${T.green}`,textAlign:"center"}}>
               <div style={{fontSize:36,marginBottom:8}}>🎉</div>
-              <div style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text}}>Recenzie publicată!</div>
+              <div style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text}}>{t("reviews_published","Recenzie publicată!")}</div>
             </Card>
           )}
 
@@ -1843,10 +1870,10 @@ function PageReviews({ gs, update }) {
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
                     <Avatar initials={r.reviewer_initials||r.reviewer_name?.slice(0,2)||"??"} color={T.green} size={32}/>
                     <div>
-                      <div style={{fontSize:13,fontWeight:700,color:T.text}}>{r.reviewer_name||"Anonim"}</div>
+                      <div style={{fontSize:13,fontWeight:700,color:T.text}}>{r.reviewer_name||t("reviews_anon","Anonim")}</div>
                       <div style={{display:"flex",alignItems:"center",gap:6,marginTop:1}}>
                         <Stars rating={r.rating} size={11}/>
-                        {r.reviewer_verified&&<span style={{background:"#f0fdf4",color:T.green,borderRadius:999,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ Verificat</span>}
+                        {r.reviewer_verified&&<span style={{background:"#f0fdf4",color:T.green,borderRadius:999,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ {t("nav_verified","Verificat")}</span>}
                       </div>
                     </div>
                   </div>
@@ -1921,10 +1948,10 @@ function PageAnalytics({ gs }) {
                 <div style={{width:36,height:36,borderRadius:9,background:`${job.color}15`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{job.icon}</div>
                 <div><div style={{fontWeight:700,fontSize:14,color:T.text,fontFamily:"Outfit,sans-serif"}}>{job.title}</div><div style={{fontSize:11,color:T.text3}}>📋 {job.category} · {job.salary} {t("analytics_per_day")}</div></div>
               </div>
-              <Badge color={T.green}>● activ</Badge>
+              <Badge color={T.green}>● {t("analytics_active","activ")}</Badge>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
-              {[{l:"Vizualizări",v:job.rating*50|0,c:T.blue},{l:"Aplicări",v:job.reviews,c:T.green},{l:"Contacte",v:Math.round(job.reviews*0.3),c:T.purple},{l:"Conversie",v:`${(job.reviews/(job.rating*50)*100).toFixed(1)}%`,c:T.amber}].map(m=>(
+              {[{l:t("analytics_views","Vizualizări"),v:job.rating*50|0,c:T.blue},{l:t("analytics_applies","Aplicări"),v:job.reviews,c:T.green},{l:t("analytics_contacts","Contacte"),v:Math.round(job.reviews*0.3),c:T.purple},{l:t("analytics_conversion","Conversie"),v:`${(job.reviews/(job.rating*50)*100).toFixed(1)}%`,c:T.amber}].map(m=>(
                 <div key={m.l} style={{textAlign:"center",padding:"6px 4px",background:"#fafaf9",borderRadius:7}}>
                   <div style={{fontSize:14,fontWeight:800,color:m.c,fontFamily:"Outfit,sans-serif"}}>{m.v}</div>
                   <div style={{fontSize:9,color:T.text3}}>{m.l}</div>
@@ -2599,10 +2626,13 @@ function ConnectJobApp() {
           </div>
           {/* Avatar */}
           <div style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}} onClick={()=>navigate("verify")}>
-            <Avatar initials={gs.user.initials} color={T.green} size={32}/>
+            {gs.user.avatar
+              ? <img src={gs.user.avatar} alt="" style={{width:32,height:32,borderRadius:"50%",objectFit:"cover",border:`2px solid ${T.green}`}}/>
+              : <Avatar initials={gs.user.initials} color={T.green} size={32}/>
+            }
             <div style={{display:"flex",flexDirection:"column"}}>
               <span style={{fontSize:12,fontWeight:700,color:T.text,lineHeight:1}}>{gs.user.name.split(" ")[0]}</span>
-              {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>✓ Verificat</span>}
+              {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>✓ {t("nav_verified","Verificat")}</span>}
             </div>
           </div>
           {/* Selector de limba */}
@@ -2821,6 +2851,7 @@ function MiniBar({ value, max, color }) {
 //  MAIN CALCULATOR COMPONENT
 // ══════════════════════════════════════════════════════════════
 export function FuelCalculator({ defaultFrom="", defaultTo="", onClose }) {
+  const { t } = useTranslation("t");
   const [from, setFrom]         = useState(defaultFrom);
   const [to, setTo]             = useState(defaultTo);
   const [fuelType, setFuelType] = useState("benzina");
@@ -3059,8 +3090,8 @@ export function FuelCalculator({ defaultFrom="", defaultTo="", onClose }) {
                 transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:8,
               }}>
                 {loading
-                  ? <><div style={{width:18,height:18,borderRadius:"50%",border:"2px solid #ccc",borderTopColor:"#888",animation:"spin 0.8s linear infinite"}}/>Se calculează...</>
-                  : <>🗺️ Calculează ruta tur-retur</>
+                  ? <><div style={{width:18,height:18,borderRadius:"50%",border:"2px solid #ccc",borderTopColor:"#888",animation:"spin 0.8s linear infinite"}}/>{t("fuel_calculating","Se calculează...")}</>
+                  : <>🗺️ {t("fuel_calc_btn","Calculează ruta tur-retur")}</>
                 }
               </button>
             </div>
@@ -3207,6 +3238,7 @@ export function FuelCalculator({ defaultFrom="", defaultTo="", onClose }) {
 export function FuelButton({ defaultFrom="", defaultTo="" }) {
   const [open, setOpen] = useState(false);
   const [pulse, setPulse] = useState(true);
+  const [hover, setHover] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setPulse(false), 4000);
@@ -3216,26 +3248,26 @@ export function FuelButton({ defaultFrom="", defaultTo="" }) {
   return (
     <>
       {/* Floating button */}
-      <div className="jc-float-left" style={{ position:"fixed", bottom:28, left:28, zIndex:990 }}>
+      <div className="jc-float-left" style={{ position:"fixed", bottom:16, left:16, zIndex:990 }}>
         {/* Tooltip */}
-        {pulse && (
+        {(pulse || hover) && (
           <div style={{
-            position:"absolute",bottom:"calc(100% + 10px)",left:0,
+            position:"absolute",bottom:"calc(100% + 8px)",left:0,
             background:T.dark,color:"#f1f5f9",
-            borderRadius:9,padding:"7px 12px",
-            fontSize:12,fontWeight:600,whiteSpace:"nowrap",
+            borderRadius:9,padding:"6px 10px",
+            fontSize:11,fontWeight:600,whiteSpace:"nowrap",
             boxShadow:"0 4px 12px rgba(0,0,0,0.3)",
             animation:"fadeIn 0.3s ease",
           }}>
             ⛽ Calculator rută & carburant
-            <div style={{ position:"absolute",bottom:-5,right:20,width:10,height:10,background:T.dark,transform:"rotate(45deg)" }}/>
+            <div style={{ position:"absolute",bottom:-5,left:14,width:8,height:8,background:T.dark,transform:"rotate(45deg)" }}/>
           </div>
         )}
 
         {/* Pulse ring */}
         {pulse && (
           <div style={{
-            position:"absolute",inset:-8,borderRadius:"50%",
+            position:"absolute",inset:-6,borderRadius:"50%",
             border:`2px solid ${T.green}`,
             animation:"ringPulse 1.5s ease-out infinite",
           }}/>
@@ -3244,21 +3276,23 @@ export function FuelButton({ defaultFrom="", defaultTo="" }) {
         <button
           onClick={() => { setOpen(true); setPulse(false); }}
           style={{
-            width:58, height:58, borderRadius:"50%", border:"none",
+            width:44, height:44, borderRadius:"50%", border:"none",
             cursor:"pointer",
             background:`linear-gradient(135deg,${T.green},${T.greenD})`,
-            boxShadow:`0 6px 24px ${T.green}66, 0 2px 8px rgba(0,0,0,0.2)`,
+            boxShadow:`0 4px 16px ${T.green}55, 0 2px 6px rgba(0,0,0,0.15)`,
             display:"flex", alignItems:"center", justifyContent:"center",
-            fontSize:26,
+            fontSize:20,
             transition:"all 0.25s cubic-bezier(0.175,0.885,0.32,1.275)",
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = "scale(1.12)";
-            e.currentTarget.style.boxShadow = `0 10px 30px ${T.green}88`;
+            e.currentTarget.style.boxShadow = `0 8px 22px ${T.green}77`;
+            setHover(true);
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = "scale(1)";
-            e.currentTarget.style.boxShadow = `0 6px 24px ${T.green}66, 0 2px 8px rgba(0,0,0,0.2)`;
+            e.currentTarget.style.boxShadow = `0 4px 16px ${T.green}55, 0 2px 6px rgba(0,0,0,0.15)`;
+            setHover(false);
           }}
         >
           🗺️
@@ -3513,6 +3547,7 @@ function moovitUrl(from, to) {
 //  MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
 export function TransportSchedule({ from = "", to = "", onClose }) {
+  const { t } = useTranslation("t");
   const [selectedCity, setSelectedCity] = useState(detectCity(from) || "madrid");
   const [selectedType, setSelectedType] = useState("all");
   const [selectedDay,  setSelectedDay]  = useState("weekday");
@@ -3568,7 +3603,7 @@ export function TransportSchedule({ from = "", to = "", onClose }) {
             </div>
             <div style={{ textAlign:"right" }}>
               <div style={{ fontFamily:"monospace",fontSize:22,fontWeight:800,color:T.greenLight }}>{timeStr}</div>
-              <div style={{ fontSize:10,color:"#64748b",textTransform:"uppercase" }}>Ora curentă</div>
+              <div style={{ fontSize:10,color:"#64748b",textTransform:"uppercase" }}>{t("transport_current_time","Ora curentă")}</div>
             </div>
             <button onClick={onClose} style={{ width:34,height:34,borderRadius:9,background:"#1e293b",border:"1px solid #334155",color:"#64748b",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",marginLeft:4 }}>✕</button>
           </div>
@@ -3903,6 +3938,7 @@ export function TransportSchedule({ from = "", to = "", onClose }) {
 export function TransportButton({ from = "", to = "" }) {
   const [open, setOpen] = useState(false);
   const [pulse, setPulse] = useState(true);
+  const [hover, setHover] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setPulse(false), 5000);
@@ -3911,22 +3947,22 @@ export function TransportButton({ from = "", to = "" }) {
 
   return (
     <>
-      <div style={{ position:"fixed", bottom:28, left:100, zIndex:990 }}>
-        {pulse && (
+      <div className="jc-float-transport" style={{ position:"fixed", bottom:70, left:16, zIndex:990 }}>
+        {(pulse || hover) && (
           <div style={{
-            position:"absolute", bottom:"calc(100% + 10px)", left:0,
-            background:T.dark, color:"#f1f5f9", borderRadius:9, padding:"7px 12px",
-            fontSize:12, fontWeight:600, whiteSpace:"nowrap",
+            position:"absolute", bottom:"calc(100% + 8px)", left:0,
+            background:T.dark, color:"#f1f5f9", borderRadius:9, padding:"6px 10px",
+            fontSize:11, fontWeight:600, whiteSpace:"nowrap",
             boxShadow:"0 4px 12px rgba(0,0,0,0.3)", animation:"fadeIn 0.3s ease",
           }}>
             🚇 Program transport public
-            <div style={{ position:"absolute",bottom:-5,left:20,width:10,height:10,background:T.dark,transform:"rotate(45deg)" }}/>
+            <div style={{ position:"absolute",bottom:-5,left:14,width:8,height:8,background:T.dark,transform:"rotate(45deg)" }}/>
           </div>
         )}
 
         {pulse && (
           <div style={{
-            position:"absolute", inset:-8, borderRadius:"50%",
+            position:"absolute", inset:-6, borderRadius:"50%",
             border:"2px solid #2563eb",
             animation:"ringPulse 1.5s ease-out infinite",
           }}/>
@@ -3934,15 +3970,15 @@ export function TransportButton({ from = "", to = "" }) {
 
         <button
           onClick={() => { setOpen(true); setPulse(false); }}
+          onMouseEnter={e => { e.currentTarget.style.transform="scale(1.12)"; e.currentTarget.style.boxShadow="0 8px 22px rgba(37,99,235,0.6)"; setHover(true); }}
+          onMouseLeave={e => { e.currentTarget.style.transform="scale(1)"; e.currentTarget.style.boxShadow="0 4px 16px rgba(37,99,235,0.45), 0 2px 6px rgba(0,0,0,0.15)"; setHover(false); }}
           style={{
-            width:58, height:58, borderRadius:"50%", border:"none", cursor:"pointer",
+            width:44, height:44, borderRadius:"50%", border:"none", cursor:"pointer",
             background:"linear-gradient(135deg,#2563eb,#1d4ed8)",
-            boxShadow:"0 6px 24px rgba(37,99,235,0.55), 0 2px 8px rgba(0,0,0,0.2)",
-            display:"flex", alignItems:"center", justifyContent:"center", fontSize:26,
+            boxShadow:"0 4px 16px rgba(37,99,235,0.45), 0 2px 6px rgba(0,0,0,0.15)",
+            display:"flex", alignItems:"center", justifyContent:"center", fontSize:20,
             transition:"all 0.25s cubic-bezier(0.175,0.885,0.32,1.275)",
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform="scale(1.12)"; }}
-          onMouseLeave={e => { e.currentTarget.style.transform="scale(1)"; }}
         >🚇</button>
       </div>
 

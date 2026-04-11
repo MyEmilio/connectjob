@@ -67,6 +67,10 @@ router.post("/:id/release", auth, async (req, res) => {
 // POST /api/payments/:id/dispute
 router.post("/:id/dispute", auth, async (req, res) => {
   try {
+    const payment = await db.findPaymentById(req.params.id);
+    if (!payment) return res.status(404).json({ error: "Plata negasita" });
+    if (String(payment.payer_id) !== String(req.user.id) && String(payment.payee_id) !== String(req.user.id))
+      return res.status(403).json({ error: "Acces interzis" });
     await db.updatePayment(req.params.id, { status: "disputed" });
     res.json({ success: true, message: "Disputa inregistrata. Echipa va analiza in 24h." });
   } catch (err) {
