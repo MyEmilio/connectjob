@@ -15,6 +15,7 @@ import ro from "./locales/ro";
 import ar from "./locales/ar";
 
 export const LANGUAGES = [
+  { code:"ro", label:"Română",     flag:"🇷🇴", rtl:false },
   { code:"es", label:"Español",    flag:"🇪🇸", rtl:false },
   { code:"ca", label:"Català",     flag:"🏴󠁥󠁳󠁣󠁴󠁿", rtl:false },
   { code:"en", label:"English",    flag:"🇬🇧", rtl:false },
@@ -24,7 +25,6 @@ export const LANGUAGES = [
   { code:"it", label:"Italiano",   flag:"🇮🇹", rtl:false },
   { code:"nl", label:"Nederlands", flag:"🇳🇱", rtl:false },
   { code:"ru", label:"Русский",    flag:"🇷🇺", rtl:false },
-  { code:"ro", label:"Română",     flag:"🇷🇴", rtl:false },
   { code:"ar", label:"العربية",    flag:"🇸🇦", rtl:true  },
 ];
 
@@ -37,8 +37,8 @@ i18n
     resources,
     ns: ["t"],
     defaultNS: "t",
-    fallbackLng: "es",          // Spaniola — limba principala
-    lng: localStorage.getItem("jc_lang") || "es",
+    fallbackLng: "ro",          // Româna — limba principala
+    lng: localStorage.getItem("jc_lang") || "ro",
     interpolation: { escapeValue: false },
     detection: { order: ["localStorage"], lookupLocalStorage: "jc_lang" },
   });
@@ -52,7 +52,7 @@ i18n.on("languageChanged", (lng) => {
 });
 
 // Seteaza directia la pornire
-const initialLang = localStorage.getItem("jc_lang") || "es";
+const initialLang = localStorage.getItem("jc_lang") || "ro";
 const initialRtl  = LANGUAGES.find(l => l.code === initialLang)?.rtl || false;
 document.documentElement.setAttribute("dir", initialRtl ? "rtl" : "ltr");
 document.documentElement.setAttribute("lang", initialLang);
