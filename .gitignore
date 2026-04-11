@@ -28,6 +28,11 @@ pids
 
 # Coverage directory
 coverage/
+
+# Test reports and test files (may contain test credentials)
+test_reports/
+backend/tests/
+backend_test.py
 .nyc_output
 
 # IDE
