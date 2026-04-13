@@ -9,6 +9,7 @@ export default function LanguageSwitcher() {
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState({ top:0, right:0 });
   const btnRef = useRef(null);
+  const isMobile = window.innerWidth < 768;
 
   const current = LANGUAGES.find(l => l.code === i18n.language) || LANGUAGES[0];
 
@@ -38,13 +39,13 @@ export default function LanguageSwitcher() {
   return (
     <div style={{ position:"relative" }}>
       <button ref={btnRef} onClick={handleOpen} style={{
-        display:"flex", alignItems:"center", gap:6, padding:"6px 12px",
+        display:"flex", alignItems:"center", gap:4, padding: isMobile ? "6px 8px" : "6px 12px",
         borderRadius:10, border:`1.5px solid ${T.border}`, background:"#fff",
         cursor:"pointer", fontSize:13, fontWeight:600, color:T.text,
         transition:"all 0.15s",
       }}>
         <span style={{ fontSize:16 }}>{current.flag}</span>
-        <span style={{ maxWidth:60, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{current.label}</span>
+        {!isMobile && <span style={{ maxWidth:60, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{current.label}</span>}
         <span style={{ fontSize:10, color:T.text2, marginLeft:2 }}>{open ? "▲" : "▼"}</span>
       </button>
 

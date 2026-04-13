@@ -1590,8 +1590,88 @@ function PageContract({ gs, update, navigate }) {
 // ══════════════════════════════════════════════════════════════
 function PageVerify({ gs, update, navigate }) {
   const { t } = useTranslation("t");
+  const COUNTRY_CODES = [
+    {flag:"🇦🇱",name:"Albania",code:"+355"},
+    {flag:"🇩🇪",name:"Allemagne",code:"+49"},
+    {flag:"🇦🇩",name:"Andorra",code:"+376"},
+    {flag:"🇦🇴",name:"Angola",code:"+244"},
+    {flag:"🇸🇦",name:"Arabia Saudită",code:"+966"},
+    {flag:"🇦🇷",name:"Argentina",code:"+54"},
+    {flag:"🇦🇲",name:"Armenia",code:"+374"},
+    {flag:"🇦🇺",name:"Australia",code:"+61"},
+    {flag:"🇦🇹",name:"Austria",code:"+43"},
+    {flag:"🇦🇿",name:"Azerbaidjan",code:"+994"},
+    {flag:"🇧🇪",name:"Belgia",code:"+32"},
+    {flag:"🇧🇾",name:"Belarus",code:"+375"},
+    {flag:"🇧🇦",name:"Bosnia",code:"+387"},
+    {flag:"🇧🇷",name:"Brazilia",code:"+55"},
+    {flag:"🇧🇬",name:"Bulgaria",code:"+359"},
+    {flag:"🇨🇦",name:"Canada",code:"+1"},
+    {flag:"🇨🇱",name:"Chile",code:"+56"},
+    {flag:"🇨🇳",name:"China",code:"+86"},
+    {flag:"🇨🇾",name:"Cipru",code:"+357"},
+    {flag:"🇨🇴",name:"Columbia",code:"+57"},
+    {flag:"🇭🇷",name:"Croatia",code:"+385"},
+    {flag:"🇩🇰",name:"Danemarca",code:"+45"},
+    {flag:"🇪🇨",name:"Ecuador",code:"+593"},
+    {flag:"🇪🇬",name:"Egipt",code:"+20"},
+    {flag:"🇦🇪",name:"Emiratele Arabe",code:"+971"},
+    {flag:"🇪🇪",name:"Estonia",code:"+372"},
+    {flag:"🇪🇹",name:"Etiopia",code:"+251"},
+    {flag:"🇵🇭",name:"Filipine",code:"+63"},
+    {flag:"🇫🇮",name:"Finlanda",code:"+358"},
+    {flag:"🇫🇷",name:"Franța",code:"+33"},
+    {flag:"🇬🇪",name:"Georgia",code:"+995"},
+    {flag:"🇬🇷",name:"Grecia",code:"+30"},
+    {flag:"🇳🇱",name:"Olanda",code:"+31"},
+    {flag:"🇭🇺",name:"Ungaria",code:"+36"},
+    {flag:"🇮🇳",name:"India",code:"+91"},
+    {flag:"🇮🇩",name:"Indonezia",code:"+62"},
+    {flag:"🇮🇪",name:"Irlanda",code:"+353"},
+    {flag:"🇮🇱",name:"Israel",code:"+972"},
+    {flag:"🇮🇹",name:"Italia",code:"+39"},
+    {flag:"🇯🇵",name:"Japonia",code:"+81"},
+    {flag:"🇰🇿",name:"Kazahstan",code:"+7"},
+    {flag:"🇰🇬",name:"Kârgâzstan",code:"+996"},
+    {flag:"🇽🇰",name:"Kosovo",code:"+383"},
+    {flag:"🇱🇻",name:"Letonia",code:"+371"},
+    {flag:"🇱🇧",name:"Liban",code:"+961"},
+    {flag:"🇱🇹",name:"Lituania",code:"+370"},
+    {flag:"🇱🇺",name:"Luxemburg",code:"+352"},
+    {flag:"🇲🇰",name:"Macedonia",code:"+389"},
+    {flag:"🇲🇦",name:"Maroc",code:"+212"},
+    {flag:"🇲🇩",name:"Moldova",code:"+373"},
+    {flag:"🇲🇪",name:"Muntenegru",code:"+382"},
+    {flag:"🇲🇽",name:"Mexic",code:"+52"},
+    {flag:"🇳🇴",name:"Norvegia",code:"+47"},
+    {flag:"🇵🇰",name:"Pakistan",code:"+92"},
+    {flag:"🇵🇪",name:"Peru",code:"+51"},
+    {flag:"🇵🇱",name:"Polonia",code:"+48"},
+    {flag:"🇵🇹",name:"Portugalia",code:"+351"},
+    {flag:"🇬🇧",name:"Regatul Unit",code:"+44"},
+    {flag:"🇨🇿",name:"Cehia",code:"+420"},
+    {flag:"🇷🇴",name:"România",code:"+40"},
+    {flag:"🇷🇺",name:"Rusia",code:"+7"},
+    {flag:"🇸🇲",name:"San Marino",code:"+378"},
+    {flag:"🇷🇸",name:"Serbia",code:"+381"},
+    {flag:"🇸🇰",name:"Slovacia",code:"+421"},
+    {flag:"🇸🇮",name:"Slovenia",code:"+386"},
+    {flag:"🇪🇸",name:"Spania",code:"+34"},
+    {flag:"🇸🇪",name:"Suedia",code:"+46"},
+    {flag:"🇨🇭",name:"Elveția",code:"+41"},
+    {flag:"🇹🇯",name:"Tadjikistan",code:"+992"},
+    {flag:"🇹🇭",name:"Thailanda",code:"+66"},
+    {flag:"🇹🇳",name:"Tunisia",code:"+216"},
+    {flag:"🇹🇷",name:"Turcia",code:"+90"},
+    {flag:"🇺🇦",name:"Ucraina",code:"+380"},
+    {flag:"🇺🇸",name:"SUA",code:"+1"},
+    {flag:"🇺🇿",name:"Uzbekistan",code:"+998"},
+    {flag:"🇻🇪",name:"Venezuela",code:"+58"},
+    {flag:"🇻🇳",name:"Vietnam",code:"+84"},
+  ];
   const [step,setStep]=useState(gs.user.verified?4:0);
   const [phone,setPhone]=useState("");
+  const [prefix,setPrefix]=useState("+34");
   const [otp,setOtp]=useState(["","","","","",""]);
   const [otpSent,setOtpSent]=useState(false);
   const [otpTimer,setOtpTimer]=useState(0);
@@ -1669,15 +1749,19 @@ function PageVerify({ gs, update, navigate }) {
               <div style={{marginBottom:14}}>
                 <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",letterSpacing:"0.05em",marginBottom:6}}>{t("verify_phone_lbl")}</label>
                 <div style={{display:"flex",gap:8}}>
-                  <div style={{padding:"0 12px",background:"#f5f5f4",borderRadius:9,border:`1.5px solid ${T.border}`,display:"flex",alignItems:"center",fontSize:14,fontWeight:600,whiteSpace:"nowrap"}}>🇷🇴 +40</div>
-                  <input value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,""))} placeholder="722 123 456" maxLength={9} style={{flex:1,height:44,borderRadius:9,border:`1.5px solid ${T.border}`,padding:"0 12px",fontSize:15,fontFamily:"DM Sans,sans-serif",outline:"none",letterSpacing:"0.1em"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
+                  <select value={prefix} onChange={e=>setPrefix(e.target.value)} style={{height:44,borderRadius:9,border:`1.5px solid ${T.border}`,padding:"0 8px",fontSize:13,fontFamily:"DM Sans,sans-serif",outline:"none",background:"#f5f5f4",cursor:"pointer",minWidth:110,maxWidth:130}}>
+                    {COUNTRY_CODES.map(c=>(
+                      <option key={c.code+c.name} value={c.code}>{c.flag} {c.name} {c.code}</option>
+                    ))}
+                  </select>
+                  <input value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,""))} placeholder="722 123 456" maxLength={12} style={{flex:1,height:44,borderRadius:9,border:`1.5px solid ${T.border}`,padding:"0 12px",fontSize:15,fontFamily:"DM Sans,sans-serif",outline:"none",letterSpacing:"0.1em"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
                 </div>
               </div>
               <Btn onClick={async()=>{
                 if(phone.length<9)return; setLoading(true);
                 try {
                   const apiMod = await import("./services/api");
-                  const res = await apiMod.default.post("/kyc/send-otp",{ phone:`+40${phone}` });
+                  const res = await apiMod.default.post("/kyc/send-otp",{ phone:`${prefix}${phone}` });
                   if(res.data.demo_code) alert(`📱 Cod demo (doar dezvoltare): ${res.data.demo_code}`);
                   setOtpSent(true); setOtpTimer(60);
                 } catch(e){ alert(e.response?.data?.error||"Eroare la trimitere SMS"); }
@@ -1686,7 +1770,7 @@ function PageVerify({ gs, update, navigate }) {
             </>
           ):(
             <>
-              <p style={{fontSize:13,color:"#057a55",textAlign:"center",marginBottom:14,background:"#f0fdf4",borderRadius:8,padding:"7px",border:"1px solid #bbf7d0"}}>{t("verify_code_sent")} +40 {phone}</p>
+              <p style={{fontSize:13,color:"#057a55",textAlign:"center",marginBottom:14,background:"#f0fdf4",borderRadius:8,padding:"7px",border:"1px solid #bbf7d0"}}>{t("verify_code_sent")} {prefix} {phone}</p>
               <div style={{marginBottom:14}}>
                 <label style={{display:"block",fontSize:11,fontWeight:700,color:T.text2,textTransform:"uppercase",marginBottom:9}}>{t("verify_code_lbl")}</label>
                 <div style={{display:"flex",gap:7,justifyContent:"center"}}>
@@ -1701,7 +1785,7 @@ function PageVerify({ gs, update, navigate }) {
                 if(code.length<6)return; setLoading(true);
                 try {
                   const apiMod = await import("./services/api");
-                  await apiMod.default.post("/kyc/verify-otp",{ phone:`+40${phone}`, code });
+                  await apiMod.default.post("/kyc/verify-otp",{ phone:`${prefix}${phone}`, code });
                   setStep(2);
                 } catch(e){ alert(e.response?.data?.error||"Cod invalid sau expirat"); }
                 finally{ setLoading(false); }
@@ -2606,34 +2690,38 @@ function ConnectJobApp() {
       )}
 
       {/* Top navbar */}
-      <nav style={{ background:"rgba(255,255,255,0.97)",backdropFilter:"blur(14px)",borderBottom:`1.5px solid ${T.border}`,height:58,padding:"0 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:80,boxShadow:"0 1px 20px rgba(0,0,0,0.05)" }}>
-        <div style={{display:"flex",alignItems:"center",gap:9}}>
+      <nav style={{ background:"rgba(255,255,255,0.97)",backdropFilter:"blur(14px)",borderBottom:`1.5px solid ${T.border}`,height:58,padding:"0 12px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:80,boxShadow:"0 1px 20px rgba(0,0,0,0.05)" }}>
+        <div style={{display:"flex",alignItems:"center",gap:9,flexShrink:0}}>
           <div style={{width:32,height:32,borderRadius:10,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:`0 3px 10px ${T.green}44`}}>⚡</div>
-          <span style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:18,color:T.text,letterSpacing:"-0.02em"}}>Connect<span style={{color:T.green}}>Job</span></span>
+          {!isMobile && <span style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:18,color:T.text,letterSpacing:"-0.02em"}}>Connect<span style={{color:T.green}}>Job</span></span>}
         </div>
 
-        {/* Page title */}
-        <div style={{fontFamily:"Outfit,sans-serif",fontWeight:700,fontSize:15,color:T.text2}}>
-          {PAGE_TITLES[page]}
-        </div>
+        {/* Page title — ascuns pe mobile */}
+        {!isMobile && (
+          <div style={{fontFamily:"Outfit,sans-serif",fontWeight:700,fontSize:15,color:T.text2}}>
+            {PAGE_TITLES[page]}
+          </div>
+        )}
 
         {/* User area */}
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <div style={{display:"flex",alignItems:"center",gap:isMobile?6:10,flexShrink:0}}>
           {/* Notifications */}
           <div style={{position:"relative"}}>
             <button style={{width:34,height:34,borderRadius:9,background:"#f5f5f4",border:`1.5px solid ${T.border}`,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>🔔</button>
             {gs.notifications>0&&<div style={{position:"absolute",top:-4,right:-4,width:16,height:16,borderRadius:"50%",background:T.red,border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700,color:"#fff"}}>{gs.notifications}</div>}
           </div>
-          {/* Avatar */}
+          {/* Avatar — pe mobile doar iconita, fara text */}
           <div style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}} onClick={()=>navigate("verify")}>
             {gs.user.avatar
               ? <img src={gs.user.avatar} alt="" style={{width:32,height:32,borderRadius:"50%",objectFit:"cover",border:`2px solid ${T.green}`}}/>
               : <Avatar initials={gs.user.initials} color={T.green} size={32}/>
             }
-            <div style={{display:"flex",flexDirection:"column"}}>
-              <span style={{fontSize:12,fontWeight:700,color:T.text,lineHeight:1}}>{gs.user.name.split(" ")[0]}</span>
-              {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>✓ {t("nav_verified","Verificat")}</span>}
-            </div>
+            {!isMobile && (
+              <div style={{display:"flex",flexDirection:"column"}}>
+                <span style={{fontSize:12,fontWeight:700,color:T.text,lineHeight:1}}>{gs.user.name.split(" ")[0]}</span>
+                {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>✓ {t("nav_verified","Verificat")}</span>}
+              </div>
+            )}
           </div>
           {/* Selector de limba */}
           <LanguageSwitcher/>
