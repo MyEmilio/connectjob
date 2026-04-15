@@ -182,7 +182,7 @@ export default function Register() {
               <GoogleLogin
                 onSuccess={handleGoogle}
                 onError={()=>setError(t("error_generic"))}
-                theme="outline" size="large" width="100%"
+                theme="outline" size="large" width={360}
                 text="signup_with" shape="rectangular"
                 locale={localStorage.getItem("jc_lang")||"es"}
               />

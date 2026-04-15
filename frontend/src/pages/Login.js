@@ -122,7 +122,7 @@ export default function Login() {
                 useOneTap={false}
                 theme="outline"
                 size="large"
-                width="100%"
+                width={360}
                 text="signin_with"
                 shape="rectangular"
                 locale={localStorage.getItem("jc_lang") || "es"}
