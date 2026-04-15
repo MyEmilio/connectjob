@@ -18,8 +18,12 @@ const ALLOWED_ORIGINS = [
   process.env.CLIENT_URL || "http://localhost:3000",
   "http://localhost:3000",
   "http://localhost:3001",
+  "https://connectjob-frontend.onrender.com",
+  "https://connectjob.app",
+  "https://www.connectjob.app",
   "https://frontend-delta-five-76.vercel.app",
   /\.vercel\.app$/,
+  /\.onrender\.com$/,
 ];
 
 const app    = express();
