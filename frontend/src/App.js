@@ -58,12 +58,31 @@ function ConnectJobApp() {
   const { user, loading: authLoading, logout } = useAuth();
   const { t } = useTranslation("t");
   const [gs, updateGs] = useGlobalState();
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState(() => {
+    // Restore page from URL hash if present
+    const hash = window.location.hash.replace("#", "");
+    return hash && hash !== "" ? hash : "home";
+  });
   const [loadingPage, setLoadingPage] = useState(false);
   const [pwaShow, setPwaShow] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [trialInfo, setTrialInfo] = useState(null);
   const prevPage = useRef("home");
+
+  // Sync page state with browser history for back button support
+  useEffect(() => {
+    const onPopState = (e) => {
+      const newPage = e.state?.page || window.location.hash.replace("#", "") || "home";
+      prevPage.current = page;
+      setPage(newPage);
+    };
+    window.addEventListener("popstate", onPopState);
+    // Set initial history state
+    if (!window.history.state?.page) {
+      window.history.replaceState({ page }, "", `#${page}`);
+    }
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [page]);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -100,6 +119,7 @@ function ConnectJobApp() {
     if(to===page) return;
     setLoadingPage(true);
     prevPage.current = page;
+    window.history.pushState({ page: to }, "", `#${to}`);
     setTimeout(()=>{ setPage(to); setLoadingPage(false); }, 200);
   }, [page]);
 
