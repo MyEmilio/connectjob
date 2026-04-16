@@ -6,17 +6,17 @@ import api from "../services/api";
 import { getSocket } from "../services/socket";
 
 const LANGS = [
-  { code:"ro", speech:"ro-RO", flag:"\u{1F1F7}\u{1F1F4}", name:"Română" },
-  { code:"en", speech:"en-GB", flag:"\u{1F1EC}\u{1F1E7}", name:"English" },
   { code:"es", speech:"es-ES", flag:"\u{1F1EA}\u{1F1F8}", name:"Español" },
+  { code:"ca", speech:"ca-ES", flag:"\u{1F3F4}", name:"Català" },
+  { code:"en", speech:"en-GB", flag:"\u{1F1EC}\u{1F1E7}", name:"English" },
   { code:"fr", speech:"fr-FR", flag:"\u{1F1EB}\u{1F1F7}", name:"Français" },
   { code:"de", speech:"de-DE", flag:"\u{1F1E9}\u{1F1EA}", name:"Deutsch" },
   { code:"it", speech:"it-IT", flag:"\u{1F1EE}\u{1F1F9}", name:"Italiano" },
   { code:"pt", speech:"pt-PT", flag:"\u{1F1F5}\u{1F1F9}", name:"Português" },
   { code:"nl", speech:"nl-NL", flag:"\u{1F1F3}\u{1F1F1}", name:"Nederlands" },
   { code:"ru", speech:"ru-RU", flag:"\u{1F1F7}\u{1F1FA}", name:"Русский" },
+  { code:"ro", speech:"ro-RO", flag:"\u{1F1F7}\u{1F1F4}", name:"Română" },
   { code:"ar", speech:"ar-SA", flag:"\u{1F1F8}\u{1F1E6}", name:"العربية" },
-  { code:"ca", speech:"ca-ES", flag:"\u{1F3F4}", name:"Català" },
 ];
 
 export default function PageChat({ gs, update, navigate }) {
@@ -30,8 +30,8 @@ export default function PageChat({ gs, update, navigate }) {
   const [interim, setInterim]   = useState("");
   const [recTime, setRecTime]   = useState(0);
   const [myLang, setMyLang]     = useState(() => {
-    const uiLang = i18n.language?.split("-")[0] || "ro";
-    return LANGS.find(l => l.code === uiLang)?.code || "ro";
+    const uiLang = i18n.language?.split("-")[0] || "es";
+    return LANGS.find(l => l.code === uiLang)?.code || "es";
   });
   const [modal, setModal]       = useState(null);
   const [reportReason, setReportReason] = useState("");
