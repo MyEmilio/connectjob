@@ -87,7 +87,7 @@ router.post(
   messageValidator,
   async (req, res) => {
     try {
-      const { text } = req.body;
+      const { text, attachment } = req.body;
       const conv = await db.findConversationById(req.params.id);
       if (!conv) return res.status(404).json({ error: "Conversatie negasita" });
       if (
@@ -96,22 +96,35 @@ router.post(
       )
         return res.status(403).json({ error: "Acces interzis" });
 
-      // Chat moderation — check for contact info sharing
-      const sender = await User.findById(req.user.id).lean();
-      const modResult = moderateMessage(text.trim(), sender?.subscription_plan || "free");
-      if (!modResult.allowed) {
-        return res.status(403).json({
-          error: modResult.reason,
-          moderation: true,
-          category: modResult.category,
-        });
+      // Chat moderation — check text for contact info sharing
+      if (text && text.trim()) {
+        const sender = await User.findById(req.user.id).lean();
+        const modResult = moderateMessage(text.trim(), sender?.subscription_plan || "free");
+        if (!modResult.allowed) {
+          return res.status(403).json({
+            error: modResult.reason,
+            moderation: true,
+            category: modResult.category,
+          });
+        }
       }
 
-      const msg = await db.createMessage({
+      const msgData = {
         conversation_id: req.params.id,
         sender_id: req.user.id,
-        text: text.trim(),
-      });
+        text: (text || "").trim(),
+      };
+      if (attachment?.url) {
+        msgData.attachment = {
+          url: attachment.url,
+          type: attachment.type || "image",
+          name: attachment.name || "",
+          size: attachment.size || 0,
+          mimetype: attachment.mimetype || "",
+        };
+      }
+
+      const msg = await db.createMessage(msgData);
 
       // Send push notification to recipient
       try {

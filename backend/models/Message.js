@@ -16,17 +16,33 @@ const messageSchema = new mongoose.Schema(
     },
     text: {
       type: String,
-      required: [true, "Mesajul este obligatoriu"],
+      default: "",
       maxlength: [2000, "Mesajul poate avea maxim 2000 caractere"],
       trim: true,
     },
     read: { type: Boolean, default: false },
+    // File attachment
+    attachment: {
+      url: { type: String, default: "" },
+      type: { type: String, enum: ["", "image", "document"], default: "" },
+      name: { type: String, default: "" },
+      size: { type: Number, default: 0 },
+      mimetype: { type: String, default: "" },
+    },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
 
 // Compound index for conversation messages
 messageSchema.index({ conversation_id: 1, created_at: -1 });
+
+// Validate: must have text or attachment
+messageSchema.pre("validate", function (next) {
+  if (!this.text && !this.attachment?.url) {
+    this.invalidate("text", "El mensaje debe tener texto o archivo adjunto");
+  }
+  next();
+});
 
 messageSchema.set("toJSON", {
   virtuals: true,

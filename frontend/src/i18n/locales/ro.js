@@ -486,6 +486,9 @@ const ro = {
   map_day: "zi",
   map_distance: "distanta",
   map_my_location: "Locatia mea",
+  map_open_gmaps: "Deschide in Google Maps",
+  chat_file_too_large: "Fisierul e prea mare (max. 10MB)",
+  chat_upload_error: "Eroare la uploadul fisierului",
 
   // Escrow
   escrow_select_job: "Selecteaza un job pentru a folosi Escrow.",

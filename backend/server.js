@@ -131,6 +131,7 @@ app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/stats", require("./routes/stats"));
 app.use("/api/translate", require("./routes/translate"));
 app.use("/api/subscriptions", require("./routes/subscriptions"));
+app.use("/api/uploads", require("./routes/uploads"));
 
 // ── Health Check ───────────────────────────────────────────────
 const startTime = Date.now();

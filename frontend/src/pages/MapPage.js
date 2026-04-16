@@ -7,7 +7,6 @@ import "react-leaflet-cluster/dist/assets/MarkerCluster.css";
 import "react-leaflet-cluster/dist/assets/MarkerCluster.Default.css";
 import api from "../services/api";
 import { useTranslation } from "react-i18next";
-import { FuelCalculator, TransportSchedule } from "./FuelCalculator";
 
 // Fix icoane Leaflet cu Webpack
 delete L.Icon.Default.prototype._getIconUrl;
@@ -96,8 +95,6 @@ export default function MapPage({ navigate, update }) {
   const [loading, setLoading]   = useState(true);
   const [radius, setRadius]     = useState(50);
   const [mapSize, setMapSize]   = useState("normal");
-  const [showRoute, setShowRoute] = useState(false);
-  const [showTransport, setShowTransport] = useState(false);
 
   const cats = useMemo(() => ["all", ...new Set(jobs.map(j => j.category).filter(Boolean))], [jobs]);
   const filtered = useMemo(() => {
@@ -216,7 +213,7 @@ export default function MapPage({ navigate, update }) {
           <div data-testid="map-job-detail" style={{ borderTop:`2px solid ${T.green}22`, padding:14, background:"#fafaf9", overflowY:"auto", maxHeight:"45%" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
               <div style={{ fontWeight:800, fontSize:15, color:T.text }}>{selected.title}</div>
-              <button data-testid="map-close-detail" onClick={() => { setSelected(null); setShowRoute(false); setShowTransport(false); }} style={{ background:"none", border:"none", cursor:"pointer", fontSize:16, color:T.text3 }}>✕</button>
+              <button data-testid="map-close-detail" onClick={() => setSelected(null)} style={{ background:"none", border:"none", cursor:"pointer", fontSize:16, color:T.text3 }}>✕</button>
             </div>
             <div style={{ fontSize:12, color:T.text3, marginBottom:4 }}>{selected.employer || t("map_employer","Empleador")} · {selected.category}</div>
             <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:6 }}>{selected.salary} RON/{t("map_day","día")}</div>
@@ -244,40 +241,23 @@ export default function MapPage({ navigate, update }) {
                   background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
                 }}>💬 {t("nav_chat","Mensaje")}</button>
               </div>
-              {/* Contextual: Route Calculator + Transport - only when job selected */}
-              <div style={{ display:"flex", gap:6, marginTop:2 }}>
-                <button data-testid="map-route-calc-btn" onClick={() => { setShowRoute(!showRoute); setShowTransport(false); }} style={{
-                  flex:1, padding:"7px", borderRadius:8, border: showRoute ? `1.5px solid ${T.amber}` : `1px solid ${T.border}`, cursor:"pointer",
-                  background: showRoute ? "#fef3c7" : "#fff", color: showRoute ? "#d97706" : T.text2, fontWeight:600, fontSize:12,
-                }}>⛽ {t("home_fuel_calc","Calculadora Ruta")}</button>
-                <button data-testid="map-transport-btn" onClick={() => { setShowTransport(!showTransport); setShowRoute(false); }} style={{
-                  flex:1, padding:"7px", borderRadius:8, border: showTransport ? `1.5px solid ${T.blue}` : `1px solid ${T.border}`, cursor:"pointer",
-                  background: showTransport ? "#eff6ff" : "#fff", color: showTransport ? T.blue : T.text2, fontWeight:600, fontSize:12,
-                }}>🚌 Transport</button>
-              </div>
+              {/* Google Maps navigation button */}
+              <button data-testid="map-gmaps-btn" onClick={() => {
+                const dest = `${selected.lat},${selected.lng}`;
+                const origin = userPos ? `${userPos[0]},${userPos[1]}` : "";
+                const url = origin
+                  ? `https://www.google.com/maps/dir/${origin}/${dest}`
+                  : `https://www.google.com/maps/search/?api=1&query=${dest}`;
+                window.open(url, "_blank");
+              }} style={{
+                width:"100%", padding:"9px", borderRadius:8, border:"none", cursor:"pointer",
+                background:"linear-gradient(135deg,#4285F4,#34A853)", color:"#fff", fontWeight:700, fontSize:12,
+                display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+                boxShadow:"0 3px 10px rgba(66,133,244,0.3)",
+              }}>
+                🗺️ {t("map_open_gmaps")}
+              </button>
             </div>
-          </div>
-        )}
-
-        {/* Contextual Route Calculator overlay */}
-        {showRoute && selected && (
-          <div style={{ borderTop:`1px solid ${T.border}`, maxHeight:"50%", overflowY:"auto" }}>
-            <FuelCalculator
-              defaultFrom={userPos ? `${userPos[0].toFixed(4)},${userPos[1].toFixed(4)}` : t("map_my_location","Mi ubicación")}
-              defaultTo={selected.location?.address || selected.title}
-              onClose={() => setShowRoute(false)}
-            />
-          </div>
-        )}
-
-        {/* Contextual Transport overlay */}
-        {showTransport && selected && (
-          <div style={{ borderTop:`1px solid ${T.border}`, maxHeight:"50%", overflowY:"auto" }}>
-            <TransportSchedule
-              from={userPos ? `${userPos[0].toFixed(4)},${userPos[1].toFixed(4)}` : "Locatia mea"}
-              to={selected.location?.address || selected.title}
-              onClose={() => setShowTransport(false)}
-            />
           </div>
         )}
       </div>

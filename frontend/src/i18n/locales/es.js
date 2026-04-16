@@ -632,6 +632,9 @@ const es = {
   map_day: "día",
   map_distance: "distancia",
   map_my_location: "Mi ubicación",
+  map_open_gmaps: "Abrir en Google Maps",
+  chat_file_too_large: "El archivo es demasiado grande (máx. 10MB)",
+  chat_upload_error: "Error al subir archivo",
 
   // Escrow
   escrow_select_job: "Selecciona un empleo para usar Escrow.",

@@ -6,7 +6,6 @@ import usePushNotifications from "../hooks/usePushNotifications";
 import useNotificationPreferences from "../hooks/useNotificationPreferences";
 import DashboardStats from "../components/DashboardStats";
 import AdvancedSearch from "../components/AdvancedSearch";
-import { FuelCalculatorModal, TransportSchedule } from "./FuelCalculator";
 
 function HowItWorksModal({ onClose }) {
   const { t } = useTranslation("t");
@@ -138,8 +137,6 @@ export default function PageHome({ gs, update, navigate }) {
   const promotedJobs = allJobs.filter(j => j.promoted);
   const recentJobs = allJobs.slice(0, 6);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
-  const [showFuelCalc, setShowFuelCalc] = useState(false);
-  const [showTransport, setShowTransport] = useState(false);
   const [showNotifPrefs, setShowNotifPrefs] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
@@ -151,8 +148,6 @@ export default function PageHome({ gs, update, navigate }) {
   return (
     <div data-testid="page-home" style={{ animation:"fadeIn 0.3s ease" }}>
       {showHowItWorks && <HowItWorksModal onClose={()=>setShowHowItWorks(false)}/>}
-      {showFuelCalc && <FuelCalculatorModal from="" to="" onClose={()=>setShowFuelCalc(false)}/>}
-      {showTransport && <TransportSchedule from="" to="" onClose={()=>setShowTransport(false)}/>}
       {showNotifPrefs && <NotificationPreferencesModal onClose={()=>setShowNotifPrefs(false)}/>}
       {showDashboard && <DashboardStats onClose={()=>setShowDashboard(false)}/>}
       {showAdvancedSearch && <AdvancedSearch filters={searchFilters} onFilterChange={setSearchFilters} onClose={()=>setShowAdvancedSearch(false)}/>}
@@ -186,8 +181,6 @@ export default function PageHome({ gs, update, navigate }) {
 
       {/* Hidden triggers for sidebar quick actions */}
       <div style={{display:"none"}}>
-        <button data-testid="fuel-calculator-btn" onClick={()=>setShowFuelCalc(true)}/>
-        <button data-testid="transport-schedule-btn" onClick={()=>setShowTransport(true)}/>
         <button data-testid="dashboard-stats-btn" onClick={()=>setShowDashboard(true)}/>
         <button data-testid="advanced-search-btn" onClick={()=>setShowAdvancedSearch(true)}/>
       </div>

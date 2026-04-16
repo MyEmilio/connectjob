@@ -41,6 +41,9 @@ export default function PageChat({ gs, update, navigate }) {
   const [translating, setTranslating] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [moderationAlert, setModerationAlert] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
+  const fileInputRef = useRef(null);
   const recRef = useRef(null);
   const timerRef = useRef(null);
   const bottomRef = useRef(null);
@@ -165,7 +168,68 @@ export default function PageChat({ gs, update, navigate }) {
   };
   const stopVoice = () => { recRef.current?.stop(); setIsListening(false); setInterim(""); };
 
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setModerationAlert(t("chat_file_too_large"));
+      setTimeout(() => setModerationAlert(null), 4000);
+      return;
+    }
+    setUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await api.post("/uploads/chat", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setPendingFile(res.data);
+    } catch (err) {
+      setModerationAlert(err.response?.data?.error || t("chat_upload_error"));
+      setTimeout(() => setModerationAlert(null), 4000);
+    } finally {
+      setUploadingFile(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const sendWithAttachment = () => {
+    if (!pendingFile && !input.trim() && !interim.trim()) return;
+    const txt = (input.trim() + (interim.trim() ? " " + interim.trim() : "")).trim();
+    if (isListening) stopVoice();
+    setInput(""); setInterim("");
+
+    if (isDemo) {
+      const myMsg = { id: Date.now(), sender_id: "me", sender_initials: gs.user?.initials || "EU", text: txt || "", attachment: pendingFile || null, created_at: new Date().toISOString() };
+      setMessages(p => [...p, myMsg]);
+      setPendingFile(null);
+      return;
+    }
+
+    const payload = { text: txt || "" };
+    if (pendingFile) {
+      payload.attachment = pendingFile;
+    }
+
+    const socket = getSocket();
+    if (socket) {
+      socket.emit("send_message", { conversation_id: activeId, ...payload });
+      setPendingFile(null);
+    } else {
+      api.post(`/messages/conversations/${activeId}/send`, payload).then(r => {
+        setMessages(p => [...p, r.data]);
+        setPendingFile(null);
+      }).catch((err) => {
+        if (err.response?.data?.moderation) {
+          setModerationAlert(err.response.data.error);
+          setTimeout(() => setModerationAlert(null), 6000);
+        }
+      });
+    }
+  };
+
   const send = () => {
+    if (pendingFile) { sendWithAttachment(); return; }
     const base = input.trim(), extra = interim.trim();
     const txt = base && extra && !base.endsWith(extra) ? `${base} ${extra}`.trim() : (base || extra);
     if (!txt || !activeId) return;
@@ -389,7 +453,25 @@ export default function PageChat({ gs, update, navigate }) {
                   {!isMe && <Avatar initials={msg.sender_initials || "??"} color={T.green} size={24} />}
                   <div style={{ maxWidth: "65%" }}>
                     <div style={{ background: isMe ? `linear-gradient(135deg,${T.green},${T.greenDark})` : T.white, color: isMe ? "#fff" : T.text, borderRadius: isMe ? "16px 16px 4px 16px" : "16px 16px 16px 4px", padding: "8px 12px", fontSize: 13, lineHeight: 1.5, boxShadow: isMe ? `0 2px 8px ${T.green}33` : "0 1px 4px rgba(0,0,0,0.06)", border: isMe ? "none" : `1.5px solid ${T.border}` }}>
-                      {tr ? tr.text : msg.text}
+                      {/* Attachment display */}
+                      {msg.attachment?.url && (
+                        <div style={{ marginBottom: msg.text ? 6 : 0 }}>
+                          {msg.attachment.type === "image" ? (
+                            <a href={msg.attachment.url} target="_blank" rel="noreferrer">
+                              <img src={msg.attachment.url} alt={msg.attachment.name || ""} style={{ maxWidth: "100%", maxHeight: 200, borderRadius: 8, display: "block" }} />
+                            </a>
+                          ) : (
+                            <a href={msg.attachment.url} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 8, background: isMe ? "rgba(255,255,255,0.15)" : "#f5f5f4", textDecoration: "none" }}>
+                              <span style={{ fontSize: 22 }}>📄</span>
+                              <div>
+                                <div style={{ fontSize: 12, fontWeight: 600, color: isMe ? "#fff" : T.text }}>{msg.attachment.name || "PDF"}</div>
+                                {msg.attachment.size > 0 && <div style={{ fontSize: 10, color: isMe ? "rgba(255,255,255,0.7)" : T.text3 }}>{(msg.attachment.size / 1024).toFixed(0)} KB</div>}
+                              </div>
+                            </a>
+                          )}
+                        </div>
+                      )}
+                      {(tr ? tr.text : msg.text) && <span>{tr ? tr.text : msg.text}</span>}
                     </div>
                     {/* Translation badge */}
                     {tr && (
@@ -443,12 +525,33 @@ export default function PageChat({ gs, update, navigate }) {
                 <button onClick={stopVoice} style={{ background: "#ef4444", color: "#fff", border: "none", borderRadius: 6, padding: "4px 8px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>■</button>
               </div>
             )}
+            {/* Pending file preview */}
+            {pendingFile && (
+              <div data-testid="chat-file-preview" style={{ marginBottom: 8, padding: "8px 12px", borderRadius: 10, background: "#f0f9ff", border: "1px solid #bae6fd", display: "flex", alignItems: "center", gap: 8 }}>
+                {pendingFile.type === "image" ? (
+                  <img src={pendingFile.url} alt="" style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover" }} />
+                ) : (
+                  <div style={{ width: 48, height: 48, borderRadius: 8, background: "#e0f2fe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>📄</div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pendingFile.name}</div>
+                  <div style={{ fontSize: 10, color: T.text3 }}>{(pendingFile.size / 1024).toFixed(0)} KB</div>
+                </div>
+                <button onClick={() => setPendingFile(null)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: T.text3, padding: 2 }}>✕</button>
+              </div>
+            )}
             <div style={{ display: "flex", alignItems: "flex-end", gap: 6 }}>
+              {/* Hidden file input */}
+              <input ref={fileInputRef} type="file" accept="image/*,.pdf" onChange={handleFileSelect} style={{ display: "none" }} />
+              {/* Upload button */}
+              <button data-testid="chat-attach-btn" onClick={() => fileInputRef.current?.click()} disabled={uploadingFile} style={{ width: 38, height: 38, borderRadius: 10, border: `1.5px solid ${T.border}`, cursor: uploadingFile ? "wait" : "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", background: uploadingFile ? "#f5f5f4" : T.white, flexShrink: 0, opacity: uploadingFile ? 0.6 : 1 }}>
+                {uploadingFile ? "⏳" : "📎"}
+              </button>
               <div style={{ flex: 1, background: "#f5f5f4", borderRadius: 12, border: isListening ? `1.5px solid #ef4444` : `1.5px solid ${T.border}`, padding: "8px 12px" }}>
                 <textarea data-testid="chat-input" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={isListening ? t("chat_speaking") : t("chat_placeholder")} rows={1} style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontSize: 13, fontFamily: "DM Sans,sans-serif", color: T.text, resize: "none", lineHeight: 1.5, maxHeight: 72 }} />
               </div>
               <button data-testid="chat-voice-btn" onClick={isListening ? stopVoice : startVoice} style={{ width: 38, height: 38, borderRadius: 10, border: "none", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", background: isListening ? "linear-gradient(135deg,#ef4444,#dc2626)" : `linear-gradient(135deg,${T.dark},${T.dark3})`, boxShadow: isListening ? "0 0 0 3px rgba(239,68,68,0.3)" : "none" }}>{isListening ? "⏹" : "🎤"}</button>
-              <button data-testid="chat-send-btn" onClick={send} disabled={!input.trim() && !interim.trim()} style={{ width: 38, height: 38, borderRadius: 10, border: "none", cursor: (input.trim() || interim.trim()) ? "pointer" : "not-allowed", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", background: (input.trim() || interim.trim()) ? `linear-gradient(135deg,${T.green},${T.greenDark})` : "#e7e5e4", boxShadow: (input.trim() || interim.trim()) ? `0 4px 12px ${T.green}44` : "none" }}>➤</button>
+              <button data-testid="chat-send-btn" onClick={send} disabled={!input.trim() && !interim.trim() && !pendingFile} style={{ width: 38, height: 38, borderRadius: 10, border: "none", cursor: (input.trim() || interim.trim() || pendingFile) ? "pointer" : "not-allowed", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", background: (input.trim() || interim.trim() || pendingFile) ? `linear-gradient(135deg,${T.green},${T.greenDark})` : "#e7e5e4", boxShadow: (input.trim() || interim.trim() || pendingFile) ? `0 4px 12px ${T.green}44` : "none" }}>➤</button>
             </div>
           </div>
         </>)}
