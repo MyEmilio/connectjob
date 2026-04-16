@@ -61,7 +61,7 @@ export default function PageAnalytics({ gs }) {
               <Badge color={T.green}>● activ</Badge>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
-              {[{l:"Vizualizări",v:(job.rating||0)*50|0,c:T.blue},{l:"Aplicări",v:job.reviews||0,c:T.green},{l:"Contacte",v:Math.round((job.reviews||0)*0.3),c:T.purple},{l:"Conversie",v:`${((job.reviews||0)/((job.rating||1)*50)*100).toFixed(1)}%`,c:T.amber}].map(m=>(
+              {[{l:t("analytics_views"),v:(job.rating||0)*50|0,c:T.blue},{l:t("analytics_applications"),v:job.reviews||0,c:T.green},{l:t("analytics_contacts"),v:Math.round((job.reviews||0)*0.3),c:T.purple},{l:t("analytics_conversion"),v:`${((job.reviews||0)/((job.rating||1)*50)*100).toFixed(1)}%`,c:T.amber}].map(m=>(
                 <div key={m.l} style={{textAlign:"center",padding:"6px 4px",background:"#fafaf9",borderRadius:7}}>
                   <div style={{fontSize:14,fontWeight:800,color:m.c,fontFamily:"Outfit,sans-serif"}}>{m.v}</div>
                   <div style={{fontSize:9,color:T.text3}}>{m.l}</div>

@@ -71,7 +71,7 @@ function LocateUser({ onLocate, label }) {
       padding:"10px 16px", cursor:"pointer", fontWeight:700, fontSize:13,
       boxShadow:"0 4px 12px rgba(5,150,105,0.4)",
     }}>
-      {label || "Locatia mea"}
+      {label || t("map_my_location")}
     </button>
   );
 }

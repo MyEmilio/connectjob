@@ -9,8 +9,8 @@ const T = {
 };
 
 const CATEGORIES = [
-  "Curățenie","Animale","Construcții","Grădină","Transport",
-  "Îngrijire","Livrare","IT","Educație","Evenimente","Altele",
+  "Limpieza","Animales","Construcción","Jardín","Transporte",
+  "Cuidados","Entrega","IT","Educación","Eventos","Otros",
 ];
 const ICONS = ["💼","🔧","🏗️","🌿","🚗","📦","💻","🎓","🎪","🍽️","🏊","🐕","⚡","🖌️","👶","📱","🔑","🌍"];
 

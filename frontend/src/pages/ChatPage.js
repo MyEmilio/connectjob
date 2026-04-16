@@ -179,7 +179,7 @@ export default function ChatPage() {
                   }}>
                     {msg.text}
                     <div style={{ fontSize:10, marginTop:4, opacity:0.7, textAlign:"right" }}>
-                      {new Date(msg.created_at).toLocaleTimeString("ro", { hour:"2-digit", minute:"2-digit" })}
+                      {new Date(msg.created_at).toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" })}
                     </div>
                   </div>
                 </div>

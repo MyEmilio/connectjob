@@ -181,7 +181,7 @@ export default function PageCalendar({ gs, update }) {
       <Card style={{padding:"16px 18px"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
           <div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text}}>
-            {new Date(selectedDate+"T12:00").toLocaleDateString("ro",{weekday:"long",day:"numeric",month:"long"})}
+            {new Date(selectedDate+"T12:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})}
             {selectedDate === todayStr && <span style={{marginLeft:8,fontSize:11,padding:"2px 8px",borderRadius:20,background:T.green,color:"#fff",fontWeight:700}}>{t("home_today")}</span>}
           </div>
           <Btn data-testid="cal-add-event-btn" onClick={openAdd} color={T.green} size="sm">+ {t("cal_add","Adaugă")}</Btn>
@@ -226,7 +226,7 @@ export default function PageCalendar({ gs, update }) {
           <div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,marginBottom:10}}>📆 {t("cal_coming_soon","Urmează în curând")}</div>
           {events.filter(ev=>ev.date>=todayStr&&ev.date>selectedDate).sort((a,b)=>a.date>b.date?1:a.time>b.time?1:-1).slice(0,5).map(ev=>{
             const tp=typeObj(ev.type);
-            const evDate=new Date(ev.date+"T12:00").toLocaleDateString("ro",{weekday:"short",day:"numeric",month:"short"});
+            const evDate=new Date(ev.date+"T12:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
             return (
               <div key={ev.id} onClick={()=>setSelectedDate(ev.date)} style={{display:"flex",gap:10,alignItems:"center",padding:"8px 10px",borderRadius:9,cursor:"pointer",marginBottom:6,background:"#fafaf9",border:`1px solid ${T.border}`}}>
                 <div style={{width:32,height:32,borderRadius:8,background:tp.color+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{tp.icon}</div>

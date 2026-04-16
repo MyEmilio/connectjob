@@ -28,7 +28,7 @@ export default function ForgotPassword() {
       <div data-testid="forgot-password-page" style={{ background:T.white, borderRadius:20, padding:"36px 32px", maxWidth:420, width:"100%", boxShadow:"0 8px 32px rgba(0,0,0,0.08)", border:`1px solid ${T.border}` }}>
         <div style={{ textAlign:"center", marginBottom:24 }}>
           <div style={{ fontSize:48, marginBottom:8 }}>🔑</div>
-          <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text, margin:"0 0 6px" }}>Resetare Parolă</h2>
+          <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text, margin:"0 0 6px" }}>{t("auth_reset_title")}</h2>
           <p style={{ color:T.text2, fontSize:13 }}>Introdu email-ul și îți trimitem un link de resetare</p>
         </div>
 
@@ -60,7 +60,7 @@ export default function ForgotPassword() {
               width:"100%", padding:"13px", borderRadius:12, border:"none", cursor:loading?"not-allowed":"pointer",
               background:loading?"#d1d5db":`linear-gradient(135deg,${T.green},${T.greenDark})`,
               color:"#fff", fontWeight:700, fontSize:14, marginBottom:16,
-            }}>{loading ? "Se trimite..." : "📧 Trimite link de resetare"}</button>
+            }}>{loading ? t("auth_sending") : `📧 ${t("auth_send_reset")}`}</button>
             <p style={{ textAlign:"center", fontSize:13, color:T.text2, margin:0 }}>
               <Link to="/login" style={{ color:T.green, fontWeight:700, textDecoration:"none" }}>Înapoi la Login</Link>
             </p>

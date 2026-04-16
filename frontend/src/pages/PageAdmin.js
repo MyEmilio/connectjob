@@ -13,7 +13,7 @@ function ProductionConfigPanel() {
     api.get("/config/status").then(r => setConfig(r.data)).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <Loader text="Verificare configurare..."/>;
+  if (loading) return <Loader text={t("admin_checking")}/>;
   if (!config) return null;
 
   const statusColors = { active: T.green, secure: T.green, simulated: T.amber, local: T.amber, inactive: T.red, weak: T.red };
@@ -27,14 +27,14 @@ function ProductionConfigPanel() {
             {config.production_ready ? "✅" : "⚙️"}
           </div>
           <div>
-            <div style={{ fontFamily: "Outfit,sans-serif", fontSize: 16, fontWeight: 800, color: T.text }}>Configurare Producție</div>
+            <div style={{ fontFamily: "Outfit,sans-serif", fontSize: 16, fontWeight: 800, color: T.text }}>{t("admin_prod_config")}</div>
             <div style={{ fontSize: 12, color: config.production_ready ? T.green : T.amber, fontWeight: 600 }}>
               {config.production_ready ? "Toate serviciile active" : `${config.active_services} servicii configurate`}
             </div>
           </div>
         </div>
         <button onClick={() => setExpanded(!expanded)} data-testid="config-toggle-btn" style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: "#fafaf9", cursor: "pointer", fontSize: 12, fontWeight: 600, color: T.text2 }}>
-          {expanded ? "▲ Ascunde" : "▼ Detalii"}
+          {expanded ? t("admin_hide") : t("admin_details")}
         </button>
       </div>
 
@@ -147,11 +147,11 @@ export default function PageAdmin({ gs }) {
                 <div style={{ width:36, height:36, borderRadius:"50%", background:`${T.red}15`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>⚠️</div>
                 <div>
                   <div style={{ fontWeight:700, fontSize:14, color:T.text }}>{REASONS[r.reason]||r.reason}</div>
-                  <div style={{ fontSize:11, color:T.text3 }}>{new Date(r.created_at).toLocaleDateString("ro",{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>
+                  <div style={{ fontSize:11, color:T.text3 }}>{new Date(r.created_at).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>
                 </div>
               </div>
               <Badge color={r.status==="pending"?T.amber:r.status==="actioned"?T.green:T.text3}>
-                {r.status==="pending"?"⏳ Pending":r.status==="actioned"?"✅ Acționat":"❌ Respins"}
+                {r.status==="pending"?t("admin_status_pending"):r.status==="actioned"?t("admin_status_actioned"):t("admin_status_rejected")}
               </Badge>
             </div>
 

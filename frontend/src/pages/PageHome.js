@@ -88,7 +88,7 @@ function NotificationPreferencesModal({ onClose }) {
     <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(8px)",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",padding:16 }} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{ background:T.white,borderRadius:20,width:"100%",maxWidth:520,maxHeight:"90vh",overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.4)",display:"flex",flexDirection:"column" }}>
         <div style={{padding:"20px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div><h2 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 4px"}}>⚙️ Preferinte Notificari</h2><p style={{fontSize:13,color:T.text3,margin:0}}>Alege categoriile pentru alerte joburi noi</p></div>
+          <div><h2 style={{fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 4px"}}>⚙️ {t("notif_pref_title")}</h2><p style={{fontSize:13,color:T.text3,margin:0}}>{t("notif_pref_desc")}</p></div>
           <button onClick={onClose} style={{background:"transparent",border:"none",fontSize:24,color:T.text3,cursor:"pointer",padding:4}}>✕</button>
         </div>
         <div style={{padding:"20px 24px",overflowY:"auto",flex:1}}>
@@ -97,7 +97,7 @@ function NotificationPreferencesModal({ onClose }) {
               <div style={{marginBottom:24}}>
                 <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,margin:"0 0 12px",textTransform:"uppercase",letterSpacing:1}}>Tipuri de notificari</h3>
                 <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                  {[{key:"notify_new_jobs",label:"Joburi noi in categoriile favorite",icon:"🆕"},{key:"notify_messages",label:"Mesaje primite",icon:"💬"},{key:"notify_applications",label:"Actualizari aplicari",icon:"📩"}].map(item=>(
+                  {[{key:"notify_new_jobs",label:t("notif_new_jobs"),icon:"🆕"},{key:"notify_messages",label:t("notif_messages"),icon:"💬"},{key:"notify_applications",label:t("notif_applications"),icon:"📩"}].map(item=>(
                     <label key={item.key} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:T.dark3,borderRadius:12,cursor:"pointer",border:localPrefs[item.key]?`2px solid ${T.green}`:"2px solid transparent",transition:"all 0.2s"}}>
                       <input type="checkbox" checked={localPrefs[item.key]} onChange={e=>setLocalPrefs(prev=>({...prev,[item.key]:e.target.checked}))} style={{width:18,height:18,accentColor:T.green}}/>
                       <span style={{fontSize:20}}>{item.icon}</span>
@@ -107,8 +107,8 @@ function NotificationPreferencesModal({ onClose }) {
                 </div>
               </div>
               <div>
-                <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,margin:"0 0 4px",textTransform:"uppercase",letterSpacing:1}}>Categorii favorite ({preferences.favorite_categories.length}/10)</h3>
-                <p style={{fontSize:12,color:T.text3,margin:"0 0 12px"}}>Selecteaza categoriile pentru care vrei sa primesti alerte</p>
+                <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,margin:"0 0 4px",textTransform:"uppercase",letterSpacing:1}}>{t("notif_fav_categories")} ({preferences.favorite_categories.length}/10)</h3>
+                <p style={{fontSize:12,color:T.text3,margin:"0 0 12px"}}>{t("notif_select_categories")}</p>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))",gap:8}}>
                   {CATEGORIES.map(cat=>{
                     const isSelected=isCategorySelected(cat.key);
@@ -124,8 +124,8 @@ function NotificationPreferencesModal({ onClose }) {
           )}
         </div>
         <div style={{padding:"16px 24px",borderTop:`1px solid ${T.border}`,display:"flex",gap:12}}>
-          <button onClick={onClose} style={{flex:1,padding:"12px",borderRadius:12,border:`1px solid ${T.border}`,background:"transparent",color:T.text2,fontWeight:600,fontSize:14,cursor:"pointer",fontFamily:"DM Sans,sans-serif"}}>Anuleaza</button>
-          <button onClick={handleSaveSettings} disabled={saving} style={{flex:1,padding:"12px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontWeight:700,fontSize:14,cursor:saving?"wait":"pointer",fontFamily:"DM Sans,sans-serif",boxShadow:`0 4px 16px ${T.green}44`,opacity:saving?0.7:1}}>{saving?"Se salveaza...":"Salveaza"}</button>
+          <button onClick={onClose} style={{flex:1,padding:"12px",borderRadius:12,border:`1px solid ${T.border}`,background:"transparent",color:T.text2,fontWeight:600,fontSize:14,cursor:"pointer",fontFamily:"DM Sans,sans-serif"}}>{t("notif_cancel")}</button>
+          <button onClick={handleSaveSettings} disabled={saving} style={{flex:1,padding:"12px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontWeight:700,fontSize:14,cursor:saving?"wait":"pointer",fontFamily:"DM Sans,sans-serif",boxShadow:`0 4px 16px ${T.green}44`,opacity:saving?0.7:1}}>{saving?t("notif_saving"):t("notif_save")}</button>
         </div>
       </div>
     </div>

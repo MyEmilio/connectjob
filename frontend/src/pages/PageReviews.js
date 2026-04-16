@@ -102,7 +102,7 @@ export default function PageReviews({ gs, update }) {
                       </div>
                     </div>
                   </div>
-                  <span style={{fontSize:11,color:T.text3}}>{r.created_at?new Date(r.created_at).toLocaleDateString("ro"):""}</span>
+                  <span style={{fontSize:11,color:T.text3}}>{r.created_at?new Date(r.created_at).toLocaleDateString(undefined):""}</span>
                 </div>
                 <p style={{fontSize:13,color:T.text2,lineHeight:1.6,margin:0}}>{r.text}</p>
               </Card>

@@ -80,7 +80,7 @@ export default function ResetPassword() {
               <div style={{ marginBottom:20 }}>
                 <label style={{ fontSize:12, fontWeight:700, color:T.text2, textTransform:"uppercase", display:"block", marginBottom:6 }}>Confirmă parola</label>
                 <input data-testid="reset-confirm-input" type="password" required value={confirm} onChange={e => setConfirm(e.target.value)}
-                  placeholder="Repetă parola"
+                  placeholder={t("auth_repeat_password")}
                   style={{ width:"100%", padding:"11px 14px", borderRadius:10, border:`1.5px solid ${T.border}`, fontSize:14, outline:"none", boxSizing:"border-box" }}/>
               </div>
               <button data-testid="reset-submit-btn" type="submit" disabled={loading} style={{

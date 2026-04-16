@@ -17,11 +17,11 @@ export default function PageContract({ gs, update, navigate }) {
     <div data-testid="page-contract" style={{textAlign:"center",padding:"60px 24px",color:T.text2}}>
       <div style={{fontSize:52,marginBottom:14}}>📝</div>
       <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:700,color:T.text,marginBottom:8}}>Niciun job selectat</div>
-      <div style={{fontSize:14,marginBottom:24,color:T.text2}}>Selectează un job din lista de locuri de muncă pentru a genera contractul.</div>
+      <div style={{fontSize:14,marginBottom:24,color:T.text2}}>{t("contract_select_job")}</div>
       <Btn onClick={()=>navigate("jobs")} color={T.green} style={{margin:"0 auto"}}>🗂️ Caută joburi</Btn>
     </div>
   );
-  const date=new Date().toLocaleDateString("ro",{year:"numeric",month:"long",day:"numeric"});
+  const date=new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
   const contractId=`JC-${Date.now().toString().slice(-6)}`;
 
   return (

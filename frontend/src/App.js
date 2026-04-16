@@ -388,7 +388,7 @@ function ConnectJobApp() {
           { key:"jobs",  icon:"🗂️", label:"Joburi" },
           { key:"map",   icon:"🗺️", label:t("nav_map") },
           { key:"chat",  icon:"💬", label:t("nav_chat"), badge: gs.unreadMessages },
-          { key:"verify",icon: gs.user.verified?"✅":"👤", label:gs.user.verified?"Profil":"Profil" },
+          { key:"verify",icon: gs.user.verified?"✅":"👤", label:t("nav_profile") },
         ].map(item=>(
           <button key={item.key} onClick={()=>navigate(item.key)} data-testid={`bottom-nav-${item.key}`} style={{
             flex:1, background:"none", border:"none", cursor:"pointer",
