@@ -451,6 +451,32 @@ const ro = {
   plan_feat_badge: "Badge Premium",
   plan_feat_no_moderation: "Fara moderare in chat",
   plan_feat_zero_commission: "Comision 0% la primele 5 tranzactii",
+
+  // Demo chat
+  demo_job_pool: "Curatare piscina",
+  demo_job_dogs: "Plimbare caini",
+  demo_job_electric: "Reparatii electrice",
+  demo_msg_available: "Esti disponibil maine?",
+  demo_msg_dogs: "Cainii sunt doi labradors",
+  demo_msg_monday: "Pot incepe luni.",
+  demo_chat1_1: "Buna ziua! Am vazut ca ai aplicat pentru curatare piscina.",
+  demo_chat1_2: "Da! Sunt interesat. Am 3 ani experienta.",
+  demo_chat1_3: "Excelent! Ce program preferi?",
+  demo_chat1_4: "Prefer dimineata, 8-12.",
+  demo_chat1_5: "Esti disponibil maine?",
+  demo_chat2_1: "Salut! Ai experienta cu caini mari?",
+  demo_chat2_2: "Da, am crescut cu caini mari!",
+  demo_chat2_3: "Cainii mei sunt doi labradors.",
+  demo_chat3_1: "Buna ziua! Ai autorizatie ANRE?",
+  demo_chat3_2: "Da, 5 ani experienta. Am autorizatie.",
+  demo_chat3_3: "Pot incepe luni, am toate sculele.",
+  demo_reply_1: "Multumesc! Revin curand.",
+  demo_reply_2: "Perfect, vorbim maine!",
+  demo_reply_3: "Inteles, te sun.",
+  demo_reply_4: "Excelent!",
+  chat_translated_from: "Tradus din",
+  chat_see_original: "Vezi originalul",
+  chat_lang_label: "MESAJE (AUTO-TRANSLATE)",
 };
 
 export default ro;

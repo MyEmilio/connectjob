@@ -133,7 +133,7 @@ function NotificationPreferencesModal({ onClose }) {
 }
 
 export default function PageHome({ gs, update, navigate }) {
-  const { t } = useTranslation("t");
+  const { t, i18n } = useTranslation("t");
   const allJobs = gs.jobs || [];
   const promotedJobs = allJobs.filter(j => j.promoted);
   const recentJobs = allJobs.slice(0, 6);
@@ -162,15 +162,20 @@ export default function PageHome({ gs, update, navigate }) {
         <div style={{ position:"absolute",top:-40,right:-40,width:180,height:180,borderRadius:"50%",background:"rgba(5,150,105,0.08)" }}/>
         <div style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
           <div>
-            <div style={{ fontSize:12,color:"#64748b",marginBottom:4 }}>{new Date().toLocaleDateString("ro",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
+            <div style={{ fontSize:12,color:"#64748b",marginBottom:4 }}>{new Date().toLocaleDateString(i18n.language,{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
             <h1 className="jc-hero-title" style={{ fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:"#f1f5f9",margin:"0 0 6px" }}>{t("home_greeting")}, {gs.user.name.split(" ")[0]}! 👋</h1>
             <p style={{ color:"#94a3b8",fontSize:13,margin:0 }}>
               {allJobs.length > 0 ? <><strong style={{color:T.greenLight}}>{allJobs.length} {t("jobs_ads_label")}</strong> {t("home_jobs_available")}</> : t("home_no_jobs_hero")}
             </p>
           </div>
-          <div className="jc-hero-btns" style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+          <div className="jc-hero-btns" style={{ display:"flex",gap:8,flexWrap:"wrap",alignItems:"center" }}>
             <Btn onClick={()=>navigate("map")} color={T.green} size="sm">{t("home_on_map_btn")}</Btn>
             <Btn onClick={()=>{ update({jobsCategory:""}); navigate("jobs"); }} color={T.blue} size="sm">{t("home_search_btn")}</Btn>
+            {isSupported && (
+              <Btn onClick={handleNotificationToggle} color={isSubscribed?"#059669":"#6366f1"} size="sm" style={{opacity:notifLoading?0.6:1}}>
+                {isSubscribed?"🔔":"🔕"} {isSubscribed?t("home_notif_on"):t("home_notif_off")}
+              </Btn>
+            )}
             {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>{t("home_verify_btn")}</Btn>}
             <button onClick={()=>setShowHowItWorks(true)} style={{ padding:"7px 13px",borderRadius:10,border:"1.5px solid rgba(52,211,153,0.35)",background:"rgba(52,211,153,0.08)",color:T.greenLight,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontFamily:"DM Sans,sans-serif",transition:"all 0.2s" }}>
               <span style={{ fontSize:15 }}>💡</span> {t("home_hiw_btn")}
@@ -179,19 +184,12 @@ export default function PageHome({ gs, update, navigate }) {
         </div>
       </div>
 
-      {/* Notifications toggle (compact) */}
-      <div style={{ marginBottom:24 }}>
-        {/* Hidden triggers for sidebar quick actions */}
-        <button data-testid="fuel-calculator-btn" onClick={()=>setShowFuelCalc(true)} style={{display:"none"}}/>
-        <button data-testid="transport-schedule-btn" onClick={()=>setShowTransport(true)} style={{display:"none"}}/>
-        <button data-testid="dashboard-stats-btn" onClick={()=>setShowDashboard(true)} style={{display:"none"}}/>
-        <button data-testid="advanced-search-btn" onClick={()=>setShowAdvancedSearch(true)} style={{display:"none"}}/>
-        {isSupported && (
-          <button data-testid="notifications-toggle-btn" onClick={handleNotificationToggle} disabled={notifLoading} className="jc-notification-btn" style={{ width:"100%",background:isSubscribed?"linear-gradient(135deg,#059669 0%,#047857 100%)":"linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)",border:"none",borderRadius:14,padding:"14px 18px",cursor:notifLoading?"wait":"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,boxShadow:isSubscribed?"0 4px 16px rgba(5,150,105,0.25)":"0 4px 16px rgba(99,102,241,0.25)",transition:"all 0.25s ease",opacity:notifLoading?0.7:1 }}>
-            <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{fontSize:22}}>{isSubscribed?"🔔":"🔕"}</div><div style={{textAlign:"left"}}><div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:"#fff"}}>{isSubscribed?t("home_notif_on"):t("home_notif_off")}</div><div style={{fontSize:11,color:"rgba(255,255,255,0.8)"}}>{isSubscribed?t("home_notif_on_desc"):t("home_notif_off_desc")}</div></div></div>
-            <div style={{background:"rgba(255,255,255,0.2)",borderRadius:8,padding:"6px 12px",fontSize:11,fontWeight:700,color:"#fff"}}>{notifLoading?"...":isSubscribed?"ON":"OFF"}</div>
-          </button>
-        )}
+      {/* Hidden triggers for sidebar quick actions */}
+      <div style={{display:"none"}}>
+        <button data-testid="fuel-calculator-btn" onClick={()=>setShowFuelCalc(true)}/>
+        <button data-testid="transport-schedule-btn" onClick={()=>setShowTransport(true)}/>
+        <button data-testid="dashboard-stats-btn" onClick={()=>setShowDashboard(true)}/>
+        <button data-testid="advanced-search-btn" onClick={()=>setShowAdvancedSearch(true)}/>
       </div>
 
       {/* Category grid */}

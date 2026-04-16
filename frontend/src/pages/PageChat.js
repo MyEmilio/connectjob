@@ -51,27 +51,27 @@ export default function PageChat({ gs, update, navigate }) {
   const myLangObj = LANGS.find(l => l.code === myLang) || LANGS[0];
 
   const DEMO_CONVS = [
-    { id:"demo1", user1_id:"me", user2_id:"other1", user2_name:"SC CleanPro SRL", user2_initials:"CP", job_title:"Curățare piscinã", last_msg:"Ești disponibil mâine?", unread:2 },
-    { id:"demo2", user1_id:"me", user2_id:"other2", user2_name:"Maria Constantin", user2_initials:"MC", job_title:"Plimbare câini", last_msg:"Câinii sunt doi labradors", unread:0 },
-    { id:"demo3", user1_id:"me", user2_id:"other3", user2_name:"Andrei Electricul", user2_initials:"AE", job_title:"Reparații electrice", last_msg:"Pot începe luni.", unread:1 },
+    { id:"demo1", user1_id:"me", user2_id:"other1", user2_name:"SC CleanPro SRL", user2_initials:"CP", job_title:t("demo_job_pool","Limpieza piscina"), last_msg:t("demo_msg_available","¿Estás disponible mañana?"), unread:2 },
+    { id:"demo2", user1_id:"me", user2_id:"other2", user2_name:"Maria Constantin", user2_initials:"MC", job_title:t("demo_job_dogs","Paseo perros"), last_msg:t("demo_msg_dogs","Los perros son dos labradores"), unread:0 },
+    { id:"demo3", user1_id:"me", user2_id:"other3", user2_name:"Andrei Electricul", user2_initials:"AE", job_title:t("demo_job_electric","Reparaciones eléctricas"), last_msg:t("demo_msg_monday","Puedo empezar el lunes."), unread:1 },
   ];
   const DEMO_MESSAGES = {
     demo1: [
-      { id:1, sender_id:"other1", sender_initials:"CP", text:"Bună ziua! Am văzut că ai aplicat pentru curățare piscinã.", created_at:new Date().toISOString() },
-      { id:2, sender_id:"me", sender_initials:"AI", text:"Da! Sunt interesat. Am 3 ani experiență.", created_at:new Date().toISOString() },
-      { id:3, sender_id:"other1", sender_initials:"CP", text:"Excelent! Ce program preferi?", created_at:new Date().toISOString() },
-      { id:4, sender_id:"me", sender_initials:"AI", text:"Prefer dimineața, 8-12.", created_at:new Date().toISOString() },
-      { id:5, sender_id:"other1", sender_initials:"CP", text:"Ești disponibil mâine?", created_at:new Date().toISOString() },
+      { id:1, sender_id:"other1", sender_initials:"CP", text:t("demo_chat1_1","¡Buenos días! He visto que has aplicado para limpieza de piscina."), created_at:new Date().toISOString() },
+      { id:2, sender_id:"me", sender_initials:"AI", text:t("demo_chat1_2","¡Sí! Estoy interesado. Tengo 3 años de experiencia."), created_at:new Date().toISOString() },
+      { id:3, sender_id:"other1", sender_initials:"CP", text:t("demo_chat1_3","¡Excelente! ¿Qué horario prefieres?"), created_at:new Date().toISOString() },
+      { id:4, sender_id:"me", sender_initials:"AI", text:t("demo_chat1_4","Prefiero por la mañana, 8-12."), created_at:new Date().toISOString() },
+      { id:5, sender_id:"other1", sender_initials:"CP", text:t("demo_chat1_5","¿Estás disponible mañana?"), created_at:new Date().toISOString() },
     ],
     demo2: [
-      { id:1, sender_id:"other2", sender_initials:"MC", text:"Salut! Ai experiență cu câini mari?", created_at:new Date().toISOString() },
-      { id:2, sender_id:"me", sender_initials:"AI", text:"Da, am crescut cu câini mari!", created_at:new Date().toISOString() },
-      { id:3, sender_id:"other2", sender_initials:"MC", text:"Câinii mei sunt doi labradors", created_at:new Date().toISOString() },
+      { id:1, sender_id:"other2", sender_initials:"MC", text:t("demo_chat2_1","¡Hola! ¿Tienes experiencia con perros grandes?"), created_at:new Date().toISOString() },
+      { id:2, sender_id:"me", sender_initials:"AI", text:t("demo_chat2_2","¡Sí, crecí con perros grandes!"), created_at:new Date().toISOString() },
+      { id:3, sender_id:"other2", sender_initials:"MC", text:t("demo_chat2_3","Mis perros son dos labradores."), created_at:new Date().toISOString() },
     ],
     demo3: [
-      { id:1, sender_id:"me", sender_initials:"AI", text:"Bună ziua! Ai autorizație ANRE?", created_at:new Date().toISOString() },
-      { id:2, sender_id:"other3", sender_initials:"AE", text:"Da, 5 ani experiență. Am autorizație.", created_at:new Date().toISOString() },
-      { id:3, sender_id:"other3", sender_initials:"AE", text:"Pot începe luni, am toate sculele.", created_at:new Date().toISOString() },
+      { id:1, sender_id:"me", sender_initials:"AI", text:t("demo_chat3_1","¡Buenos días! ¿Tienes autorización ANRE?"), created_at:new Date().toISOString() },
+      { id:2, sender_id:"other3", sender_initials:"AE", text:t("demo_chat3_2","Sí, 5 años de experiencia. Tengo autorización."), created_at:new Date().toISOString() },
+      { id:3, sender_id:"other3", sender_initials:"AE", text:t("demo_chat3_3","Puedo empezar el lunes, tengo todas las herramientas."), created_at:new Date().toISOString() },
     ],
   };
 
@@ -179,7 +179,7 @@ export default function PageChat({ gs, update, navigate }) {
       setTyping(true);
       setTimeout(() => {
         setTyping(false);
-        const rep = ["Mulțumesc! Revin curând.", "Perfect, vorbim mâine!", "Înțeles, te sun.", "Excelent!"][Math.floor(Math.random() * 4)];
+      const rep = [t("demo_reply_1","¡Gracias! Vuelvo pronto."), t("demo_reply_2","¡Perfecto, hablamos mañana!"), t("demo_reply_3","Entendido, te llamo."), t("demo_reply_4","¡Excelente!")][Math.floor(Math.random() * 4)];
         const repMsg = { id: Date.now() + 1, sender_id: "other", sender_initials: "??", text: rep, created_at: new Date().toISOString() };
         setMessages(p => [...p, repMsg]);
       }, 1000 + Math.random() * 800);
@@ -309,7 +309,7 @@ export default function PageChat({ gs, update, navigate }) {
         </div>
         {/* Language selector */}
         <div style={{ padding: "10px 12px", borderTop: "1px solid #1e293b" }}>
-          <div style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>🌐 {t("chat_title")} (auto-translate)</div>
+          <div style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>🌐 {t("chat_lang_label")}</div>
           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
             {LANGS.map(l => (
               <button key={l.code} onClick={() => setMyLang(l.code)} data-testid={`chat-lang-${l.code}`}
@@ -319,7 +319,7 @@ export default function PageChat({ gs, update, navigate }) {
             ))}
           </div>
           <div style={{ marginTop: 6, fontSize: 10, color: T.green, fontWeight: 600 }}>
-            {myLangObj.flag} {myLangObj.name} {translating && "— Se traduce..."}
+            {myLangObj.flag} {myLangObj.name} {translating && `— ${t("loading")}...`}
           </div>
         </div>
       </div>
@@ -374,14 +374,14 @@ export default function PageChat({ gs, update, navigate }) {
             <span style={{ fontSize: 14 }}>🌐</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: T.green }}>{t("chat_auto_translate_active")}</span>
             <span style={{ fontSize: 10, color: T.text3 }}>— {t("chat_translating_to")} {myLangObj.name}</span>
-            {translating && <span style={{ fontSize: 10, color: T.amber, marginLeft: "auto", fontWeight: 700 }}>Se traduce...</span>}
+            {translating && <span style={{ fontSize: 10, color: T.amber, marginLeft: "auto", fontWeight: 700 }}>{t("loading")}...</span>}
           </div>
 
           {/* Messages */}
           <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px 6px", display: "flex", flexDirection: "column", gap: 5 }}>
             {messages.map((msg) => {
               const isMe = isDemo ? msg.sender_id === "me" : String(msg.sender_id) === String(gs.user?.id);
-              const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString("ro", { hour: "2-digit", minute: "2-digit" }) : "";
+              const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString(i18n.language, { hour: "2-digit", minute: "2-digit" }) : "";
               const tr = !isMe ? translations[`${msg.id}_${myLang}`] : null;
 
               return (
@@ -394,9 +394,9 @@ export default function PageChat({ gs, update, navigate }) {
                     {/* Translation badge */}
                     {tr && (
                       <div style={{ fontSize: 9, marginTop: 2, color: T.blue, fontWeight: 600, display: "flex", alignItems: "center", gap: 3, paddingLeft: 4 }}>
-                        🌐 Tradus din {LANGS.find(l => l.code === tr.from)?.flag || ""} {LANGS.find(l => l.code === tr.from)?.name || tr.from}
+                        🌐 {t("chat_translated_from","Traducido de")} {LANGS.find(l => l.code === tr.from)?.flag || ""} {LANGS.find(l => l.code === tr.from)?.name || tr.from}
                         <button onClick={() => { const newTr = { ...translations }; delete newTr[`${msg.id}_${myLang}`]; setTranslations(newTr); }}
-                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 9, color: T.text3, padding: "0 2px" }} title="Vezi originalul">
+                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 9, color: T.text3, padding: "0 2px" }} title={t("chat_see_original","Ver original")}>
                           👁
                         </button>
                       </div>
