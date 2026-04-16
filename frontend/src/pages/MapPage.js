@@ -195,7 +195,10 @@ export default function MapPage({ navigate, update }) {
                   {job.icon || "💼"}
                 </div>
                 <div style={{ minWidth:0, flex:1 }}>
-                  <div style={{ fontWeight:700, fontSize:13, color:T.text, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{job.title}</div>
+                  <div style={{ fontWeight:700, fontSize:13, color:T.text, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    {job.title}
+                    {job.is_demo && <span style={{ marginLeft:6, background:"#94a3b8", color:"#fff", borderRadius:999, padding:"1px 6px", fontSize:8, fontWeight:700, verticalAlign:"middle" }}>DEMO</span>}
+                  </div>
                   <div style={{ fontSize:11, color:T.text3 }}>
                     {job.employer || job.category}
                     {job.distance != null && ` · ${job.distance} km`}

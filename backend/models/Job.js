@@ -36,6 +36,7 @@ const jobSchema = new mongoose.Schema(
       default: "part-time",
     },
     urgent: { type: Boolean, default: false },
+    is_demo: { type: Boolean, default: false },
     active: { type: Boolean, default: true },
     promoted: { type: Boolean, default: false },
     second_job: { type: Boolean, default: false },

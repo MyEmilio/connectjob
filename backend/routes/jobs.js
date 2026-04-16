@@ -22,6 +22,7 @@ router.get("/", async (req, res) => {
       urgent,
       second_job,
       work_duration,
+      hide_demo,
       lat,
       lng,
       radius = 50,
@@ -35,6 +36,11 @@ router.get("/", async (req, res) => {
       second_job,
       work_duration,
     });
+
+    // Filter out demo jobs if requested
+    if (hide_demo === "true" || hide_demo === "1") {
+      jobs = jobs.filter(j => !j.is_demo);
+    }
 
     if (lat && lng) {
       const toLat = parseFloat(lat),

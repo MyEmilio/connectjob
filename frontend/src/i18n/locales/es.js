@@ -636,6 +636,13 @@ const es = {
   chat_file_too_large: "El archivo es demasiado grande (máx. 10MB)",
   chat_upload_error: "Error al subir archivo",
 
+  // Demo system
+  demo_badge: "DEMO",
+  demo_hide_btn: "Ocultar anuncios demo",
+  demo_show_btn: "Mostrar anuncios demo",
+  demo_hidden_msg: "Anuncios demo ocultos",
+  demo_tooltip: "Este es un anuncio de demostración",
+
   // Escrow
   escrow_select_job: "Selecciona un empleo para usar Escrow.",
   escrow_step_config: "Configuración",

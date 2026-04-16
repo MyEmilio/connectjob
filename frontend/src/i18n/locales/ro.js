@@ -490,6 +490,13 @@ const ro = {
   chat_file_too_large: "Fisierul e prea mare (max. 10MB)",
   chat_upload_error: "Eroare la uploadul fisierului",
 
+  // Demo system
+  demo_badge: "DEMO",
+  demo_hide_btn: "Ascunde anunturile demo",
+  demo_show_btn: "Arata anunturile demo",
+  demo_hidden_msg: "Anunturi demo ascunse",
+  demo_tooltip: "Acesta este un anunt demonstrativ",
+
   // Escrow
   escrow_select_job: "Selecteaza un job pentru a folosi Escrow.",
   escrow_step_config: "Configurare",

@@ -12,8 +12,11 @@ export default function PageJobs({ gs, update, navigate }) {
   const [secondJob, setSecondJob]       = useState(false);
   const [sortBy, setSortBy]             = useState("recent");
   const [searchText, setSearchText]     = useState("");
+  const [hideDemo, setHideDemo]         = useState(() => localStorage.getItem("jc_hide_demo") === "true");
 
-  const allJobs = gs.jobs || [];
+  const toggleDemo = () => { const next = !hideDemo; setHideDemo(next); localStorage.setItem("jc_hide_demo", String(next)); };
+
+  const allJobs = (gs.jobs || []).filter(j => hideDemo ? !j.is_demo : true);
   const selectedCatObj = CATEGORIES.find(c => c.key === category);
 
   const jobMatchesCat = (job, catKey) => {
@@ -61,6 +64,9 @@ export default function PageJobs({ gs, update, navigate }) {
             {selectedCatObj ? `${selectedCatObj.icon} ${t(`cat_${selectedCatObj.key}`,{defaultValue:selectedCatObj.label})}` : category==="diverse"?t("jobs_title_diverse"):t("jobs_title_all")}
           </h1>
           <Badge color={T.green}>{sorted.length} {t("jobs_ads_label")}</Badge>
+          <button data-testid="jobs-toggle-demo" onClick={toggleDemo} style={{padding:"4px 10px",borderRadius:8,border:`1px solid ${hideDemo?"#86efac":T.border}`,background:hideDemo?"#f0fdf4":"#f8fafc",color:hideDemo?"#166534":T.text3,fontSize:10,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>
+            {hideDemo ? t("demo_show_btn") : t("demo_hide_btn")}
+          </button>
           {gs.user.role === "employer" && <Btn size="sm" color={T.green} onClick={()=>navigate("post_job")} style={{marginLeft:"auto"}}>{t("jobs_post_btn")}</Btn>}
         </div>
         <div style={{ position:"relative",marginBottom:12 }}>

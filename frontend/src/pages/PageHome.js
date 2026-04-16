@@ -133,13 +133,21 @@ function NotificationPreferencesModal({ onClose }) {
 
 export default function PageHome({ gs, update, navigate }) {
   const { t, i18n } = useTranslation("t");
-  const allJobs = gs.jobs || [];
-  const promotedJobs = allJobs.filter(j => j.promoted);
-  const recentJobs = allJobs.slice(0, 6);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showNotifPrefs, setShowNotifPrefs] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [hideDemo, setHideDemo] = useState(() => localStorage.getItem("jc_hide_demo") === "true");
+
+  const allJobs = gs.jobs || [];
+  const toggleDemo = () => {
+    const next = !hideDemo;
+    setHideDemo(next);
+    localStorage.setItem("jc_hide_demo", String(next));
+  };
+  const filteredJobs = hideDemo ? allJobs.filter(j => !j.is_demo) : allJobs;
+  const promotedJobs = filteredJobs.filter(j => j.promoted);
+  const recentJobs = filteredJobs.slice(0, 6);
   const [searchFilters, setSearchFilters] = useState({});
   const { isSupported, isSubscribed, loading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
   const getCatCount = (cat) => allJobs.filter(j => { const jc = (j.category||"").toLowerCase(); return jc === cat.key || jc === cat.label.toLowerCase() || cat.label.toLowerCase().includes(jc) || jc.includes(cat.key); }).length;
@@ -212,7 +220,15 @@ export default function PageHome({ gs, update, navigate }) {
         <div>
           {promotedJobs.length>0&&(<div style={{marginBottom:20}}><div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.amber,margin:0}}>{t("home_promoted_section")}</h3><div style={{flex:1,height:1,background:`${T.amber}44`}}/></div><div style={{display:"flex",flexDirection:"column",gap:8}}>{promotedJobs.slice(0,3).map(job=><JobCardRow key={job.id||job._id} job={job} promoted navigate={navigate} update={update} t={t}/>)}</div></div>)}
           <div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><h3 style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0}}>{t("home_recent_section")}</h3><Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>{t("home_all_ads_arrow")}</Btn></div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+              <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:0}}>{t("home_recent_section")}</h3>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <button data-testid="toggle-demo-btn" onClick={toggleDemo} style={{padding:"4px 10px",borderRadius:8,border:`1px solid ${hideDemo?"#86efac":T.border}`,background:hideDemo?"#f0fdf4":"#f8fafc",color:hideDemo?"#166534":T.text3,fontSize:10,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>
+                  {hideDemo ? t("demo_show_btn") : t("demo_hide_btn")}
+                </button>
+                <Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>{t("home_all_ads_arrow")}</Btn>
+              </div>
+            </div>
             {recentJobs.length>0?(<div style={{display:"flex",flexDirection:"column",gap:8}}>{recentJobs.map(job=><JobCardRow key={job.id||job._id} job={job} navigate={navigate} update={update} t={t}/>)}</div>):(
               <Card style={{padding:"32px",textAlign:"center"}}><div style={{fontSize:40,marginBottom:10}}>📋</div><div style={{fontSize:14,fontWeight:600,color:T.text,marginBottom:8}}>{t("home_no_ads")}</div><div style={{fontSize:12,color:T.text3,marginBottom:16}}>{t("home_no_ads_sub")}</div>{gs.user.role==="employer"&&<Btn onClick={()=>navigate("post_job")} color={T.green}>{t("home_post_ad_btn")}</Btn>}</Card>
             )}
