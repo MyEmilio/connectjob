@@ -383,7 +383,7 @@ function ConnectJobApp() {
       }}>
         {[
           { key:"home",  icon:"🏠", label:t("nav_home") },
-          { key:"jobs",  icon:"🗂️", label:"Joburi" },
+          { key:"jobs",  icon:"🗂️", label:t("nav_jobs") },
           { key:"map",   icon:"🗺️", label:t("nav_map") },
           { key:"chat",  icon:"💬", label:t("nav_chat"), badge: gs.unreadMessages },
           { key:"verify",icon: gs.user.verified?"✅":"👤", label:t("nav_profile") },
