@@ -114,7 +114,7 @@ export default function MapPage({ navigate, update }) {
       .finally(() => setLoading(false));
   }, [userPos, radius]);
 
-  const center = userPos || [46.7712, 23.6236];
+  const center = userPos || [38.3452, -0.4810]; // Alicante, España
   const jobCount = filtered.length;
 
   return (
@@ -140,7 +140,7 @@ export default function MapPage({ navigate, update }) {
               {t("map_filter","Filtrare")}
             </div>
             <div data-testid="map-job-count" style={{ fontSize:11, fontWeight:700, color:T.green, background:`${T.green}12`, borderRadius:999, padding:"2px 10px" }}>
-              {jobCount} {jobCount === 1 ? "job" : "joburi"}
+              {jobCount} {jobCount === 1 ? t("map_job_singular","empleo") : t("map_job_plural","empleos")}
             </div>
           </div>
 
@@ -160,7 +160,7 @@ export default function MapPage({ navigate, update }) {
           {userPos && (
             <div data-testid="map-radius-filter" style={{ marginBottom:4 }}>
               <div style={{ fontSize:11, fontWeight:600, color:T.text2, marginBottom:5, display:"flex", justifyContent:"space-between" }}>
-                <span>Raza: {radius} km</span>
+                <span>{t("map_radius","Radio")}: {radius} km</span>
               </div>
               <div style={{ display:"flex", gap:5 }}>
                 {RADIUS_OPTIONS.map(r => (
@@ -218,8 +218,8 @@ export default function MapPage({ navigate, update }) {
               <div style={{ fontWeight:800, fontSize:15, color:T.text }}>{selected.title}</div>
               <button data-testid="map-close-detail" onClick={() => { setSelected(null); setShowRoute(false); setShowTransport(false); }} style={{ background:"none", border:"none", cursor:"pointer", fontSize:16, color:T.text3 }}>✕</button>
             </div>
-            <div style={{ fontSize:12, color:T.text3, marginBottom:4 }}>{selected.employer || "Angajator"} · {selected.category}</div>
-            <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:6 }}>{selected.salary} RON/zi</div>
+            <div style={{ fontSize:12, color:T.text3, marginBottom:4 }}>{selected.employer || t("map_employer","Empleador")} · {selected.category}</div>
+            <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:6 }}>{selected.salary} RON/{t("map_day","día")}</div>
             {selected.description && <div style={{ fontSize:12, color:T.text2, marginBottom:8, lineHeight:1.5 }}>{selected.description}</div>}
             {selected.skills?.length > 0 && (
               <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:10 }}>
@@ -227,29 +227,29 @@ export default function MapPage({ navigate, update }) {
               </div>
             )}
             {selected.distance != null && (
-              <div style={{ fontSize:12, color:T.blue, fontWeight:700, marginBottom:10 }}>📍 {selected.distance} km distanta</div>
+              <div style={{ fontSize:12, color:T.blue, fontWeight:700, marginBottom:10 }}>📍 {selected.distance} km {t("map_distance","distancia")}</div>
             )}
             <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
               <button data-testid="map-apply-escrow" onClick={() => { update({ selectedJob: selected }); navigate("escrow"); }} style={{
                 padding:"9px", borderRadius:8, border:"none", cursor:"pointer",
                 background:T.green, color:"#fff", fontWeight:700, fontSize:12,
-              }}>🔒 {t("home_apply","Aplica")} + Escrow</button>
+              }}>🔒 {t("home_apply","Solicitar")} + Escrow</button>
               <div style={{ display:"flex", gap:6 }}>
                 <button data-testid="map-contract-btn" onClick={() => { update({ selectedJob: selected }); navigate("contract"); }} style={{
                   flex:1, padding:"7px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
                   background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
-                }}>📝 Contract</button>
+                }}>📝 {t("nav_contract","Contrato")}</button>
                 <button data-testid="map-chat-btn" onClick={() => navigate("chat")} style={{
                   flex:1, padding:"7px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
                   background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
-                }}>💬 Mesaj</button>
+                }}>💬 {t("nav_chat","Mensaje")}</button>
               </div>
               {/* Contextual: Route Calculator + Transport - only when job selected */}
               <div style={{ display:"flex", gap:6, marginTop:2 }}>
                 <button data-testid="map-route-calc-btn" onClick={() => { setShowRoute(!showRoute); setShowTransport(false); }} style={{
                   flex:1, padding:"7px", borderRadius:8, border: showRoute ? `1.5px solid ${T.amber}` : `1px solid ${T.border}`, cursor:"pointer",
                   background: showRoute ? "#fef3c7" : "#fff", color: showRoute ? "#d97706" : T.text2, fontWeight:600, fontSize:12,
-                }}>⛽ Calculator Ruta</button>
+                }}>⛽ {t("home_fuel_calc","Calculadora Ruta")}</button>
                 <button data-testid="map-transport-btn" onClick={() => { setShowTransport(!showTransport); setShowRoute(false); }} style={{
                   flex:1, padding:"7px", borderRadius:8, border: showTransport ? `1.5px solid ${T.blue}` : `1px solid ${T.border}`, cursor:"pointer",
                   background: showTransport ? "#eff6ff" : "#fff", color: showTransport ? T.blue : T.text2, fontWeight:600, fontSize:12,
@@ -263,7 +263,7 @@ export default function MapPage({ navigate, update }) {
         {showRoute && selected && (
           <div style={{ borderTop:`1px solid ${T.border}`, maxHeight:"50%", overflowY:"auto" }}>
             <FuelCalculator
-              defaultFrom={userPos ? `${userPos[0].toFixed(4)},${userPos[1].toFixed(4)}` : "Locatia mea"}
+              defaultFrom={userPos ? `${userPos[0].toFixed(4)},${userPos[1].toFixed(4)}` : t("map_my_location","Mi ubicación")}
               defaultTo={selected.location?.address || selected.title}
               onClose={() => setShowRoute(false)}
             />

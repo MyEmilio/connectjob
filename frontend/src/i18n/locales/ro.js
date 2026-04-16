@@ -477,6 +477,15 @@ const ro = {
   chat_translated_from: "Tradus din",
   chat_see_original: "Vezi originalul",
   chat_lang_label: "MESAJE (AUTO-TRANSLATE)",
+
+  // Map
+  map_job_singular: "job",
+  map_job_plural: "joburi",
+  map_radius: "Raza",
+  map_employer: "Angajator",
+  map_day: "zi",
+  map_distance: "distanta",
+  map_my_location: "Locatia mea",
 };
 
 export default ro;

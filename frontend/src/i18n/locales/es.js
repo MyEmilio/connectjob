@@ -624,6 +624,15 @@ const es = {
   chat_see_original: "Ver original",
   chat_lang_label: "MENSAJES (AUTO-TRANSLATE)",
 
+  // Map
+  map_job_singular: "empleo",
+  map_job_plural: "empleos",
+  map_radius: "Radio",
+  map_employer: "Empleador",
+  map_day: "día",
+  map_distance: "distancia",
+  map_my_location: "Mi ubicación",
+
   // Common
   btn_back:        "Volver",
   btn_save:        "Guardar",
