@@ -182,15 +182,15 @@ export default function PageHome({ gs, update, navigate }) {
       {/* Quick Actions */}
       <div className="jc-quick-actions" style={{ marginBottom:28 }}>
         <div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:14 }}>
-          <h2 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:0 }}>🚀 Actiuni rapide</h2>
+          <h2 style={{ fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:T.text,margin:0 }}>🚀 {t("home_quick_actions")}</h2>
           <div style={{ flex:1,height:1,background:T.border }}/>
         </div>
         <div className="jc-quick-btns" style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:14 }}>
           {[
-            { id:"fuel-calculator-btn", onClick:()=>setShowFuelCalc(true), bg:"linear-gradient(135deg,#f59e0b 0%,#d97706 100%)", shadow:"rgba(245,158,11,0.35)", emoji:"⛽", title:"Calculator Ruta", desc:"Distanta, cost carburant si comparatie transport" },
-            { id:"transport-schedule-btn", onClick:()=>setShowTransport(true), bg:"linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%)", shadow:"rgba(37,99,235,0.35)", emoji:"🚇", title:"Program Transport", desc:"Orare autobuze, metrouri si trenuri" },
-            { id:"dashboard-stats-btn", onClick:()=>setShowDashboard(true), bg:"linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)", shadow:"rgba(139,92,246,0.35)", emoji:"📊", title:"Dashboard", desc:"Statistici, grafice si activitate" },
-            { id:"advanced-search-btn", onClick:()=>setShowAdvancedSearch(true), bg:"linear-gradient(135deg,#059669 0%,#047857 100%)", shadow:"rgba(5,150,105,0.35)", emoji:"🔍", title:"Cautare Avansata", desc:"Filtre salariu, distanta, categorie" },
+            { id:"fuel-calculator-btn", onClick:()=>setShowFuelCalc(true), bg:"linear-gradient(135deg,#f59e0b 0%,#d97706 100%)", shadow:"rgba(245,158,11,0.35)", emoji:"⛽", title:t("home_fuel_calc"), desc:t("home_fuel_desc") },
+            { id:"transport-schedule-btn", onClick:()=>setShowTransport(true), bg:"linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%)", shadow:"rgba(37,99,235,0.35)", emoji:"🚇", title:t("home_transport"), desc:t("home_transport_desc") },
+            { id:"dashboard-stats-btn", onClick:()=>setShowDashboard(true), bg:"linear-gradient(135deg,#8b5cf6 0%,#7c3aed 100%)", shadow:"rgba(139,92,246,0.35)", emoji:"📊", title:t("home_dashboard"), desc:t("home_dashboard_desc") },
+            { id:"advanced-search-btn", onClick:()=>setShowAdvancedSearch(true), bg:"linear-gradient(135deg,#059669 0%,#047857 100%)", shadow:"rgba(5,150,105,0.35)", emoji:"🔍", title:t("home_adv_search"), desc:t("home_adv_search_desc") },
           ].map(btn=>(
             <button key={btn.id} data-testid={btn.id} onClick={btn.onClick} className="jc-action-card" style={{ background:btn.bg,border:"none",borderRadius:16,padding:"20px 18px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"flex-start",gap:10,boxShadow:`0 6px 24px ${btn.shadow}`,transition:"all 0.25s ease",textAlign:"left",position:"relative",overflow:"hidden",minHeight:120 }}
               onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px) scale(1.02)";}} onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0) scale(1)";}}
@@ -203,7 +203,7 @@ export default function PageHome({ gs, update, navigate }) {
         </div>
         {isSupported && (
           <button data-testid="notifications-toggle-btn" onClick={handleNotificationToggle} disabled={notifLoading} className="jc-notification-btn" style={{ marginTop:14,width:"100%",background:isSubscribed?"linear-gradient(135deg,#059669 0%,#047857 100%)":"linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)",border:"none",borderRadius:14,padding:"16px 20px",cursor:notifLoading?"wait":"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,boxShadow:isSubscribed?"0 4px 20px rgba(5,150,105,0.3)":"0 4px 20px rgba(99,102,241,0.3)",transition:"all 0.25s ease",opacity:notifLoading?0.7:1 }}>
-            <div style={{display:"flex",alignItems:"center",gap:12}}><div style={{fontSize:28}}>{isSubscribed?"🔔":"🔕"}</div><div style={{textAlign:"left"}}><div style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:"#fff"}}>{isSubscribed?"Notificari activate":"Activeaza notificarile"}</div><div style={{fontSize:12,color:"rgba(255,255,255,0.8)"}}>{isSubscribed?"Vei primi alerte pentru mesaje si aplicari":"Fii primul care afla de joburi noi"}</div></div></div>
+            <div style={{display:"flex",alignItems:"center",gap:12}}><div style={{fontSize:28}}>{isSubscribed?"🔔":"🔕"}</div><div style={{textAlign:"left"}}><div style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:"#fff"}}>{isSubscribed?t("home_notif_on"):t("home_notif_off")}</div><div style={{fontSize:12,color:"rgba(255,255,255,0.8)"}}>{isSubscribed?t("home_notif_on_desc"):t("home_notif_off_desc")}</div></div></div>
             <div style={{background:"rgba(255,255,255,0.2)",borderRadius:8,padding:"8px 14px",fontSize:12,fontWeight:700,color:"#fff"}}>{notifLoading?"...":isSubscribed?"ON":"OFF"}</div>
           </button>
         )}

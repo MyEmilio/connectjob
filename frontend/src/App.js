@@ -115,7 +115,7 @@ function ConnectJobApp() {
     { key:"contract",  icon:"📝", label:t("nav_contract") },
     { key:"reviews",   icon:"⭐", label:t("nav_reviews") },
     { key:"analytics", icon:"📊", label:t("nav_analytics") },
-    { key:"pricing",  icon:"💎", label:"Planuri" },
+    { key:"pricing",  icon:"💎", label:t("nav_pricing","Planes") },
     { key:"post_job",  icon:"➕", label:t("nav_post_job"),  hidden: gs.user.role !== "employer" },
     { key:"verify",    icon: gs.user.verified?"✅":"🛡️", label: gs.user.verified?t("nav_verified"):t("nav_verify"), badge: gs.user.verified?null:"!" },
     { key:"admin",     icon:"🛡️", label:t("nav_admin"),         hidden: gs.user.role !== "admin" },
@@ -131,7 +131,7 @@ function ConnectJobApp() {
     contract:  t("nav_contract"),
     reviews:   t("nav_reviews"),
     analytics: t("nav_analytics"),
-    pricing:   "💎 Planuri & Preturi",
+    pricing:   t("nav_pricing_title","💎 Planes y Precios"),
     post_job:  t("nav_post_job"),
     verify:    t("nav_verify"),
     admin:     `🛡️ ${t("nav_admin")}`,
@@ -245,7 +245,7 @@ function ConnectJobApp() {
             <Avatar initials={gs.user.initials} color={T.green} size={32}/>
             <div style={{display:"flex",flexDirection:"column"}}>
               <span style={{fontSize:12,fontWeight:700,color:T.text,lineHeight:1}}>{gs.user.name.split(" ")[0]}</span>
-              {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>✓ Verificat</span>}
+              {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>{t("nav_verified_badge","✓ Verificado")}</span>}
               {gs.user.subscription_plan && gs.user.subscription_plan !== "free" && (
                 <span data-testid="plan-badge-nav" style={{fontSize:8,fontWeight:700,color:"#fff",background:gs.user.subscription_plan==="premium"?`linear-gradient(135deg,${T.amber},${T.amberDark})`:`linear-gradient(135deg,${T.green},${T.greenDark})`,borderRadius:999,padding:"1px 6px",display:"inline-block",marginTop:1,textTransform:"uppercase"}}>{gs.user.subscription_plan}</span>
               )}
@@ -297,12 +297,12 @@ function ConnectJobApp() {
             <div data-testid="sidebar-trial-widget" onClick={()=>navigate("pricing")} style={{marginTop:10,padding:"10px",background:`linear-gradient(135deg,${T.green}10,${T.blue}08)`,borderRadius:10,border:`1.5px solid ${T.green}22`,cursor:"pointer",transition:"all 0.15s"}}>
               <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
                 <div style={{width:24,height:24,borderRadius:7,background:`linear-gradient(135deg,${T.green},${T.greenDark})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#fff",fontWeight:900}}>{trialInfo.trial.days_remaining}</div>
-                <div style={{fontSize:10,fontWeight:700,color:T.green,textTransform:"uppercase",letterSpacing:"0.05em"}}>Pro Trial</div>
+                <div style={{fontSize:10,fontWeight:700,color:T.green,textTransform:"uppercase",letterSpacing:"0.05em"}}>{t("sidebar_trial_pro","PRO TRIAL")}</div>
               </div>
               <div style={{fontSize:10,color:T.text2,lineHeight:1.4}}>
-                {trialInfo.trial.days_remaining} {trialInfo.trial.days_remaining===1?"zi":"zile"} ramase
+                {trialInfo.trial.days_remaining} {trialInfo.trial.days_remaining===1?t("sidebar_trial_day","día restante"):t("sidebar_trial_days","días restantes")}
               </div>
-              <div style={{marginTop:6,padding:"4px 8px",borderRadius:6,background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontSize:9,fontWeight:700,textAlign:"center"}}>Upgrade acum</div>
+              <div style={{marginTop:6,padding:"4px 8px",borderRadius:6,background:`linear-gradient(135deg,${T.green},${T.greenDark})`,color:"#fff",fontSize:9,fontWeight:700,textAlign:"center"}}>{t("sidebar_upgrade_now","Upgrade ahora")}</div>
             </div>
           )}
 
@@ -310,8 +310,8 @@ function ConnectJobApp() {
           {trialInfo?.trial_eligible && !trialInfo?.trial?.active && trialInfo?.plan === "free" && (
             <div data-testid="sidebar-trial-cta" onClick={()=>navigate("pricing")} style={{marginTop:10,padding:"10px",background:`${T.green}06`,borderRadius:10,border:`1.5px dashed ${T.green}33`,cursor:"pointer",textAlign:"center",transition:"all 0.15s"}}>
               <div style={{fontSize:16,marginBottom:3}}>⚡</div>
-              <div style={{fontSize:10,fontWeight:700,color:T.green}}>Pro gratuit 7 zile</div>
-              <div style={{fontSize:9,color:T.text3,marginTop:2}}>Incearca acum</div>
+              <div style={{fontSize:10,fontWeight:700,color:T.green}}>{t("sidebar_try_pro_free","Pro gratis 7 días")}</div>
+              <div style={{fontSize:9,color:T.text3,marginTop:2}}>{t("sidebar_try_now","Pruébalo ahora")}</div>
             </div>
           )}
 

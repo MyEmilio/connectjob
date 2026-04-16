@@ -13,39 +13,21 @@ const PLANS = {
     name: "Free",
     price: 0,
     interval: null,
-    features: [
-      "3 aplicari pe zi",
-      "Chat de baza (cu moderare)",
-      "Profil simplu",
-      "Vizualizare joburi",
-    ],
+    feature_keys: ["plan_feat_3apps", "plan_feat_chat_basic", "plan_feat_profile_simple", "plan_feat_view_jobs"],
     limits: { daily_applications: 3, chat_moderation: true, promoted_jobs: 0 },
   },
   pro: {
     name: "Pro",
     price: 49.99,
     interval: "month",
-    features: [
-      "Aplicari nelimitate",
-      "Chat cu traducere automata",
-      "Profil evidentiat",
-      "Statistici detaliate",
-      "Moderare chat relaxata",
-    ],
+    feature_keys: ["plan_feat_unlimited_apps", "plan_feat_chat_translate", "plan_feat_profile_highlight", "plan_feat_stats", "plan_feat_chat_relaxed"],
     limits: { daily_applications: -1, chat_moderation: false, promoted_jobs: 3 },
   },
   premium: {
     name: "Premium",
     price: 99.99,
     interval: "month",
-    features: [
-      "Tot ce include Pro",
-      "Job-uri promovate",
-      "Asistenta prioritara",
-      "Badge Premium",
-      "Fara moderare in chat",
-      "Comision 0% la primele 5 tranzactii",
-    ],
+    feature_keys: ["plan_feat_all_pro", "plan_feat_promoted", "plan_feat_priority", "plan_feat_badge", "plan_feat_no_moderation", "plan_feat_zero_commission"],
     limits: { daily_applications: -1, chat_moderation: false, promoted_jobs: 10 },
   },
 };
@@ -65,7 +47,11 @@ try {
 router.get("/plans", (req, res) => {
   const plans = Object.entries(PLANS).map(([key, plan]) => ({
     id: key,
-    ...plan,
+    name: plan.name,
+    price: plan.price,
+    interval: plan.interval,
+    feature_keys: plan.feature_keys,
+    limits: plan.limits,
     stripe_configured: !!stripe,
   }));
   res.json({ plans });

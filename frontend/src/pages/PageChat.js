@@ -281,8 +281,8 @@ export default function PageChat({ gs, update, navigate }) {
       <div className="jc-chat-sidebar" style={{ width: 270, background: T.dark, display: expanded ? "flex" : "none", flexDirection: "column", flexShrink: 0 }}>
         <div style={{ padding: "14px 12px 10px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <h3 style={{ color: "#f1f5f9", fontFamily: "Outfit,sans-serif", fontSize: 15, fontWeight: 700, margin: 0 }}>Mesaje</h3>
-            <span style={{ background: T.green, color: "#fff", borderRadius: 999, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>{convs.reduce((a, c) => a + c.unread, 0)} nou</span>
+            <h3 style={{ color: "#f1f5f9", fontFamily: "Outfit,sans-serif", fontSize: 15, fontWeight: 700, margin: 0 }}>{t("chat_messages_title")}</h3>
+            <span style={{ background: T.green, color: "#fff", borderRadius: 999, padding: "1px 8px", fontSize: 11, fontWeight: 700 }}>{convs.reduce((a, c) => a + c.unread, 0)} {t("chat_new_count")}</span>
           </div>
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "0 8px 8px" }}>
@@ -309,7 +309,7 @@ export default function PageChat({ gs, update, navigate }) {
         </div>
         {/* Language selector */}
         <div style={{ padding: "10px 12px", borderTop: "1px solid #1e293b" }}>
-          <div style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>🌐 Limba mea (traducere + voce)</div>
+          <div style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>🌐 {t("chat_title")} (auto-translate)</div>
           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
             {LANGS.map(l => (
               <button key={l.code} onClick={() => setMyLang(l.code)} data-testid={`chat-lang-${l.code}`}
@@ -333,7 +333,7 @@ export default function PageChat({ gs, update, navigate }) {
               <Avatar initials={active ? (String(active.user1_id) === String(gs.user?.id) ? active.user2_initials : active.user1_initials) : "??"} color={T.green} size={38} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 14, color: T.text, fontFamily: "Outfit,sans-serif" }}>{active ? (String(active.user1_id) === String(gs.user?.id) ? active.user2_name : active.user1_name) : "?"}</div>
-                <div style={{ fontSize: 11, color: T.text3 }}>📋 {active?.job_title || "Conversatie"}</div>
+                <div style={{ fontSize: 11, color: T.text3 }}>📋 {active?.job_title || t("chat_conversation")}</div>
               </div>
               <div style={{ display: "flex", gap: 6 }}>
                 <button data-testid="chat-whatsapp-btn" onClick={() => setModal("whatsapp")} style={{ width: 34, height: 34, borderRadius: 8, border: "none", cursor: "pointer", fontSize: 18, background: "linear-gradient(135deg,#25d366,#128c7e)", display: "flex", alignItems: "center", justifyContent: "center" }}>💬</button>
@@ -346,7 +346,7 @@ export default function PageChat({ gs, update, navigate }) {
             </>
           ) : (
             <div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontWeight: 700, color: T.text, fontSize: 14 }}>💬 Mesaje</span>
+              <span style={{ fontWeight: 700, color: T.text, fontSize: 14 }}>💬 {t("chat_messages_title")}</span>
               <button data-testid="chat-resize-btn-empty" onClick={() => setExpanded(!expanded)} style={{ width: 34, height: 34, borderRadius: 8, border: `1px solid ${T.border}`, cursor: "pointer", fontSize: 14, background: "#f5f5f4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {expanded ? "⊖" : "⊕"}
               </button>
@@ -357,8 +357,8 @@ export default function PageChat({ gs, update, navigate }) {
         {expanded && !active && (
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: T.text3 }}>
             <div style={{ fontSize: 48 }}>💬</div>
-            <div style={{ fontSize: 15, fontWeight: 600 }}>Nicio conversatie activa</div>
-            <div style={{ fontSize: 13 }}>Aplica la un job pentru a incepe o conversatie</div>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>{t("chat_no_active")}</div>
+            <div style={{ fontSize: 13 }}>{t("chat_apply_to_start")}</div>
           </div>
         )}
 
@@ -366,14 +366,14 @@ export default function PageChat({ gs, update, navigate }) {
           {isDemo && (
             <div style={{ margin: "6px 12px 0", background: "#fef3c7", borderRadius: 8, padding: "5px 12px", display: "flex", alignItems: "center", gap: 8, border: "1px solid #fde68a", fontSize: 11, color: "#92400e" }}>
               <span>⚡</span>
-              <span><strong>Mod demonstratie</strong> — Aplică la un job pentru a porni o conversație reală.</span>
+              <span><strong>{t("chat_demo_mode")}</strong> — {t("chat_demo_desc")}</span>
             </div>
           )}
 
           <div style={{ margin: "6px 12px 0", background: `linear-gradient(135deg,${T.green}08,${T.blue}08)`, borderRadius: 10, padding: "6px 14px", display: "flex", alignItems: "center", gap: 8, border: `1px solid ${T.green}22` }}>
             <span style={{ fontSize: 14 }}>🌐</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: T.green }}>Traducere automată activă</span>
-            <span style={{ fontSize: 10, color: T.text3 }}>— Mesajele se traduc în {myLangObj.name}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: T.green }}>{t("chat_auto_translate_active")}</span>
+            <span style={{ fontSize: 10, color: T.text3 }}>— {t("chat_translating_to")} {myLangObj.name}</span>
             {translating && <span style={{ fontSize: 10, color: T.amber, marginLeft: "auto", fontWeight: 700 }}>Se traduce...</span>}
           </div>
 
@@ -426,7 +426,7 @@ export default function PageChat({ gs, update, navigate }) {
               <div data-testid="moderation-alert" style={{ marginBottom: 8, padding: "8px 12px", borderRadius: 10, background: "#fef2f2", border: "1px solid #fecaca", display: "flex", alignItems: "center", gap: 8, animation: "fadeIn 0.2s ease" }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>🛡️</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#991b1b", marginBottom: 2 }}>Mesaj blocat</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#991b1b", marginBottom: 2 }}>{t("chat_msg_blocked")}</div>
                   <div style={{ fontSize: 10, color: "#b91c1c", lineHeight: 1.4 }}>{moderationAlert}</div>
                 </div>
                 <button onClick={() => setModerationAlert(null)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#b91c1c", padding: 2 }}>✕</button>
