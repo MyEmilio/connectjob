@@ -29,12 +29,8 @@
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -52,20 +48,43 @@
   .jc-bottom-nav {
     display: flex !important;
   }
+
+  /* Hide page title on mobile */
+  .jc-page-title {
+    display: none !important;
+  }
+
+  /* Navbar compact on mobile */
+  nav[data-testid="top-navbar"] {
+    padding: 0 10px !important;
+    height: 52px !important;
+  }
   
-  /* Main content full width */
+  /* Main content full width — no overflow, no horizontal scroll */
   .jc-main-content {
-    padding: 16px 14px 80px !important;
+    padding: 14px 12px 80px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Prevent horizontal scroll on entire app */
+  body, html, #root {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
   }
   
   /* Hero section mobile */
   .jc-hero {
-    padding: 18px 16px !important;
+    padding: 16px 14px !important;
     border-radius: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .jc-hero-title {
-    font-size: 20px !important;
+    font-size: 22px !important;
   }
   
   .jc-hero-btns {
@@ -78,24 +97,24 @@
     font-size: 13px !important;
   }
   
-  /* Quick actions - stack on mobile */
-  .jc-quick-btns {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-  
-  .jc-action-card {
-    min-height: 100px !important;
-    padding: 18px 16px !important;
-  }
-  
-  .jc-action-card > div:last-child > div:first-child {
-    font-size: 16px !important;
-  }
-  
-  /* Home grid - single column */
+  /* Home grid - single column, full width */
   .jc-home-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  /* All cards and containers — full width */
+  .jc-home-grid > div,
+  .jc-notification-btn {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Category grid — 2 columns, full width */
+  div[style*="gridTemplateColumns"][style*="170px"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
   }
 
   /* Map sidebar - hidden on mobile */
@@ -103,45 +122,69 @@
     display: none !important;
   }
 
-  /* Chat sidebar - hidden on mobile, show chat area full width */
+  /* Chat sidebar - hidden on mobile */
   .jc-chat-sidebar {
     display: none !important;
   }
-  
-  /* Category grid mobile */
-  .jc-quick-actions + div .jc-quick-btns,
-  div[style*="gridTemplateColumns"][style*="170px"] {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px !important;
+
+  /* Bigger fonts and better contrast on mobile */
+  .jc-main-content h1 {
+    font-size: 22px !important;
+  }
+
+  .jc-main-content h2 {
+    font-size: 18px !important;
+  }
+
+  .jc-main-content h3 {
+    font-size: 15px !important;
+  }
+
+  /* Category cards - better readability */
+  div[style*="gridTemplateColumns"][style*="170px"] > div {
+    padding: 12px 10px !important;
+  }
+
+  div[style*="gridTemplateColumns"][style*="170px"] > div > div:last-child > div:first-child {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #1c1917 !important;
+  }
+
+  div[style*="gridTemplateColumns"][style*="170px"] > div > div:last-child > div:last-child {
+    font-size: 12px !important;
+    font-weight: 600 !important;
   }
 }
 
 /* Extra small mobile: max-width 480px */
 @media (max-width: 480px) {
   .jc-main-content {
-    padding: 12px 10px 80px !important;
+    padding: 10px 8px 80px !important;
   }
   
   .jc-hero {
-    padding: 14px 12px !important;
+    padding: 14px 10px !important;
   }
   
   .jc-hero-title {
-    font-size: 18px !important;
+    font-size: 20px !important;
   }
   
   .jc-hero-btns button {
-    padding: 9px 14px !important;
+    padding: 8px 12px !important;
     font-size: 12px !important;
   }
-  
-  .jc-action-card {
-    min-height: 90px !important;
-    padding: 16px 14px !important;
-  }
-  
+
   /* Single column for categories on very small screens */
   div[style*="gridTemplateColumns"][style*="170px"] {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* Tablet: 768px - 1024px */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .jc-desktop-sidebar {
+    width: 180px !important;
   }
 }

@@ -228,8 +228,8 @@ function ConnectJobApp() {
           <span style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:18,color:T.text,letterSpacing:"-0.02em"}}>Connect<span style={{color:T.green}}>Job</span></span>
         </div>
 
-        {/* Page title */}
-        <div style={{fontFamily:"Outfit,sans-serif",fontWeight:700,fontSize:15,color:T.text2}}>
+        {/* Page title - hidden on mobile */}
+        <div className="jc-page-title" style={{fontFamily:"Outfit,sans-serif",fontWeight:700,fontSize:15,color:T.text2}}>
           {PAGE_TITLES[page]}
         </div>
 
@@ -280,6 +280,22 @@ function ConnectJobApp() {
               {item.badge&&<div style={{marginLeft:"auto",background:item.badge==="!"?T.amber:T.red,color:"#fff",borderRadius:999,minWidth:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700}}>{item.badge}</div>}
             </div>
           ))}
+
+          {/* Quick Actions in sidebar */}
+          <div style={{marginTop:12,padding:"10px",background:`${T.amber}06`,borderRadius:10,border:`1px solid ${T.amber}22`}}>
+            <div style={{fontSize:10,fontWeight:700,color:T.amber,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:8}}>🚀 {t("home_quick_actions","Acciones rápidas")}</div>
+            {[
+              {key:"fuel",icon:"⛽",label:t("home_fuel_calc","Calculadora de Ruta"),page:"home",action:"fuel"},
+              {key:"transport",icon:"🚇",label:t("home_transport","Horarios Transporte"),page:"home",action:"transport"},
+              {key:"dashboard",icon:"📊",label:t("home_dashboard","Dashboard"),page:"home",action:"dashboard"},
+              {key:"search",icon:"🔍",label:t("home_adv_search","Búsqueda Avanzada"),page:"home",action:"search"},
+            ].map(a=>(
+              <div key={a.key} onClick={()=>{navigate("home");setTimeout(()=>{const el=document.querySelector(`[data-testid="${a.key==="fuel"?"fuel-calculator-btn":a.key==="transport"?"transport-schedule-btn":a.key==="dashboard"?"dashboard-stats-btn":"advanced-search-btn"}"]`);if(el)el.click();},300);}} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 4px",cursor:"pointer",borderRadius:6,transition:"background 0.12s"}} onMouseEnter={e=>e.currentTarget.style.background=`${T.amber}10`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                <span style={{fontSize:14}}>{a.icon}</span>
+                <span style={{fontSize:11,fontWeight:500,color:T.text2}}>{a.label}</span>
+              </div>
+            ))}
+          </div>
 
           {/* Quick stats in sidebar */}
           <div style={{marginTop:16,padding:"10px",background:`${T.green}08`,borderRadius:10,border:`1px solid ${T.green}22`}}>
