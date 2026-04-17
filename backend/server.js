@@ -17,7 +17,7 @@ mongoose
   .then(() => logger.info("MongoDB connected successfully"))
   .catch((err) => {
     logger.error("MongoDB connection error", { error: err.message });
-    process.exit(1);
+    logger.warn("Server continues in degraded mode — MongoDB unavailable");
   });
 
 // Track MongoDB connection state
