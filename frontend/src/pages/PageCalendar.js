@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { T } from "../constants/theme";
 import { Card, Btn } from "../components/shared";
@@ -26,7 +26,7 @@ export default function PageCalendar({ gs, update }) {
   const [editId, setEditId] = useState(null);
   const emptyForm = { title:"", type:"maintenance", date:todayStr, time:"09:00", location:"", client:"", notes:"", recurring:"none", reminderMin:30 };
   const [form, setForm] = useState(emptyForm);
-  const events = gs.schedule || [];
+  const events = useMemo(() => gs.schedule || [], [gs.schedule]);
 
   useEffect(() => {
     try { localStorage.setItem("jc_schedule", JSON.stringify(events)); } catch(e){}
