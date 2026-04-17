@@ -12,8 +12,14 @@ const db = require("./db/database");
 const logger = require("./utils/logger");
 
 // ── MongoDB Connection ─────────────────────────────────────────
+const mongoUri = process.env.MONGO_URI;
+const mongoOpts = {
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 45000,
+  family: 4,
+};
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(mongoUri, mongoOpts)
   .then(() => logger.info("MongoDB connected successfully"))
   .catch((err) => {
     logger.error("MongoDB connection error", { error: err.message });
