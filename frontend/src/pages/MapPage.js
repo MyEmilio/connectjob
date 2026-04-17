@@ -57,6 +57,7 @@ const jobIcon = (color, emoji) => L.divIcon({
 
 // Buton localizare
 function LocateUser({ onLocate, label }) {
+  const { t } = useTranslation("t");
   const map = useMap();
   return (
     <button data-testid="map-locate-btn" onClick={() => {

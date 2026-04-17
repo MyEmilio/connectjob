@@ -5,6 +5,7 @@ import { Card, Badge, Loader } from "../components/shared";
 import api from "../services/api";
 
 function ProductionConfigPanel() {
+  const { t } = useTranslation("t");
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);

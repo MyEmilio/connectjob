@@ -160,7 +160,7 @@ export default function PageVerify({ gs, update, navigate }) {
             try {
               await api.post("/kyc/complete");
               let s=0;
-              const iv=setInterval(()=>{s+=3;setScore(s);if(s>=96){clearInterval(iv);setStep(4);update({user:{...gs.user,verified:true}});}},30);
+              const iv=setInterval(()=>{s+=3;if(s>=96){clearInterval(iv);setStep(4);update({user:{...gs.user,verified:true}});}},30);
             } catch(e){ alert(e.response?.data?.error||"Eroare la verificare"); setLoading(false); }
           }} disabled={loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
             {loading?"🔍 Se verifică...":"📸 Fă selfie"}

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import api from "../services/api";
 
 const T = { green:"#059669", greenDark:"#047857", text:"#1c1917", text2:"#57534e", text3:"#a8a29e", border:"#e7e5e4", bg:"#fafaf9", white:"#fff", red:"#ef4444" };
 
 export default function ResetPassword() {
+  const { t } = useTranslation("t");
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get("token");

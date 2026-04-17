@@ -77,6 +77,7 @@ function HowItWorksModal({ onClose }) {
 }
 
 function NotificationPreferencesModal({ onClose }) {
+  const { t } = useTranslation("t");
   const { preferences, loading, saving, toggleFavoriteCategory, updatePreferences } = useNotificationPreferences();
   const [localPrefs, setLocalPrefs] = useState({ notify_new_jobs: true, notify_messages: true, notify_applications: true });
   const { useEffect } = require("react");
