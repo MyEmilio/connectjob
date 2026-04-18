@@ -1,13 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from "react-leaflet";
-import MarkerClusterGroup from "react-leaflet-cluster";
+import { useState, useEffect, useRef } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "react-leaflet-cluster/dist/assets/MarkerCluster.css";
-import "react-leaflet-cluster/dist/assets/MarkerCluster.Default.css";
 import api from "../services/api";
 import { useTranslation } from "react-i18next";
-import { FuelCalculator, TransportSchedule } from "./FuelCalculator";
 
 // Fix icoane Leaflet cu Webpack
 delete L.Icon.Default.prototype._getIconUrl;
@@ -20,47 +16,13 @@ L.Icon.Default.mergeOptions({
 const T = {
   green:"#059669", dark:"#0f172a", text:"#1c1917",
   text2:"#57534e", text3:"#a8a29e", border:"#e7e5e4", bg:"#fafaf9",
-  amber:"#f59e0b", blue:"#3b82f6", purple:"#8b5cf6", red:"#ef4444",
 };
 
-// Custom cluster icon
-const createClusterIcon = (cluster) => {
-  const count = cluster.getChildCount();
-  let size = 36, bg = T.green, ring = "rgba(5,150,105,0.25)";
-  if (count >= 20) { size = 50; bg = "#d97706"; ring = "rgba(217,119,6,0.25)"; }
-  else if (count >= 10) { size = 44; bg = T.blue; ring = "rgba(59,130,246,0.25)"; }
-  else if (count >= 5) { size = 40; bg = T.purple; ring = "rgba(139,92,246,0.25)"; }
-
-  return L.divIcon({
-    html: `<div style="
-      background:${bg};color:#fff;border-radius:50%;
-      width:${size}px;height:${size}px;
-      display:flex;align-items:center;justify-content:center;
-      font-weight:800;font-size:${size > 44 ? 16 : 13}px;
-      font-family:DM Sans,sans-serif;
-      box-shadow:0 0 0 6px ${ring}, 0 4px 14px rgba(0,0,0,0.25);
-      border:3px solid #fff;
-      transition:transform 0.2s;
-    ">${count}</div>`,
-    className: "custom-cluster-icon",
-    iconSize: L.point(size, size),
-    iconAnchor: [size / 2, size / 2],
-  });
-};
-
-// Icona custom pentru job
-const jobIcon = (color, emoji) => L.divIcon({
-  className: "",
-  html: `<div style="background:${color};color:#fff;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 10px rgba(0,0,0,0.25);border:3px solid #fff;">${emoji}</div>`,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
-});
-
-// Buton localizare
+// Buton pentru localizare utilizator
 function LocateUser({ onLocate, label }) {
   const map = useMap();
   return (
-    <button data-testid="map-locate-btn" onClick={() => {
+    <button onClick={() => {
       navigator.geolocation?.getCurrentPosition(pos => {
         map.flyTo([pos.coords.latitude, pos.coords.longitude], 14);
         onLocate([pos.coords.latitude, pos.coords.longitude]);
@@ -71,21 +33,18 @@ function LocateUser({ onLocate, label }) {
       padding:"10px 16px", cursor:"pointer", fontWeight:700, fontSize:13,
       boxShadow:"0 4px 12px rgba(5,150,105,0.4)",
     }}>
-      {label || "Locatia mea"}
+      {label || "📍 Locatia mea"}
     </button>
   );
 }
 
-// Fly to selected job
-function FlyToJob({ job }) {
-  const map = useMap();
-  useEffect(() => {
-    if (job?.lat && job?.lng) map.flyTo([job.lat, job.lng], 15, { duration: 0.8 });
-  }, [job, map]);
-  return null;
-}
-
-const RADIUS_OPTIONS = [5, 10, 25, 50, 100];
+// Icona custom pentru job
+const jobIcon = (color, emoji) => L.divIcon({
+  className: "",
+  html: `<div style="background:${color};color:#fff;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 10px rgba(0,0,0,0.25);border:3px solid #fff;">${emoji}</div>`,
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+});
 
 export default function MapPage({ navigate, update }) {
   const { t } = useTranslation("t");
@@ -94,272 +53,208 @@ export default function MapPage({ navigate, update }) {
   const [filter, setFilter]     = useState("all");
   const [userPos, setUserPos]   = useState(null);
   const [loading, setLoading]   = useState(true);
-  const [radius, setRadius]     = useState(50);
-  const [mapSize, setMapSize]   = useState("normal");
-  const [showRoute, setShowRoute] = useState(false);
-  const [showTransport, setShowTransport] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const dragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartW = useRef(0);
 
-  const cats = useMemo(() => ["all", ...new Set(jobs.map(j => j.category).filter(Boolean))], [jobs]);
-  const filtered = useMemo(() => {
-    let list = filter === "all" ? jobs : jobs.filter(j => j.category === filter);
-    return list.filter(j => j.lat && j.lng);
-  }, [jobs, filter]);
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (!dragging.current) return;
+      const delta = e.clientX - dragStartX.current;
+      const newW = Math.min(520, Math.max(200, dragStartW.current + delta));
+      setSidebarWidth(newW);
+    };
+    const onMouseUp = () => { dragging.current = false; document.body.style.cursor = ""; document.body.style.userSelect = ""; };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => { window.removeEventListener("mousemove", onMouseMove); window.removeEventListener("mouseup", onMouseUp); };
+  }, []);
+
+  const cats = ["all", ...new Set(jobs.map(j => j.category).filter(Boolean))];
+  const filtered = filter === "all" ? jobs : jobs.filter(j => j.category === filter);
 
   useEffect(() => {
     const params = {};
-    if (userPos) { params.lat = userPos[0]; params.lng = userPos[1]; params.radius = radius; }
+    if (userPos) { params.lat = userPos[0]; params.lng = userPos[1]; params.radius = 50; }
     api.get("/jobs", { params })
       .then(r => setJobs(r.data.jobs || r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [userPos, radius]);
+  }, [userPos]);
 
-  const center = userPos || [46.7712, 23.6236];
-  const jobCount = filtered.length;
+  // Center default: Alicante
+  const center = userPos || [38.3452, -0.4815];
 
   return (
-    <div data-testid="map-page" style={{ display:"flex", height: mapSize === "full" ? "calc(100vh - 58px)" : mapSize === "compact" ? 320 : "calc(100vh - 130px)", transition: "height 0.3s ease", flexDirection: mapSize === "compact" ? "column" : "row" }}>
-      {/* Resize controls */}
-      <div style={{ position:"absolute", top:8, right:8, zIndex:50, display:"flex", gap:4 }}>
-        {["compact","normal","full"].map(sz => (
-          <button key={sz} data-testid={`map-size-${sz}`} onClick={() => setMapSize(sz)} style={{
-            padding:"5px 10px", borderRadius:7, border: mapSize === sz ? `1.5px solid ${T.green}` : `1px solid ${T.border}`,
-            cursor:"pointer", fontSize:11, fontWeight:700, background: mapSize === sz ? `${T.green}15` : T.bg,
-            color: mapSize === sz ? T.green : T.text3,
-          }}>{sz === "compact" ? "⊖" : sz === "full" ? "⊕" : "◻"}</button>
-        ))}
-      </div>
-
-      {/* Sidebar — hidden in compact mode */}
-      {mapSize !== "compact" && (
-      <div className="jc-map-sidebar" style={{ width:320, background:"#fff", borderRight:`1px solid ${T.border}`, display:"flex", flexDirection:"column", overflow:"hidden" }}>
-        {/* Header cu stats */}
-        <div style={{ padding:"14px 14px 8px", borderBottom:`1px solid ${T.border}` }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:T.text3, textTransform:"uppercase", letterSpacing:"0.05em" }}>
-              {t("map_filter","Filtrare")}
-            </div>
-            <div data-testid="map-job-count" style={{ fontSize:11, fontWeight:700, color:T.green, background:`${T.green}12`, borderRadius:999, padding:"2px 10px" }}>
-              {jobCount} {jobCount === 1 ? "job" : "joburi"}
-            </div>
-          </div>
-
-          {/* Filter chips */}
-          <div style={{ display:"flex", flexWrap:"wrap", gap:5, marginBottom:10 }}>
+    <div style={{ display:"flex", height:"calc(100vh - 58px)" }}>
+      {/* Sidebar */}
+      <div style={{ width:sidebarWidth, minWidth:200, maxWidth:520, background:"#fff", borderRight:`1px solid ${T.border}`, display:"flex", flexDirection:"column", overflow:"hidden", position:"relative", flexShrink:0 }}>
+        {/* Filtre categorii */}
+        <div style={{ padding:"14px 14px 10px", borderBottom:`1px solid ${T.border}` }}>
+          <div style={{ fontSize:12, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:8 }}>{t("map_filter","Filtrează")}</div>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
             {cats.map(c => (
-              <button data-testid={`map-filter-${c}`} key={c} onClick={() => setFilter(c)} style={{
-                padding:"4px 11px", borderRadius:20, border:"none", cursor:"pointer", fontSize:11, fontWeight:600,
+              <button key={c} onClick={() => setFilter(c)} style={{
+                padding:"5px 12px", borderRadius:20, border:"none", cursor:"pointer", fontSize:12, fontWeight:600,
                 background: filter===c ? T.green : "#f5f5f4",
                 color: filter===c ? "#fff" : T.text2,
-                transition:"all 0.15s",
               }}>{c === "all" ? t("map_all","Toate") : c}</button>
             ))}
           </div>
-
-          {/* Radius slider (only when geolocated) */}
-          {userPos && (
-            <div data-testid="map-radius-filter" style={{ marginBottom:4 }}>
-              <div style={{ fontSize:11, fontWeight:600, color:T.text2, marginBottom:5, display:"flex", justifyContent:"space-between" }}>
-                <span>Raza: {radius} km</span>
-              </div>
-              <div style={{ display:"flex", gap:5 }}>
-                {RADIUS_OPTIONS.map(r => (
-                  <button data-testid={`map-radius-${r}`} key={r} onClick={() => setRadius(r)} style={{
-                    flex:1, padding:"4px 0", borderRadius:6, border:"none", cursor:"pointer",
-                    fontSize:10, fontWeight:700,
-                    background: radius===r ? T.blue : "#f1f5f9",
-                    color: radius===r ? "#fff" : T.text3,
-                    transition:"all 0.15s",
-                  }}>{r}km</button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Job list */}
-        <div data-testid="map-job-list" style={{ flex:1, overflowY:"auto" }}>
-          {loading && <div style={{ padding:20, color:T.text3, fontSize:13 }}>{t("map_loading","Se incarca...")}</div>}
+        {/* Lista joburi */}
+        <div style={{ flex:1, overflowY:"auto" }}>
+          {loading && <div style={{ padding:20, color:T.text3, fontSize:13 }}>{t("map_loading","Se încarcă...")}</div>}
           {!loading && filtered.length === 0 && (
-            <div style={{ padding:20, color:T.text3, fontSize:13, textAlign:"center" }}>
-              <div style={{ fontSize:28, marginBottom:8 }}>📍</div>
-              {t("map_no_jobs","Niciun job in aceasta zona.")}
-            </div>
+            <div style={{ padding:20, color:T.text3, fontSize:13 }}>{t("map_no_jobs","Niciun job în această categorie.")}</div>
           )}
           {filtered.map(job => (
-            <div data-testid={`map-job-item-${job.id}`} key={job.id} onClick={() => setSelected(job)} style={{
-              padding:"12px 14px", borderBottom:`1px solid ${T.border}`, cursor:"pointer",
+            <div key={job.id} onClick={() => setSelected(job)} style={{
+              padding:"14px 16px", borderBottom:`1px solid ${T.border}`, cursor:"pointer",
               background: selected?.id === job.id ? `${T.green}08` : "transparent",
               borderLeft: selected?.id === job.id ? `3px solid ${T.green}` : "3px solid transparent",
               transition:"all 0.15s",
             }}>
               <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                <div style={{ width:38, height:38, borderRadius:10, background:job.color||T.green, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0, color:"#fff" }}>
+                <div style={{ width:40, height:40, borderRadius:10, background:job.color||T.green, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0 }}>
                   {job.icon || "💼"}
                 </div>
-                <div style={{ minWidth:0, flex:1 }}>
+                <div style={{ minWidth:0 }}>
                   <div style={{ fontWeight:700, fontSize:13, color:T.text, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{job.title}</div>
-                  <div style={{ fontSize:11, color:T.text3 }}>
-                    {job.employer || job.category}
-                    {job.distance != null && ` · ${job.distance} km`}
-                  </div>
+                  <div style={{ fontSize:11, color:T.text3 }}>{job.employer} · {job.distance ? `${job.distance} km` : job.category}</div>
                 </div>
                 <div style={{ marginLeft:"auto", fontWeight:800, fontSize:14, color:job.color||T.green, whiteSpace:"nowrap" }}>{job.salary} RON</div>
               </div>
-              {job.urgent && <span style={{ fontSize:10, background:"#fef3c7", color:"#d97706", fontWeight:700, borderRadius:4, padding:"2px 6px", marginTop:4, display:"inline-block" }}>⚡ URGENT</span>}
+              {job.urgent && <span style={{ fontSize:10, background:"#fef3c7", color:"#d97706", fontWeight:700, borderRadius:4, padding:"2px 6px", marginTop:4, display:"inline-block" }}>⚡ {t("home_urgent","URGENT")}</span>}
             </div>
           ))}
         </div>
 
-        {/* Job detail panel */}
+        {/* Detalii job selectat */}
         {selected && (
-          <div data-testid="map-job-detail" style={{ borderTop:`2px solid ${T.green}22`, padding:14, background:"#fafaf9", overflowY:"auto", maxHeight:"45%" }}>
+          <div style={{ borderTop:`2px solid ${T.border}`, padding:16, background:"#fafaf9", overflowY:"auto" }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
               <div style={{ fontWeight:800, fontSize:15, color:T.text }}>{selected.title}</div>
-              <button data-testid="map-close-detail" onClick={() => { setSelected(null); setShowRoute(false); setShowTransport(false); }} style={{ background:"none", border:"none", cursor:"pointer", fontSize:16, color:T.text3 }}>✕</button>
+              {selected.urgent && <span style={{ fontSize:10, background:"#fef3c7", color:"#d97706", fontWeight:700, borderRadius:4, padding:"2px 6px" }}>🔥 {t("home_urgent","Urgent")}</span>}
             </div>
-            <div style={{ fontSize:12, color:T.text3, marginBottom:4 }}>{selected.employer || "Angajator"} · {selected.category}</div>
-            <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:6 }}>{selected.salary} RON/zi</div>
-            {selected.description && <div style={{ fontSize:12, color:T.text2, marginBottom:8, lineHeight:1.5 }}>{selected.description}</div>}
+            <div style={{ fontSize:12, color:T.text3, marginBottom:4 }}>{selected.employer} · {selected.category}</div>
+            <div style={{ fontSize:16, fontWeight:800, color:selected.color||T.green, marginBottom:8 }}>{selected.salary} {t("job_per_day","€/zi")}</div>
+
+            {/* Galerie foto job */}
+            {selected.images?.length > 0 && (
+              <div style={{ display:"flex", gap:6, marginBottom:10, overflowX:"auto" }}>
+                {selected.images.map((img, i) => (
+                  <img key={i} src={img} alt="" style={{ height:72, minWidth:90, borderRadius:8, objectFit:"cover", border:`1.5px solid ${T.border}`, cursor:"pointer", flexShrink:0 }} onClick={() => window.open(img,"_blank")}/>
+                ))}
+              </div>
+            )}
+
+            {selected.description && <div style={{ fontSize:12, color:T.text2, marginBottom:10, lineHeight:1.5 }}>{selected.description}</div>}
             {selected.skills?.length > 0 && (
               <div style={{ display:"flex", flexWrap:"wrap", gap:4, marginBottom:10 }}>
                 {selected.skills.map(s=><span key={s} style={{ background:`${selected.color||T.green}18`, color:selected.color||T.green, borderRadius:999, padding:"2px 8px", fontSize:10, fontWeight:700 }}>{s}</span>)}
               </div>
             )}
-            {selected.distance != null && (
-              <div style={{ fontSize:12, color:T.blue, fontWeight:700, marginBottom:10 }}>📍 {selected.distance} km distanta</div>
-            )}
+
+            {/* Rute */}
+            <div style={{ marginBottom:10 }}>
+              <div style={{ fontSize:10, fontWeight:700, color:T.text3, textTransform:"uppercase", marginBottom:5 }}>{t("map_routes","Trasee")}</div>
+              {[
+                {mode:"🚶", label:t("route_pedestrian","Pietonal"),  time:"23 min", color:"#059669"},
+                {mode:"🚲", label:t("route_bike","Bicicletă"),       time:"8 min",  color:"#3b82f6"},
+                {mode:"🚗", label:t("route_car","Mașină"),           time:"5 min",  color:"#f59e0b"},
+                {mode:"🚌", label:t("route_transit","Transport"),    time:"18 min", color:"#8b5cf6"},
+              ].map(r=>(
+                <div key={r.mode} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"5px 8px", borderRadius:7, marginBottom:3, background:"#fff", border:`1px solid ${T.border}`, cursor:"pointer", fontSize:12 }}
+                  onMouseEnter={e=>e.currentTarget.style.background="#f0fdf4"}
+                  onMouseLeave={e=>e.currentTarget.style.background="#fff"}
+                >
+                  <span>{r.mode} {r.label}</span>
+                  <span style={{ fontWeight:700, color:r.color }}>{r.time}</span>
+                </div>
+              ))}
+            </div>
+
             <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
-              <button data-testid="map-apply-escrow" onClick={() => { update({ selectedJob: selected }); navigate("escrow"); }} style={{
-                padding:"9px", borderRadius:8, border:"none", cursor:"pointer",
+              <button onClick={() => { update({ selectedJob: selected }); navigate("escrow"); }} style={{
+                padding:"8px", borderRadius:8, border:"none", cursor:"pointer",
                 background:T.green, color:"#fff", fontWeight:700, fontSize:12,
-              }}>🔒 {t("home_apply","Aplica")} + Escrow</button>
+              }}>🔒 {t("home_apply","Aplică")} + {t("nav_escrow","Escrow")}</button>
               <div style={{ display:"flex", gap:6 }}>
-                <button data-testid="map-contract-btn" onClick={() => { update({ selectedJob: selected }); navigate("contract"); }} style={{
+                <button onClick={() => { update({ selectedJob: selected }); navigate("contract"); }} style={{
                   flex:1, padding:"7px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
                   background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
-                }}>📝 Contract</button>
-                <button data-testid="map-chat-btn" onClick={() => navigate("chat")} style={{
+                }}>📝 {t("nav_contract","Contract")}</button>
+                <button onClick={() => navigate("chat")} style={{
                   flex:1, padding:"7px", borderRadius:8, border:`1px solid ${T.border}`, cursor:"pointer",
                   background:"#fff", color:T.text2, fontWeight:600, fontSize:12,
-                }}>💬 Mesaj</button>
-              </div>
-              {/* Contextual: Route Calculator + Transport - only when job selected */}
-              <div style={{ display:"flex", gap:6, marginTop:2 }}>
-                <button data-testid="map-route-calc-btn" onClick={() => { setShowRoute(!showRoute); setShowTransport(false); }} style={{
-                  flex:1, padding:"7px", borderRadius:8, border: showRoute ? `1.5px solid ${T.amber}` : `1px solid ${T.border}`, cursor:"pointer",
-                  background: showRoute ? "#fef3c7" : "#fff", color: showRoute ? "#d97706" : T.text2, fontWeight:600, fontSize:12,
-                }}>⛽ Calculator Ruta</button>
-                <button data-testid="map-transport-btn" onClick={() => { setShowTransport(!showTransport); setShowRoute(false); }} style={{
-                  flex:1, padding:"7px", borderRadius:8, border: showTransport ? `1.5px solid ${T.blue}` : `1px solid ${T.border}`, cursor:"pointer",
-                  background: showTransport ? "#eff6ff" : "#fff", color: showTransport ? T.blue : T.text2, fontWeight:600, fontSize:12,
-                }}>🚌 Transport</button>
+                }}>💬 {t("chat_send","Mesaj")}</button>
               </div>
             </div>
           </div>
         )}
-
-        {/* Contextual Route Calculator overlay */}
-        {showRoute && selected && (
-          <div style={{ borderTop:`1px solid ${T.border}`, maxHeight:"50%", overflowY:"auto" }}>
-            <FuelCalculator
-              defaultFrom={userPos ? `${userPos[0].toFixed(4)},${userPos[1].toFixed(4)}` : "Locatia mea"}
-              defaultTo={selected.location?.address || selected.title}
-              onClose={() => setShowRoute(false)}
-            />
-          </div>
-        )}
-
-        {/* Contextual Transport overlay */}
-        {showTransport && selected && (
-          <div style={{ borderTop:`1px solid ${T.border}`, maxHeight:"50%", overflowY:"auto" }}>
-            <TransportSchedule
-              from={userPos ? `${userPos[0].toFixed(4)},${userPos[1].toFixed(4)}` : "Locatia mea"}
-              to={selected.location?.address || selected.title}
-              onClose={() => setShowTransport(false)}
-            />
-          </div>
-        )}
+        {/* Drag handle */}
+        <div
+          onMouseDown={(e) => {
+            dragging.current = true;
+            dragStartX.current = e.clientX;
+            dragStartW.current = sidebarWidth;
+            document.body.style.cursor = "col-resize";
+            document.body.style.userSelect = "none";
+            e.preventDefault();
+          }}
+          style={{
+            position:"absolute", top:0, right:0, width:6, height:"100%",
+            cursor:"col-resize", zIndex:10,
+            background:"transparent",
+            transition:"background 0.15s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = `${T.green}40`}
+          onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+          title="Drag pentru a redimensiona"
+        />
       </div>
-      )}
 
-      {/* Harta cu Clustering */}
+      {/* Harta */}
       <div style={{ flex:1, position:"relative" }}>
-        <MapContainer center={center} zoom={13} style={{ height:"100%", width:"100%" }} data-testid="map-container">
+        <MapContainer center={center} zoom={13} style={{ height:"100%", width:"100%" }}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-
-          {/* Marker Cluster Group */}
-          <MarkerClusterGroup
-            chunkedLoading
-            iconCreateFunction={createClusterIcon}
-            maxClusterRadius={60}
-            spiderfyOnMaxZoom
-            showCoverageOnHover={false}
-            zoomToBoundsOnClick
-            animate
-          >
-            {filtered.map(job => (
-              <Marker
-                key={job.id}
-                position={[job.lat, job.lng]}
-                icon={jobIcon(job.color || T.green, job.icon || "💼")}
-                eventHandlers={{ click: () => setSelected(job) }}
-              >
-                <Popup>
-                  <div style={{ minWidth:160, fontFamily:"DM Sans, sans-serif" }}>
-                    <div style={{ fontWeight:700, fontSize:14, marginBottom:2 }}>{job.title}</div>
-                    <div style={{ color:T.text3, fontSize:12 }}>{job.employer || job.category}</div>
-                    <div style={{ color:job.color||T.green, fontWeight:800, fontSize:15, marginTop:4 }}>{job.salary} RON</div>
-                    {job.urgent && <div style={{ color:"#d97706", fontSize:11, fontWeight:700, marginTop:2 }}>⚡ URGENT</div>}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MarkerClusterGroup>
-
-          {/* User position marker */}
+          {filtered.filter(j => j.lat && j.lng).map(job => (
+            <Marker
+              key={job.id}
+              position={[job.lat, job.lng]}
+              icon={jobIcon(job.color || T.green, job.icon || "💼")}
+              eventHandlers={{ click: () => setSelected(job) }}
+            >
+              <Popup>
+                <div style={{ minWidth:180, fontFamily:"DM Sans,sans-serif" }}>
+                  {job.images?.[0] && (
+                    <img src={job.images[0]} alt="" style={{ width:"100%", height:100, objectFit:"cover", borderRadius:8, marginBottom:6, display:"block" }}/>
+                  )}
+                  <strong style={{ fontSize:13 }}>{job.title}</strong><br/>
+                  <span style={{ color:T.text3, fontSize:11 }}>{job.employer}</span><br/>
+                  <span style={{ color:job.color||T.green, fontWeight:700, fontSize:13 }}>{job.salary} RON</span>
+                  {job.images?.length > 1 && (
+                    <div style={{ fontSize:10, color:T.text3, marginTop:3 }}>🖼️ +{job.images.length - 1} {job.images.length === 2 ? "poză" : "poze"}</div>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
           {userPos && (
-            <>
-              <Marker position={userPos} icon={L.divIcon({
-                className:"",
-                html:`<div style="background:#3b82f6;border:3px solid #fff;border-radius:50%;width:18px;height:18px;box-shadow:0 0 0 6px rgba(59,130,246,0.3)"></div>`,
-                iconSize:[18,18], iconAnchor:[9,9],
-              })}/>
-              <Circle center={userPos} radius={radius * 1000} pathOptions={{
-                color: T.blue, fillColor: T.blue, fillOpacity: 0.06, weight: 1.5, dashArray: "6 4",
-              }}/>
-            </>
+            <Marker position={userPos} icon={L.divIcon({
+              className:"",
+              html:`<div style="background:#3b82f6;border:3px solid #fff;border-radius:50%;width:18px;height:18px;box-shadow:0 0 0 4px rgba(59,130,246,0.3)"></div>`,
+              iconSize:[18,18], iconAnchor:[9,9],
+            })}/>
           )}
-
-          <FlyToJob job={selected} />
           <LocateUser onLocate={setUserPos} label={t("map_locate","📍 Locatia mea")}/>
         </MapContainer>
-
-        {/* Legend overlay */}
-        <div data-testid="map-cluster-legend" style={{
-          position:"absolute", bottom:16, left:16, zIndex:1000,
-          background:"rgba(255,255,255,0.92)", backdropFilter:"blur(8px)",
-          borderRadius:10, padding:"10px 14px", fontSize:11, color:T.text2,
-          border:`1px solid ${T.border}`, boxShadow:"0 2px 10px rgba(0,0,0,0.08)",
-        }}>
-          <div style={{ fontWeight:700, color:T.text, marginBottom:5, fontSize:12 }}>Clustering</div>
-          <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-            {[
-              { color:T.green, label:"1-4" },
-              { color:T.purple, label:"5-9" },
-              { color:T.blue, label:"10-19" },
-              { color:"#d97706", label:"20+" },
-            ].map(l => (
-              <div key={l.label} style={{ display:"flex", alignItems:"center", gap:4 }}>
-                <div style={{ width:12, height:12, borderRadius:"50%", background:l.color, border:"2px solid #fff", boxShadow:`0 0 0 2px ${l.color}33` }}/>
-                <span>{l.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

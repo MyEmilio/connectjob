@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import api from "../services/api";
+import { GalleryUploader } from "../components/ImageUploader";
 
 const T = {
   green:"#059669", greenDark:"#047857", dark:"#0f172a",
@@ -14,6 +15,164 @@ const CATEGORIES = [
 ];
 const ICONS = ["💼","🔧","🏗️","🌿","🚗","📦","💻","🎓","🎪","🍽️","🏊","🐕","⚡","🖌️","👶","📱","🔑","🌍"];
 
+// ── Autocomplete adresa cu Nominatim ─────────────────────────
+function AddressAutocomplete({ lat, lng, onSelect }) {
+  const [query, setQuery]           = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading]       = useState(false);
+  const [open, setOpen]             = useState(false);
+  const [confirmed, setConfirmed]   = useState(!!lat && !!lng);
+  const debounceRef = useRef(null);
+  const wrapRef     = useRef(null);
+
+  // Inchide dropdown la click in afara
+  useEffect(() => {
+    const handler = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Afiseaza adresa confirmata cand se populeaza prin GPS
+  useEffect(() => {
+    if (lat && lng && !query) setConfirmed(true);
+  }, [lat, lng]);
+
+  const handleChange = (val) => {
+    setQuery(val);
+    setConfirmed(false);
+    clearTimeout(debounceRef.current);
+    if (val.length < 3) { setSuggestions([]); setOpen(false); return; }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=6&addressdetails=1`,
+          { headers: { "Accept-Language": "ro,en" } }
+        );
+        const data = await res.json();
+        setSuggestions(data);
+        setOpen(data.length > 0);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+  };
+
+  const handleSelect = (item) => {
+    const display = item.display_name;
+    setQuery(display);
+    setSuggestions([]);
+    setOpen(false);
+    setConfirmed(true);
+    onSelect({ lat: parseFloat(item.lat), lng: parseFloat(item.lon), display });
+  };
+
+  const handleGPS = () => {
+    navigator.geolocation?.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      // Reverse geocode pt. a afisa adresa
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+          { headers: { "Accept-Language": "ro,en" } }
+        );
+        const data = await res.json();
+        const display = data.display_name || `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+        setQuery(display);
+        setConfirmed(true);
+        onSelect({ lat: latitude, lng: longitude, display });
+      } catch {
+        setQuery(`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`);
+        setConfirmed(true);
+        onSelect({ lat: latitude, lng: longitude, display: "" });
+      }
+    }, () => alert("Nu s-a putut detecta locatia. Verifica permisiunile GPS."));
+  };
+
+  return (
+    <div ref={wrapRef} style={{ position:"relative" }}>
+      <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+        <div style={{ flex:1, position:"relative" }}>
+          <input
+            value={query}
+            onChange={e => handleChange(e.target.value)}
+            onFocus={() => suggestions.length > 0 && setOpen(true)}
+            placeholder="ex: Strada Mihai Eminescu 10, Cluj-Napoca"
+            style={{
+              ...inp,
+              paddingRight: 36,
+              borderColor: confirmed ? T.green : T.border,
+              boxShadow: confirmed ? `0 0 0 3px ${T.green}20` : "none",
+            }}
+          />
+          {loading && (
+            <span style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", fontSize:14, color:T.text3 }}>⏳</span>
+          )}
+          {confirmed && !loading && (
+            <span style={{ position:"absolute", right:10, top:"50%", transform:"translateY(-50%)", fontSize:14, color:T.green }}>✓</span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={handleGPS}
+          title="Detecteaza locatia curenta"
+          style={{
+            padding:"10px 14px", borderRadius:10, border:`1.5px solid ${T.border}`,
+            background:"#fff", cursor:"pointer", fontSize:18, flexShrink:0,
+            transition:"all 0.15s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = T.green}
+          onMouseLeave={e => e.currentTarget.style.borderColor = T.border}
+        >📍</button>
+      </div>
+
+      {/* Dropdown sugestii */}
+      {open && suggestions.length > 0 && (
+        <div style={{
+          position:"absolute", top:"calc(100% + 4px)", left:0, right:0,
+          background:"#fff", border:`1.5px solid ${T.border}`,
+          borderRadius:12, boxShadow:"0 8px 32px rgba(0,0,0,0.14)",
+          zIndex:9999, overflow:"hidden", maxHeight:280, overflowY:"auto",
+        }}>
+          {suggestions.map((item, i) => {
+            const parts = item.display_name.split(", ");
+            const main  = parts.slice(0, 2).join(", ");
+            const sub   = parts.slice(2).join(", ");
+            return (
+              <div
+                key={item.place_id || i}
+                onMouseDown={() => handleSelect(item)}
+                style={{
+                  padding:"10px 14px", cursor:"pointer",
+                  borderBottom: i < suggestions.length - 1 ? `1px solid ${T.border}` : "none",
+                  transition:"background 0.1s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = T.bg}
+                onMouseLeave={e => e.currentTarget.style.background = "#fff"}
+              >
+                <div style={{ fontSize:13, fontWeight:600, color:T.text }}>📍 {main}</div>
+                {sub && <div style={{ fontSize:11, color:T.text3, marginTop:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{sub}</div>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Coordonate confirmate */}
+      {lat && lng && (
+        <div style={{ marginTop:8, fontSize:11, color:T.text3, display:"flex", gap:12 }}>
+          <span>🌐 Lat: <strong style={{ color:T.text2 }}>{parseFloat(lat).toFixed(5)}</strong></span>
+          <span>🌐 Lng: <strong style={{ color:T.text2 }}>{parseFloat(lng).toFixed(5)}</strong></span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+
 export default function PostJobPage({ navigate, onSuccess }) {
   const { t } = useTranslation("t");
   const [form, setForm] = useState({
@@ -26,6 +185,7 @@ export default function PostJobPage({ navigate, onSuccess }) {
   const [error, setError]       = useState("");
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills]     = useState([]);
+  const [jobImages, setJobImages] = useState([]);
 
   const set = (key, val) => setForm(f => ({...f, [key]: val}));
 
@@ -37,12 +197,8 @@ export default function PostJobPage({ navigate, onSuccess }) {
 
   const removeSkill = (s) => setSkills(prev => prev.filter(x => x !== s));
 
-  // Detectare locatie automata
-  const detectLocation = () => {
-    navigator.geolocation?.getCurrentPosition(
-      pos => { set("lat", pos.coords.latitude.toFixed(6)); set("lng", pos.coords.longitude.toFixed(6)); },
-      ()  => setError("Nu s-a putut detecta locatia.")
-    );
+  const handleLocationSelect = ({ lat, lng }) => {
+    set("lat", lat); set("lng", lng);
   };
 
   const handleSubmit = async (e) => {
@@ -59,6 +215,7 @@ export default function PostJobPage({ navigate, onSuccess }) {
         lat: form.lat ? parseFloat(form.lat) : null,
         lng: form.lng ? parseFloat(form.lng) : null,
         skills,
+        images: jobImages,
       });
       setSuccess(true);
       if (onSuccess) onSuccess();
@@ -200,27 +357,37 @@ export default function PostJobPage({ navigate, onSuccess }) {
           </div>
         </div>
 
+        {/* Galerie foto */}
+        <div style={{ background:"#fff", borderRadius:16, padding:24, border:`1px solid ${T.border}`, marginBottom:16, boxShadow:"0 2px 8px rgba(0,0,0,0.05)" }}>
+          <div style={{ marginBottom:12 }}>
+            <h3 style={{ fontSize:14, fontWeight:700, color:T.text, textTransform:"uppercase", letterSpacing:"0.05em", margin:0 }}>
+              🖼️ {t("upload_gallery_title","Galerie foto")}
+            </h3>
+            <p style={{ fontSize:12, color:T.text3, margin:"4px 0 0" }}>
+              {t("upload_gallery_desc","Adaugă până la 5 poze ale locului de muncă — apar pe pin în hartă.")}
+            </p>
+          </div>
+          <GalleryUploader images={jobImages} onChange={setJobImages} maxImages={5}/>
+        </div>
+
         {/* Locatie */}
         <div style={{ background:"#fff", borderRadius:16, padding:24, border:`1px solid ${T.border}`, marginBottom:24, boxShadow:"0 2px 8px rgba(0,0,0,0.05)" }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
-            <h3 style={{ fontSize:14, fontWeight:700, color:T.text, textTransform:"uppercase", letterSpacing:"0.05em" }}>Locatie</h3>
-            <button type="button" onClick={detectLocation} style={{ fontSize:12, fontWeight:600, color:T.green, background:"transparent", border:"none", cursor:"pointer" }}>
-              📍 Detecteaza automat
-            </button>
+          <div style={{ marginBottom:14 }}>
+            <h3 style={{ fontSize:14, fontWeight:700, color:T.text, textTransform:"uppercase", letterSpacing:"0.05em", margin:0 }}>
+              📍 Locatie job
+            </h3>
+            <p style={{ fontSize:12, color:T.text3, margin:"4px 0 0" }}>
+              Scrie adresa si selecteaz-o din lista — pinul va aparea pe harta.
+            </p>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
-            <div>
-              <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:6 }}>{t("post_job_lat")}</label>
-              <input type="number" step="any" value={form.lat} onChange={e=>set("lat",e.target.value)} placeholder="46.7712" style={inp}/>
-            </div>
-            <div>
-              <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:6 }}>{t("post_job_lng")}</label>
-              <input type="number" step="any" value={form.lng} onChange={e=>set("lng",e.target.value)} placeholder="23.6236" style={inp}/>
-            </div>
-          </div>
-          {form.lat && form.lng && (
-            <div style={{ marginTop:10, fontSize:12, color:T.text3 }}>
-              📍 Coordonate: {form.lat}, {form.lng}
+          <AddressAutocomplete
+            lat={form.lat}
+            lng={form.lng}
+            onSelect={handleLocationSelect}
+          />
+          {!form.lat && !form.lng && (
+            <div style={{ marginTop:10, padding:"8px 12px", borderRadius:8, background:"#fffbeb", border:`1px solid ${T.amber}44`, fontSize:12, color:"#92400e" }}>
+              ⚠️ Fara locatie, jobul nu va aparea ca pin pe harta (va fi totusi vizibil in lista).
             </div>
           )}
         </div>

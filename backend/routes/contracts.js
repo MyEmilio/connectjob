@@ -23,6 +23,21 @@ router.get("/my", auth, async (req, res) => {
   }
 });
 
+// GET /api/contracts/:id — un contract specific (ambele parti au acces)
+router.get("/:id", auth, async (req, res) => {
+  try {
+    const contract = await db.findContractById(req.params.id);
+    if (!contract) return res.status(404).json({ error: "Contract negasit" });
+    const isParty = String(contract.worker_id) === String(req.user.id) ||
+                    String(contract.employer_id) === String(req.user.id);
+    if (!isParty && req.user.role !== "admin")
+      return res.status(403).json({ error: "Acces interzis" });
+    res.json(contract);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/contracts
 router.post("/", auth, createContractValidator, async (req, res) => {
   try {

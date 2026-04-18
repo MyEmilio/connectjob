@@ -59,7 +59,6 @@ const db = {
       .lean({ virtuals: true });
     if (!j) return null;
     return {
-      ...j,
       employer:          j.employer_id?.name,
       employer_initials: j.employer_id?.initials,
       employer_phone:    j.employer_id?.phone,

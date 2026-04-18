@@ -11,11 +11,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Redirect la login daca token expirat
+// Redirect la login daca token expirat (nu pe paginile de auth)
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const isAuthRoute = err.config?.url?.includes("/auth/");
+    if (err.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem("jc_token");
       window.location.href = "/login";
     }

@@ -1,272 +1,86 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
+const express  = require("express");
+const bcrypt   = require("bcryptjs");
+const jwt      = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
-const db = require("../db/database");
-const Token = require("../models/Token");
+const db       = require("../db/database");
 const authMiddleware = require("../middleware/auth");
-const logger = require("../utils/logger");
-const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/emailService");
-const { validate, loginSchema, registerSchema, resetRequestSchema, resetPasswordSchema } = require("../utils/validation");
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const router = express.Router();
 
 const sign = (user) =>
-  jwt.sign(
-    { id: user.id || user._id, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
+  jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-const generateToken = () => crypto.randomBytes(32).toString("hex");
-
-// ══════════════════════════════════════════════════════════════
-//  GOOGLE OAUTH — Emergent Auth flow
-// ══════════════════════════════════════════════════════════════
-// REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-router.post("/google/session", async (req, res) => {
-  try {
-    const { session_id } = req.body;
-    if (!session_id) return res.status(400).json({ error: "session_id lipsa" });
-
-    const axios = require("axios");
-    const sessionRes = await axios.get(
-      "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-      { headers: { "X-Session-ID": session_id }, timeout: 10000 }
-    );
-
-    const { email, name, picture, session_token } = sessionRes.data;
-    if (!email) return res.status(401).json({ error: "Email lipsă din sesiunea Google" });
-
-    let user = await db.findUserByEmail(email);
-    if (!user) {
-      const initials = (name || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-      user = await db.createUser({
-        name: name || email.split("@")[0], email, password: "", role: "worker",
-        initials, google_id: email, avatar: picture || "",
-        verified: true, email_verified: true,
-      });
-      logger.info("New Google user via Emergent Auth", { email });
-    } else if (!user.google_id) {
-      await db.updateUser(user.id || user._id, { google_id: email, avatar: user.avatar || picture || "", email_verified: true });
-    }
-
-    const { password: _, ...safeUser } = user;
-    res.cookie("session_token", session_token, { httpOnly: true, secure: true, sameSite: "none", path: "/", maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.json({ token: sign(safeUser), user: safeUser });
-  } catch (err) {
-    logger.error("Emergent Google auth error", { error: err.response?.data || err.message });
-    res.status(401).json({ error: "Autentificare Google eșuată: " + (err.response?.data?.detail || err.response?.data?.message || err.message) });
-  }
-});
-
-// Legacy Google credential flow
+// POST /api/auth/google — OAuth cu Google
 router.post("/google", async (req, res) => {
   try {
     const { credential } = req.body;
     if (!credential) return res.status(400).json({ error: "Token Google lipsa" });
-    if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).json({ error: "Google OAuth neconfigurat" });
+    if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).json({ error: "Google OAuth neconfigutat pe server" });
 
-    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
     const { email, name, picture, sub: googleId, email_verified } = ticket.getPayload();
     if (!email_verified) return res.status(401).json({ error: "Email Google neverificat" });
 
     let user = await db.findUserByEmail(email);
     if (!user) {
       const initials = (name || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-      user = await db.createUser({ name: name || email.split("@")[0], email, password: "", role: "worker", initials, google_id: googleId, avatar: picture || "", verified: true, email_verified: true });
+      user = await db.createUser({
+        name: name || email.split("@")[0],
+        email, password: "", role: "worker",
+        initials, google_id: googleId,
+        avatar: picture || "", verified: true,
+      });
     } else if (!user.google_id) {
-      await db.updateUser(user.id || user._id, { google_id: googleId, avatar: user.avatar || picture || "", email_verified: true });
+      await db.updateUser(user.id || user._id, { google_id: googleId, avatar: user.avatar || picture || "" });
     }
 
     const { password: _, ...safeUser } = user;
     res.json({ token: sign(safeUser), user: safeUser });
   } catch (err) {
-    logger.error("Google auth error", { error: err.message });
     res.status(401).json({ error: "Token Google invalid: " + err.message });
   }
 });
 
-// ══════════════════════════════════════════════════════════════
-//  REGISTER — cu email verification
-// ══════════════════════════════════════════════════════════════
-router.post("/register", validate(registerSchema), async (req, res) => {
+// POST /api/auth/register
+router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role } = req.validated;
+    const { name, email, password, role = "worker" } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: "Campuri obligatorii lipsa" });
+    if (await db.findUserByEmail(email)) return res.status(409).json({ error: "Email deja inregistrat" });
 
-    if (await db.findUserByEmail(email))
-      return res.status(409).json({ error: "Email deja inregistrat" });
-
-    const hash = bcrypt.hashSync(password, 10);
+    const hash     = bcrypt.hashSync(password, 10);
     const initials = name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
-    const user = await db.createUser({ name, email, password: hash, role, initials, email_verified: false });
-
-    // Generate verification token
-    const verifyToken = generateToken();
-    await Token.create({
-      user_id: user.id, token: verifyToken, type: "email_verify",
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    });
-
-    // Send verification email
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
-    const verifyUrl = `${clientUrl}/verify-email?token=${verifyToken}`;
-    try {
-      await sendVerificationEmail(email, name, verifyUrl);
-      logger.info("Verification email sent", { email });
-    } catch (emailErr) {
-      logger.warn("Could not send verification email", { email, error: emailErr.message });
-    }
-
+    const user     = await db.createUser({ name, email, password: hash, role, initials });
     const { password: _, ...safeUser } = user;
-    logger.info("New user registered", { email, role });
-    res.json({ token: sign(safeUser), user: safeUser, verify_url: verifyUrl, message: "Cont creat! Verifică email-ul pentru activare." });
-  } catch (err) {
-    logger.error("Registration error", { error: err.message });
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ══════════════════════════════════════════════════════════════
-//  VERIFY EMAIL
-// ══════════════════════════════════════════════════════════════
-router.get("/verify-email/:token", async (req, res) => {
-  try {
-    const record = await Token.findOne({
-      token: req.params.token, type: "email_verify", used: false, expires_at: { $gt: new Date() },
-    });
-    if (!record) return res.status(400).json({ error: "Token invalid sau expirat" });
-
-    await db.updateUser(record.user_id, { email_verified: true });
-    record.used = true;
-    await record.save();
-
-    logger.info("Email verified", { userId: record.user_id });
-    res.json({ success: true, message: "Email verificat cu succes!" });
-  } catch (err) {
-    logger.error("Email verify error", { error: err.message });
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Resend verification email
-router.post("/resend-verification", authMiddleware, async (req, res) => {
-  try {
-    const user = await db.findUserById(req.user.id);
-    if (!user) return res.status(404).json({ error: "User negasit" });
-    if (user.email_verified) return res.json({ message: "Email deja verificat" });
-
-    await Token.deleteMany({ user_id: user.id || user._id, type: "email_verify" });
-    const verifyToken = generateToken();
-    await Token.create({
-      user_id: user.id || user._id, token: verifyToken, type: "email_verify",
-      expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    });
-
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
-    const verifyUrl = `${clientUrl}/verify-email?token=${verifyToken}`;
-    try {
-      await sendVerificationEmail(user.email, user.name, verifyUrl);
-    } catch (emailErr) {
-      logger.warn("Could not resend verification email", { error: emailErr.message });
-    }
-
-    res.json({ success: true, verify_url: verifyUrl, message: "Email de verificare retrimis!" });
+    res.json({ token: sign(safeUser), user: safeUser });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ══════════════════════════════════════════════════════════════
-//  PASSWORD RESET
-// ══════════════════════════════════════════════════════════════
-router.post("/forgot-password", validate(resetRequestSchema), async (req, res) => {
+// POST /api/auth/login
+router.post("/login", async (req, res) => {
   try {
-    const { email } = req.validated;
-    const user = await db.findUserByEmail(email);
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: "Email si parola sunt obligatorii" });
 
-    // Always return success to prevent email enumeration
-    if (!user) return res.json({ success: true, message: "Dacă email-ul există, vei primi un link de resetare." });
-
-    // Delete old reset tokens
-    await Token.deleteMany({ user_id: user.id || user._id, type: "password_reset" });
-
-    const resetToken = generateToken();
-    await Token.create({
-      user_id: user.id || user._id, token: resetToken, type: "password_reset",
-      expires_at: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
-    });
-
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
-    const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
-    try {
-      await sendPasswordResetEmail(email, user.name, resetUrl);
-      logger.info("Password reset email sent", { email });
-    } catch (emailErr) {
-      logger.warn("Could not send reset email", { email, error: emailErr.message });
-    }
-
-    res.json({ success: true, reset_url: resetUrl, message: "Dacă email-ul există, vei primi un link de resetare." });
-  } catch (err) {
-    logger.error("Forgot password error", { error: err.message });
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.post("/reset-password", validate(resetPasswordSchema), async (req, res) => {
-  try {
-    const { token, password } = req.validated;
-
-    const record = await Token.findOne({
-      token, type: "password_reset", used: false, expires_at: { $gt: new Date() },
-    });
-    if (!record) return res.status(400).json({ error: "Token invalid sau expirat" });
-
-    const hash = bcrypt.hashSync(password, 10);
-    await db.updateUser(record.user_id, { password: hash });
-    record.used = true;
-    await record.save();
-
-    logger.info("Password reset successful", { userId: record.user_id });
-    res.json({ success: true, message: "Parola a fost resetată cu succes!" });
-  } catch (err) {
-    logger.error("Reset password error", { error: err.message });
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Verify reset token validity
-router.get("/verify-reset-token/:token", async (req, res) => {
-  const record = await Token.findOne({
-    token: req.params.token, type: "password_reset", used: false, expires_at: { $gt: new Date() },
-  });
-  res.json({ valid: !!record });
-});
-
-// ══════════════════════════════════════════════════════════════
-//  LOGIN
-// ══════════════════════════════════════════════════════════════
-router.post("/login", validate(loginSchema), async (req, res) => {
-  try {
-    const { email, password } = req.validated;
     const user = await db.findUserByEmail(email);
     if (!user || !bcrypt.compareSync(password, user.password))
       return res.status(401).json({ error: "Email sau parola incorecta" });
 
     const { password: _, ...safeUser } = user;
-    logger.info("User logged in", { email });
     res.json({ token: sign(safeUser), user: safeUser });
   } catch (err) {
-    logger.error("Login error", { error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
 
-// ══════════════════════════════════════════════════════════════
-//  ME + PROFILE
-// ══════════════════════════════════════════════════════════════
+// GET /api/auth/me
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     const user = await db.findUserById(req.user.id);
@@ -278,11 +92,22 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/auth/logout
+router.post("/logout", (req, res) => {
+  res.json({ success: true });
+});
+
+// PUT /api/auth/profile
 router.put("/profile", authMiddleware, async (req, res) => {
   try {
-    const { name, phone, bio, skills } = req.body;
-    await db.updateUser(req.user.id, { name, phone, bio, skills: skills || [] });
-    logger.info("Profile updated", { userId: req.user.id });
+    const { name, phone, bio, skills, avatar } = req.body;
+    const patch = { name, phone, bio, skills: skills || [] };
+    // avatar = base64 data URL (compressed client-side, max ~300KB)
+    if (avatar !== undefined) {
+      if (avatar && avatar.length > 400000) return res.status(413).json({ error: "Poza prea mare. Max ~300KB." });
+      patch.avatar = avatar;
+    }
+    await db.updateUser(req.user.id, patch);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

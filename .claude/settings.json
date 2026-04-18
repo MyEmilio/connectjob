@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"cal_reminder\\\\|cal_hour\\\\|cal_day_before\\\\|cal_save\\\\|cal_add_event\\\\|chat_select\" frontend/src/i18n/locales/*.js)"
+    ]
+  }
+}
