@@ -37,10 +37,12 @@ i18n
     resources,
     ns: ["t"],
     defaultNS: "t",
-    fallbackLng: "es",          // Spaniola — limba principala
+    fallbackLng: false,
     lng: localStorage.getItem("jc_lang") || "es",
     interpolation: { escapeValue: false },
     detection: { order: ["localStorage"], lookupLocalStorage: "jc_lang" },
+    saveMissing: false,
+    missingKeyHandler: false,
   });
 
 // Aplica directia RTL pt araba
