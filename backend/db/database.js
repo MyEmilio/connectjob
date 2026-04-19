@@ -75,6 +75,9 @@ const db = {
     const app = await Application.create(data);
     return app.toJSON();
   },
+  async updateApplication(job_id, worker_id, patch) {
+    await Application.findOneAndUpdate({ job_id, worker_id }, patch);
+  },
   async getApplicationsByJob(job_id) {
     const apps = await Application.find({ job_id })
       .populate("worker_id", "name initials rating verified")

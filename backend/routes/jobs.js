@@ -135,4 +135,105 @@ router.get("/:id/applications", auth, async (req, res) => {
   }
 });
 
+// POST /api/jobs/:id/select-worker — clientul alege un prestator
+router.post("/:id/select-worker", auth, async (req, res) => {
+  try {
+    const job = await db.findJobById(req.params.id);
+    if (!job) return res.status(404).json({ error: "Job negasit" });
+    if (String(job.employer_id) !== String(req.user.id)) return res.status(403).json({ error: "Nu esti proprietarul" });
+    const { worker_id } = req.body;
+    if (!worker_id) return res.status(400).json({ error: "worker_id obligatoriu" });
+
+    await db.updateJob(req.params.id, { status: "provider_chosen", selected_worker_id: worker_id });
+    await db.updateApplication(req.params.id, worker_id, { status: "accepted" });
+
+    res.json({ success: true, status: "provider_chosen" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/jobs/:id/start — incepe lucrarea
+router.post("/:id/start", auth, async (req, res) => {
+  try {
+    const job = await db.findJobById(req.params.id);
+    if (!job) return res.status(404).json({ error: "Job negasit" });
+    const isEmployer = String(job.employer_id) === String(req.user.id);
+    const isWorker   = String(job.selected_worker_id) === String(req.user.id);
+    if (!isEmployer && !isWorker) return res.status(403).json({ error: "Acces interzis" });
+    if (job.status !== "provider_chosen") return res.status(400).json({ error: "Jobul nu e in starea corecta" });
+
+    await db.updateJob(req.params.id, { status: "in_progress" });
+    res.json({ success: true, status: "in_progress" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/jobs/:id/complete — finalizeaza lucrarea
+router.post("/:id/complete", auth, async (req, res) => {
+  try {
+    const job = await db.findJobById(req.params.id);
+    if (!job) return res.status(404).json({ error: "Job negasit" });
+    const isEmployer = String(job.employer_id) === String(req.user.id);
+    const isWorker   = String(job.selected_worker_id) === String(req.user.id);
+    if (!isEmployer && !isWorker) return res.status(403).json({ error: "Acces interzis" });
+    if (job.status !== "in_progress") return res.status(400).json({ error: "Jobul nu e in desfasurare" });
+
+    await db.updateJob(req.params.id, { status: "completed", active: false });
+    res.json({ success: true, status: "completed" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/jobs/:id/cancel — anuleaza jobul
+router.post("/:id/cancel", auth, async (req, res) => {
+  try {
+    const job = await db.findJobById(req.params.id);
+    if (!job) return res.status(404).json({ error: "Job negasit" });
+    const isEmployer = String(job.employer_id) === String(req.user.id);
+    const isWorker   = String(job.selected_worker_id) === String(req.user.id);
+    if (!isEmployer && !isWorker) return res.status(403).json({ error: "Acces interzis" });
+    const cancellable = ["published", "in_discussion", "provider_chosen", "in_progress"];
+    if (!cancellable.includes(job.status)) return res.status(400).json({ error: "Jobul nu poate fi anulat" });
+
+    await db.updateJob(req.params.id, { status: "cancelled", active: false });
+    res.json({ success: true, status: "cancelled" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/jobs/:id/dispute — raporteaza o disputa
+router.post("/:id/dispute", auth, async (req, res) => {
+  try {
+    const job = await db.findJobById(req.params.id);
+    if (!job) return res.status(404).json({ error: "Job negasit" });
+    const isEmployer = String(job.employer_id) === String(req.user.id);
+    const isWorker   = String(job.selected_worker_id) === String(req.user.id);
+    if (!isEmployer && !isWorker) return res.status(403).json({ error: "Acces interzis" });
+    if (!["in_progress", "completed"].includes(job.status)) return res.status(400).json({ error: "Disputa posibila doar pe joburi active sau finalizate" });
+
+    await db.updateJob(req.params.id, { status: "dispute" });
+    res.json({ success: true, status: "dispute" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/jobs/my/active — joburile active ale unui employer sau worker
+router.get("/my/active", auth, async (req, res) => {
+  try {
+    const Job = require("../models/Job");
+    const query = req.user.role === "employer"
+      ? { employer_id: req.user.id, status: { $in: ["published", "in_discussion", "provider_chosen", "in_progress"] } }
+      : { selected_worker_id: req.user.id, status: { $in: ["provider_chosen", "in_progress"] } };
+    const jobs = await Job.find(query).sort({ updated_at: -1 }).lean();
+    res.json(jobs.map(j => ({ ...j, id: j._id })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

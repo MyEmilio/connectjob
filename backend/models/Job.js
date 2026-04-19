@@ -17,7 +17,13 @@ const jobSchema = new mongoose.Schema({
   icon:        { type: String, default: "💼" },
   color:       { type: String, default: "#059669" },
   images:      { type: [String], default: [] },
-  employer_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  employer_id:        { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  selected_worker_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+  status: {
+    type: String,
+    enum: ["draft", "published", "in_discussion", "provider_chosen", "in_progress", "completed", "cancelled", "dispute"],
+    default: "published",
+  },
 }, { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } });
 
 jobSchema.set("toJSON", {

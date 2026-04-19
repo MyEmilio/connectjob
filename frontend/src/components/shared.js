@@ -1,6 +1,27 @@
 import { useTranslation } from "react-i18next";
 import { T } from "../constants/theme";
 
+const JOB_STATUS_CONFIG = {
+  draft:           { label: "Draft",           color: "#94a3b8", bg: "#f1f5f9" },
+  published:       { label: "Publicat",        color: T.green,   bg: "#f0fdf4" },
+  in_discussion:   { label: "In discutie",     color: "#f59e0b", bg: "#fffbeb" },
+  provider_chosen: { label: "Prestator ales",  color: "#3b82f6", bg: "#eff6ff" },
+  in_progress:     { label: "In desfasurare",  color: "#8b5cf6", bg: "#f5f3ff" },
+  completed:       { label: "Finalizat",       color: "#10b981", bg: "#ecfdf5" },
+  cancelled:       { label: "Anulat",          color: "#ef4444", bg: "#fef2f2" },
+  dispute:         { label: "Disputa",         color: "#dc2626", bg: "#fef2f2" },
+};
+
+export function JobStatusBadge({ status, tr }) {
+  if (!status || status === "published") return null;
+  const cfg = JOB_STATUS_CONFIG[status] || JOB_STATUS_CONFIG.published;
+  return (
+    <span style={{ fontSize:9, fontWeight:700, padding:"2px 7px", borderRadius:999, background:cfg.bg, color:cfg.color, border:`1px solid ${cfg.color}44`, whiteSpace:"nowrap" }}>
+      {cfg.label}
+    </span>
+  );
+}
+
 export function Avatar({ initials, color=T.green, size=36, online=false }) {
   return (
     <div style={{ position:"relative", flexShrink:0 }}>
@@ -95,10 +116,11 @@ export function JobCardRow({ job, promoted=false, navigate, update, t }) {
       {promoted && <div style={{ position:"absolute",top:-7,left:12,background:`linear-gradient(135deg,${T.amber},${T.amberDark})`,color:"#fff",borderRadius:999,padding:"2px 9px",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.08em" }}>⭐ {tr("home_stats_promoted")}</div>}
       <div style={{ width:46,height:46,borderRadius:12,background:`${job.color||T.green}15`,border:`1.5px solid ${job.color||T.green}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0 }}>{job.icon||"💼"}</div>
       <div style={{ flex:1,minWidth:0 }}>
-        <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:2 }}>
+        <div style={{ display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap" }}>
           <div style={{ fontWeight:700,fontSize:14,color:T.text }}>{job.title}</div>
           {job.urgent&&<Badge color={T.red}>{tr("job_urgent_badge")}</Badge>}
           {job.second_job&&<Badge color={T.blue}>💼 2nd job</Badge>}
+          <JobStatusBadge status={job.status} tr={tr}/>
         </div>
         <div style={{ fontSize:11,color:T.text3 }}>👤 {job.employer||"—"} · 📂 {job.category||tr("job_diverse_cat")} · {job.type==="full-time"?tr("job_fulltime"):tr("job_parttime")}{job.work_duration?` · ${job.work_duration}`:""}</div>
         <div style={{ display:"flex",gap:4,marginTop:4,flexWrap:"wrap" }}>

@@ -160,6 +160,22 @@ function Badge({ children, color=T.green }) {
   return <span style={{ background:`${color}15`, color, border:`1px solid ${color}33`, borderRadius:999, padding:"2px 8px", fontSize:11, fontWeight:700 }}>{children}</span>;
 }
 
+const JOB_STATUS_CONFIG = {
+  draft:           { label:"Draft",           color:"#94a3b8", bg:"#f1f5f9" },
+  published:       { label:"Publicat",        color:T.green,   bg:"#f0fdf4" },
+  in_discussion:   { label:"In discutie",     color:"#f59e0b", bg:"#fffbeb" },
+  provider_chosen: { label:"Prestator ales",  color:"#3b82f6", bg:"#eff6ff" },
+  in_progress:     { label:"In desfasurare",  color:"#8b5cf6", bg:"#f5f3ff" },
+  completed:       { label:"Finalizat",       color:"#10b981", bg:"#ecfdf5" },
+  cancelled:       { label:"Anulat",          color:"#ef4444", bg:"#fef2f2" },
+  dispute:         { label:"Disputa",         color:"#dc2626", bg:"#fef2f2" },
+};
+function JobStatusBadge({ status }) {
+  if (!status || status === "published") return null;
+  const cfg = JOB_STATUS_CONFIG[status] || JOB_STATUS_CONFIG.published;
+  return <span style={{ fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:999,background:cfg.bg,color:cfg.color,border:`1px solid ${cfg.color}44`,whiteSpace:"nowrap" }}>{cfg.label}</span>;
+}
+
 function Loader({ text="Se încarcă..." }) {
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"60px 20px", gap:12 }}>
@@ -815,9 +831,32 @@ function PageMap({ gs, update, navigate }) {
                 ))}
               </div>
 
+              <JobStatusBadge status={selected.status} style={{marginBottom:8}}/>
               <div style={{ display:"flex",flexDirection:"column",gap:7 }}>
-                <Btn onClick={()=>navigate("escrow")} color={selected.color} size="md" style={{width:"100%",justifyContent:"center"}}>🔒 Aplică + Escrow</Btn>
-                <Btn onClick={()=>navigate("contract")} variant="outline" size="md" style={{width:"100%",justifyContent:"center"}}>📝 Contract direct</Btn>
+                {/* Worker: poate aplica doar pe joburi published */}
+                {gs.user?.role !== "employer" && selected.status === "published" && (
+                  <Btn onClick={()=>navigate("escrow")} color={selected.color} size="md" style={{width:"100%",justifyContent:"center"}}>🔒 Aplică + Escrow</Btn>
+                )}
+                {/* Employer: alege prestator cand e in_discussion */}
+                {gs.user?.role === "employer" && String(selected.employer_id) === String(gs.user?.id) && selected.status === "in_discussion" && (
+                  <Btn onClick={()=>navigate("jobs")} color={T.blue} size="md" style={{width:"100%",justifyContent:"center"}}>👥 Vezi aplicanti</Btn>
+                )}
+                {/* Ambii: porneste lucrarea cand provider_chosen */}
+                {["provider_chosen"].includes(selected.status) && (
+                  <Btn onClick={async()=>{ try{ const api=(await import("./services/api")).default; await api.post(`/jobs/${selected.id}/start`); update({selectedJob:{...selected,status:"in_progress"}}); }catch(e){} }} color={T.green} size="md" style={{width:"100%",justifyContent:"center"}}>▶ Incepe lucrarea</Btn>
+                )}
+                {/* Ambii: finalizeaza cand in_progress */}
+                {selected.status === "in_progress" && (
+                  <Btn onClick={async()=>{ try{ const api=(await import("./services/api")).default; await api.post(`/jobs/${selected.id}/complete`); update({selectedJob:{...selected,status:"completed"}}); }catch(e){} }} color={T.green} size="md" style={{width:"100%",justifyContent:"center"}}>✅ Finalizeaza lucrarea</Btn>
+                )}
+                {/* Disputa */}
+                {["in_progress","completed"].includes(selected.status) && (
+                  <Btn onClick={async()=>{ try{ const api=(await import("./services/api")).default; await api.post(`/jobs/${selected.id}/dispute`); update({selectedJob:{...selected,status:"dispute"}}); }catch(e){} }} variant="outline" size="md" style={{width:"100%",justifyContent:"center",borderColor:T.red,color:T.red}}>⚠️ Raporteaza disputa</Btn>
+                )}
+                {/* Contract si mesaj - mereu disponibile */}
+                {selected.status !== "cancelled" && selected.status !== "completed" && (
+                  <Btn onClick={()=>navigate("contract")} variant="outline" size="md" style={{width:"100%",justifyContent:"center"}}>📝 Contract direct</Btn>
+                )}
                 <Btn onClick={()=>navigate("chat")} variant="outline" size="md" style={{width:"100%",justifyContent:"center"}}>💬 Trimite mesaj</Btn>
               </div>
             </Card>
