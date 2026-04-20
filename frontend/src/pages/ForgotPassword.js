@@ -52,7 +52,7 @@ export default function ForgotPassword() {
             <div style={{ marginBottom:18 }}>
               <label style={{ fontSize:12, fontWeight:700, color:T.text2, textTransform:"uppercase", letterSpacing:"0.05em", display:"block", marginBottom:6 }}>Email</label>
               <input data-testid="forgot-email" type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="email@exemplu.com"
+                placeholder="email@ejemplo.com"
                 style={{ width:"100%", padding:"11px 14px", borderRadius:10, border:`1.5px solid ${T.border}`, fontSize:14, outline:"none", boxSizing:"border-box" }}
                 onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`}
                 onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}

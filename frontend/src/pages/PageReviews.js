@@ -40,7 +40,7 @@ export default function PageReviews({ gs, update }) {
         <Card style={{padding:"24px",textAlign:"center"}}>
           <div style={{fontFamily:"Outfit,sans-serif",fontSize:52,fontWeight:800,color:T.text,lineHeight:1}}>{avg}</div>
           <Stars rating={parseFloat(avg)} size={20}/>
-          <div style={{fontSize:13,color:T.text3,marginTop:8}}>{reviews.length} recenzii</div>
+          <div style={{fontSize:13,color:T.text3,marginTop:8}}>{reviews.length} reseñas</div>
           <div style={{marginTop:12}}>
             {[5,4,3,2,1].map(s=>{
               const count=reviews.filter(r=>r.rating===s).length;
@@ -61,19 +61,19 @@ export default function PageReviews({ gs, update }) {
         <div>
           {!submitted?(
             <Card style={{padding:"20px",marginBottom:14}}>
-              <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:"0 0 14px"}}>✍️ Lasă o recenzie</h3>
+              <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text,margin:"0 0 14px"}}>✍️ Deja una reseña</h3>
               <div style={{display:"flex",gap:6,marginBottom:12}}>
                 {[1,2,3,4,5].map(s=>(
                   <button key={s} onClick={()=>setMyRating(s)} data-testid={`review-star-${s}`} style={{width:36,height:36,borderRadius:8,border:`1.5px solid ${s<=myRating?T.amber:T.border}`,background:s<=myRating?"#fef3c7":"#fafaf9",fontSize:18,cursor:"pointer",transition:"all 0.15s"}}>★</button>
                 ))}
               </div>
-              <textarea data-testid="review-text-input" value={myText} onChange={e=>setMyText(e.target.value)} placeholder="Descrie experiența ta..." rows={3} style={{width:"100%",borderRadius:10,border:`1.5px solid ${T.border}`,padding:"9px 12px",fontSize:13,fontFamily:"DM Sans,sans-serif",resize:"none",outline:"none",boxSizing:"border-box"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
-              <Btn data-testid="review-submit-btn" onClick={submit} disabled={!myRating||!myText.trim()} color={T.green} style={{width:"100%",justifyContent:"center",marginTop:10}}>⭐ Publică recenzia</Btn>
+              <textarea data-testid="review-text-input" value={myText} onChange={e=>setMyText(e.target.value)} placeholder="Describe tu experiencia..." rows={3} style={{width:"100%",borderRadius:10,border:`1.5px solid ${T.border}`,padding:"9px 12px",fontSize:13,fontFamily:"DM Sans,sans-serif",resize:"none",outline:"none",boxSizing:"border-box"}} onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`} onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}/>
+              <Btn data-testid="review-submit-btn" onClick={submit} disabled={!myRating||!myText.trim()} color={T.green} style={{width:"100%",justifyContent:"center",marginTop:10}}>⭐ Publicar reseña</Btn>
             </Card>
           ):(
             <Card style={{padding:"20px",marginBottom:14,border:`2px solid ${T.green}`,textAlign:"center"}}>
               <div style={{fontSize:36,marginBottom:8}}>🎉</div>
-              <div style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text}}>Recenzie publicată!</div>
+              <div style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:700,color:T.text}}>¡Reseña publicada!</div>
             </Card>
           )}
 
@@ -95,10 +95,10 @@ export default function PageReviews({ gs, update }) {
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
                     <Avatar initials={r.reviewer_initials||r.reviewer_name?.slice(0,2)||"??"} color={T.green} size={32}/>
                     <div>
-                      <div style={{fontSize:13,fontWeight:700,color:T.text}}>{r.reviewer_name||"Anonim"}</div>
+                      <div style={{fontSize:13,fontWeight:700,color:T.text}}>{r.reviewer_name||"Anónimo"}</div>
                       <div style={{display:"flex",alignItems:"center",gap:6,marginTop:1}}>
                         <Stars rating={r.rating} size={11}/>
-                        {r.reviewer_verified&&<span style={{background:"#f0fdf4",color:T.green,borderRadius:999,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ Verificat</span>}
+                        {r.reviewer_verified&&<span style={{background:"#f0fdf4",color:T.green,borderRadius:999,padding:"1px 7px",fontSize:10,fontWeight:700}}>✓ Verificado</span>}
                       </div>
                     </div>
                   </div>

@@ -41,14 +41,14 @@ export default function PostJobPage({ navigate, onSuccess }) {
   const detectLocation = () => {
     navigator.geolocation?.getCurrentPosition(
       pos => { set("lat", pos.coords.latitude.toFixed(6)); set("lng", pos.coords.longitude.toFixed(6)); },
-      ()  => setError("Nu s-a putut detecta locatia.")
+      ()  => setError("No se pudo detectar la ubicación.")
     );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title || !form.salary || !form.category) {
-      setError("Titlu, categorie si salariu sunt obligatorii."); return;
+      setError("Título, categoría y salario son obligatorios."); return;
     }
     setError(""); setLoading(true);
     try {
@@ -84,7 +84,7 @@ export default function PostJobPage({ navigate, onSuccess }) {
         <h1 style={{ fontFamily:"Outfit,sans-serif", fontSize:26, fontWeight:800, color:T.dark, margin:"0 0 6px" }}>
           ➕ {t("post_job_title")}
         </h1>
-        <p style={{ color:T.text2, fontSize:14 }}>Completeaza detaliile pentru a publica un nou job.</p>
+        <p style={{ color:T.text2, fontSize:14 }}>Completa los detalles para publicar un nuevo empleo.</p>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -96,18 +96,18 @@ export default function PostJobPage({ navigate, onSuccess }) {
 
         {/* Card principal */}
         <div style={{ background:"#fff", borderRadius:16, padding:28, border:`1px solid ${T.border}`, marginBottom:16, boxShadow:"0 2px 8px rgba(0,0,0,0.05)" }}>
-          <h3 style={{ fontSize:14, fontWeight:700, color:T.text, marginBottom:16, textTransform:"uppercase", letterSpacing:"0.05em" }}>Informatii de baza</h3>
+          <h3 style={{ fontSize:14, fontWeight:700, color:T.text, marginBottom:16, textTransform:"uppercase", letterSpacing:"0.05em" }}>Información básica</h3>
 
           {/* Titlu */}
           <div style={{ marginBottom:16 }}>
             <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:6 }}>{t("post_job_name")} *</label>
-            <input value={form.title} onChange={e=>set("title",e.target.value)} required placeholder="ex: Curățare piscinã" style={inp}/>
+            <input value={form.title} onChange={e=>set("title",e.target.value)} required placeholder="ej: Limpieza piscina" style={inp}/>
           </div>
 
           {/* Descriere */}
           <div style={{ marginBottom:16 }}>
             <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:6 }}>{t("post_job_desc")}</label>
-            <textarea value={form.description} onChange={e=>set("description",e.target.value)} rows={4} placeholder="Descrie activitatile, cerintele, programul..." style={{...inp, resize:"vertical"}}/>
+            <textarea value={form.description} onChange={e=>set("description",e.target.value)} rows={4} placeholder="Describe las actividades, los requisitos, el horario..." style={{...inp, resize:"vertical"}}/>
           </div>
 
           {/* Categorie + Salariu */}
@@ -115,13 +115,13 @@ export default function PostJobPage({ navigate, onSuccess }) {
             <div>
               <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:6 }}>{t("post_job_cat")} *</label>
               <select value={form.category} onChange={e=>set("category",e.target.value)} required style={inp}>
-                <option value="">Selecteaza...</option>
+                <option value="">Selecciona...</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
               <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:6 }}>{t("post_job_salary")} *</label>
-              <input type="number" min="1" value={form.salary} onChange={e=>set("salary",e.target.value)} required placeholder="ex: 150" style={inp}/>
+              <input type="number" min="1" value={form.salary} onChange={e=>set("salary",e.target.value)} required placeholder="ej: 150" style={inp}/>
             </div>
           </div>
 
@@ -153,9 +153,9 @@ export default function PostJobPage({ navigate, onSuccess }) {
 
         {/* Icon + Culoare */}
         <div style={{ background:"#fff", borderRadius:16, padding:24, border:`1px solid ${T.border}`, marginBottom:16, boxShadow:"0 2px 8px rgba(0,0,0,0.05)" }}>
-          <h3 style={{ fontSize:14, fontWeight:700, color:T.text, marginBottom:16, textTransform:"uppercase", letterSpacing:"0.05em" }}>Aspect vizual</h3>
+          <h3 style={{ fontSize:14, fontWeight:700, color:T.text, marginBottom:16, textTransform:"uppercase", letterSpacing:"0.05em" }}>Aspecto visual</h3>
           <div style={{ marginBottom:12 }}>
-            <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:8 }}>Icon</label>
+            <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:8 }}>Icono</label>
             <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
               {ICONS.map(icon => (
                 <div key={icon} onClick={()=>set("icon",icon)} style={{
@@ -170,7 +170,7 @@ export default function PostJobPage({ navigate, onSuccess }) {
             </div>
           </div>
           <div>
-            <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:8 }}>Culoare pin harta</label>
+            <label style={{ fontSize:13, fontWeight:600, color:T.text, display:"block", marginBottom:8 }}>Color pin mapa</label>
             <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
               {["#059669","#3b82f6","#8b5cf6","#f59e0b","#ef4444","#ec4899","#ea580c","#0d9488"].map(c => (
                 <div key={c} onClick={()=>set("color",c)} style={{
@@ -187,7 +187,7 @@ export default function PostJobPage({ navigate, onSuccess }) {
         <div style={{ background:"#fff", borderRadius:16, padding:24, border:`1px solid ${T.border}`, marginBottom:16, boxShadow:"0 2px 8px rgba(0,0,0,0.05)" }}>
           <h3 style={{ fontSize:14, fontWeight:700, color:T.text, marginBottom:16, textTransform:"uppercase", letterSpacing:"0.05em" }}>{t("post_job_skills")}</h3>
           <div style={{ display:"flex", gap:8, marginBottom:12 }}>
-            <input value={skillInput} onChange={e=>setSkillInput(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"){e.preventDefault();addSkill();}}} placeholder="ex: Chimie piscina..." style={{...inp, flex:1}}/>
+            <input value={skillInput} onChange={e=>setSkillInput(e.target.value)} onKeyDown={e=>{ if(e.key==="Enter"){e.preventDefault();addSkill();}}} placeholder="ej: Química piscina..." style={{...inp, flex:1}}/>
             <button type="button" onClick={addSkill} style={{ padding:"10px 16px", borderRadius:10, border:"none", background:T.green, color:"#fff", fontWeight:700, cursor:"pointer", fontSize:13 }}>+</button>
           </div>
           <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
@@ -203,9 +203,9 @@ export default function PostJobPage({ navigate, onSuccess }) {
         {/* Locatie */}
         <div style={{ background:"#fff", borderRadius:16, padding:24, border:`1px solid ${T.border}`, marginBottom:24, boxShadow:"0 2px 8px rgba(0,0,0,0.05)" }}>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
-            <h3 style={{ fontSize:14, fontWeight:700, color:T.text, textTransform:"uppercase", letterSpacing:"0.05em" }}>Locatie</h3>
+            <h3 style={{ fontSize:14, fontWeight:700, color:T.text, textTransform:"uppercase", letterSpacing:"0.05em" }}>Ubicación</h3>
             <button type="button" onClick={detectLocation} style={{ fontSize:12, fontWeight:600, color:T.green, background:"transparent", border:"none", cursor:"pointer" }}>
-              📍 Detecteaza automat
+              📍 Detectar automáticamente
             </button>
           </div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
@@ -220,7 +220,7 @@ export default function PostJobPage({ navigate, onSuccess }) {
           </div>
           {form.lat && form.lng && (
             <div style={{ marginTop:10, fontSize:12, color:T.text3 }}>
-              📍 Coordonate: {form.lat}, {form.lng}
+              📍 Coordenadas: {form.lat}, {form.lng}
             </div>
           )}
         </div>

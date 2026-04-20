@@ -74,7 +74,7 @@ export default function Login() {
                 data-testid="login-email"
                 type="email" required value={form.email}
                 onChange={e => setForm(f=>({...f, email:e.target.value}))}
-                placeholder="email@exemplu.com"
+                placeholder="email@ejemplo.com"
                 style={{ width:"100%", padding:"11px 14px", borderRadius:10, border:`1.5px solid ${T.border}`, fontSize:14, outline:"none", boxSizing:"border-box", transition:"border 0.2s" }}
                 onFocus={e=>e.target.style.border=`1.5px solid ${T.green}`}
                 onBlur={e=>e.target.style.border=`1.5px solid ${T.border}`}
@@ -117,7 +117,7 @@ export default function Login() {
           {/* Divider */}
           <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16 }}>
             <div style={{ flex:1, height:1, background:T.border }}/>
-            <span style={{ fontSize:12, color:T.text3, whiteSpace:"nowrap" }}>{t("or_google") || "sau continuă cu"}</span>
+            <span style={{ fontSize:12, color:T.text3, whiteSpace:"nowrap" }}>{t("or_google") || "o continúa con"}</span>
             <div style={{ flex:1, height:1, background:T.border }}/>
           </div>
 

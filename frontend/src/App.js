@@ -131,7 +131,7 @@ function ConnectJobApp() {
     { key:"map",       icon:"🗺️", label:t("nav_map"),      badge: null },
     { key:"chat",      icon:"💬", label:t("nav_chat"),     badge: gs.unreadMessages },
     { key:"escrow",    icon:"🔒", label:t("nav_escrow") },
-    { key:"calendar",   icon:"📅", label:t("nav_calendar","Agendă") },
+    { key:"calendar",   icon:"📅", label:t("nav_calendar","Agenda") },
     { key:"contract",  icon:"📝", label:t("nav_contract") },
     { key:"reviews",   icon:"⭐", label:t("nav_reviews") },
     { key:"analytics", icon:"📊", label:t("nav_analytics") },
@@ -147,7 +147,7 @@ function ConnectJobApp() {
     map:       t("nav_map"),
     chat:      t("nav_chat"),
     escrow:    t("nav_escrow"),
-    calendar:  t("nav_calendar","Agendă"),
+    calendar:  t("nav_calendar","Agenda"),
     contract:  t("nav_contract"),
     reviews:   t("nav_reviews"),
     analytics: t("nav_analytics"),
@@ -159,7 +159,7 @@ function ConnectJobApp() {
 
   const renderPage = () => {
     const props = { gs, update, navigate };
-    if(loadingPage) return <Loader text="Se încarcă..."/>;
+    if(loadingPage) return <Loader text={t("loading","Cargando...")}/>;
     switch(page) {
       case "home":      return <PageHome      {...props}/>;
       case "jobs":      return <PageJobs      {...props}/>;
@@ -181,7 +181,7 @@ function ConnectJobApp() {
   // Afiseaza spinner cat timp se verifica autentificarea
   if (authLoading) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
-      <Loader text="Se incarca..."/>
+      <Loader text={t("loading","Cargando...")}/>
     </div>
   );
 

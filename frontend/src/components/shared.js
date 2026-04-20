@@ -59,7 +59,7 @@ export function Badge({ children, color=T.green }) {
   return <span style={{ background:`${color}15`, color, border:`1px solid ${color}33`, borderRadius:999, padding:"2px 8px", fontSize:11, fontWeight:700 }}>{children}</span>;
 }
 
-export function Loader({ text="Se incarca..." }) {
+export function Loader({ text="Cargando..." }) {
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"60px 20px", gap:12 }}>
       <div style={{ width:40,height:40,borderRadius:"50%",border:`3px solid ${T.border}`,borderTopColor:T.green,animation:"spin 0.8s linear infinite" }}/>

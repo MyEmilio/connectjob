@@ -63,7 +63,7 @@ export default function DashboardStats({ onClose }) {
       setStats(data);
       setError(null);
     } catch (err) {
-      setError(err.response?.data?.error || 'Eroare la încărcarea statisticilor');
+      setError(err.response?.data?.error || 'Error al cargar estadísticas');
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ export default function DashboardStats({ onClose }) {
 
   // Applications status chart
   const applicationStatusData = stats?.applications ? {
-    labels: ['În așteptare', 'Acceptate', 'Respinse'],
+    labels: ['Pendientes', 'Aceptadas', 'Rechazadas'],
     datasets: [{
       data: [
         stats.applications.sent.pending,
@@ -138,7 +138,7 @@ export default function DashboardStats({ onClose }) {
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
         zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        <div style={{ color: T.text, fontSize: 18 }}>Se încarcă statisticile...</div>
+        <div style={{ color: T.text, fontSize: 18 }}>Cargando estadísticas...</div>
       </div>
     );
   }
@@ -166,10 +166,10 @@ export default function DashboardStats({ onClose }) {
         }}>
           <div>
             <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 24, fontWeight: 800, color: T.text, margin: 0 }}>
-              📊 Dashboard Statistici
+              📊 Panel de Estadísticas
             </h2>
             <p style={{ fontSize: 14, color: T.text3, margin: '4px 0 0' }}>
-              Vizualizare completă a activității tale
+              Vista completa de tu actividad
             </p>
           </div>
           <button 
@@ -187,12 +187,12 @@ export default function DashboardStats({ onClose }) {
             {/* Overview Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
               {[
-                { label: 'Joburi postate', value: stats?.overview?.total_jobs_posted || 0, icon: '💼', color: T.blue },
-                { label: 'Aplicări trimise', value: stats?.overview?.total_applications_sent || 0, icon: '📤', color: T.green },
-                { label: 'Aplicări primite', value: stats?.overview?.applications_received || 0, icon: '📥', color: T.orange },
-                { label: 'Conversații', value: stats?.overview?.total_conversations || 0, icon: '💬', color: T.purple },
-                { label: 'Contracte semnate', value: stats?.overview?.contracts_signed || 0, icon: '✍️', color: T.greenLight },
-                { label: 'Rating mediu', value: stats?.reviews?.received?.average || '-', icon: '⭐', color: T.orange },
+                { label: 'Empleos publicados', value: stats?.overview?.total_jobs_posted || 0, icon: '💼', color: T.blue },
+                { label: 'Solicitudes enviadas', value: stats?.overview?.total_applications_sent || 0, icon: '📤', color: T.green },
+                { label: 'Solicitudes recibidas', value: stats?.overview?.applications_received || 0, icon: '📥', color: T.orange },
+                { label: 'Conversaciones', value: stats?.overview?.total_conversations || 0, icon: '💬', color: T.purple },
+                { label: 'Contratos firmados', value: stats?.overview?.contracts_signed || 0, icon: '✍️', color: T.greenLight },
+                { label: 'Valoración media', value: stats?.reviews?.received?.average || '-', icon: '⭐', color: T.orange },
               ].map((item, i) => (
                 <div key={i} style={{
                   background: T.card, borderRadius: 14, padding: '16px 14px',
@@ -214,31 +214,31 @@ export default function DashboardStats({ onClose }) {
               border: `1px solid ${T.green}33`,
             }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, color: T.text, margin: '0 0 16px', fontFamily: 'Outfit,sans-serif' }}>
-                💰 Rezumat Financiar
+                💰 Resumen Financiero
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 16 }}>
                 <div>
-                  <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>Total câștigat</div>
+                  <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>Total ganado</div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: T.greenLight }}>
-                    {stats?.finances?.total_earned?.toLocaleString() || 0} RON
+                    {stats?.finances?.total_earned?.toLocaleString() || 0} €
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>În așteptare</div>
+                  <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>Pendiente</div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: T.orange }}>
-                    {stats?.finances?.pending_earnings?.toLocaleString() || 0} RON
+                    {stats?.finances?.pending_earnings?.toLocaleString() || 0} €
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>Total plătit</div>
+                  <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>Total pagado</div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: T.purple }}>
-                    {stats?.finances?.total_paid?.toLocaleString() || 0} RON
+                    {stats?.finances?.total_paid?.toLocaleString() || 0} €
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>Comisioane</div>
+                  <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>Comisiones</div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: T.text2 }}>
-                    {stats?.finances?.commission_paid?.toLocaleString() || 0} RON
+                    {stats?.finances?.commission_paid?.toLocaleString() || 0} €
                   </div>
                 </div>
               </div>
@@ -249,7 +249,7 @@ export default function DashboardStats({ onClose }) {
               {/* Applications Chart */}
               <div style={{ background: T.card, borderRadius: 16, padding: 20, border: `1px solid ${T.border}` }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: T.text, margin: '0 0 16px' }}>
-                  📈 Aplicări (ultimele 7 zile)
+                  📈 Solicitudes (últimos 7 días)
                 </h3>
                 <div style={{ height: 180 }}>
                   {applicationsChartData && <Bar data={applicationsChartData} options={chartOptions} />}
@@ -259,7 +259,7 @@ export default function DashboardStats({ onClose }) {
               {/* Earnings Chart */}
               <div style={{ background: T.card, borderRadius: 16, padding: 20, border: `1px solid ${T.border}` }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: T.text, margin: '0 0 16px' }}>
-                  💵 Câștiguri (ultimele 6 luni)
+                  💵 Ganancias (últimos 6 meses)
                 </h3>
                 <div style={{ height: 180 }}>
                   {earningsChartData && <Line data={earningsChartData} options={chartOptions} />}
@@ -272,7 +272,7 @@ export default function DashboardStats({ onClose }) {
               {/* Doughnut Chart */}
               <div style={{ background: T.card, borderRadius: 16, padding: 20, border: `1px solid ${T.border}` }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: T.text, margin: '0 0 16px' }}>
-                  📊 Status aplicări trimise
+                  📊 Estado de solicitudes enviadas
                 </h3>
                 <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {applicationStatusData && stats.applications.sent.total > 0 ? (
@@ -285,7 +285,7 @@ export default function DashboardStats({ onClose }) {
                       }} 
                     />
                   ) : (
-                    <div style={{ color: T.text3, fontSize: 14 }}>Nicio aplicare încă</div>
+                    <div style={{ color: T.text3, fontSize: 14 }}>Ninguna solicitud aún</div>
                   )}
                 </div>
               </div>
@@ -293,23 +293,23 @@ export default function DashboardStats({ onClose }) {
               {/* Activity Summary */}
               <div style={{ background: T.card, borderRadius: 16, padding: 20, border: `1px solid ${T.border}` }}>
                 <h3 style={{ fontSize: 14, fontWeight: 700, color: T.text, margin: '0 0 16px' }}>
-                  🎯 Activitate recentă
+                  🎯 Actividad reciente
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, color: T.text2 }}>Aplicări (7 zile)</span>
+                    <span style={{ fontSize: 13, color: T.text2 }}>Solicitudes (7 días)</span>
                     <span style={{ fontSize: 18, fontWeight: 700, color: T.green }}>{stats?.activity?.applications_last_7_days || 0}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, color: T.text2 }}>Aplicări (30 zile)</span>
+                    <span style={{ fontSize: 13, color: T.text2 }}>Solicitudes (30 días)</span>
                     <span style={{ fontSize: 18, fontWeight: 700, color: T.blue }}>{stats?.activity?.applications_last_30_days || 0}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, color: T.text2 }}>Joburi postate (30 zile)</span>
+                    <span style={{ fontSize: 13, color: T.text2 }}>Empleos publicados (30 días)</span>
                     <span style={{ fontSize: 18, fontWeight: 700, color: T.purple }}>{stats?.activity?.jobs_posted_last_30_days || 0}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 13, color: T.text2 }}>Review-uri primite</span>
+                    <span style={{ fontSize: 13, color: T.text2 }}>Reseñas recibidas</span>
                     <span style={{ fontSize: 18, fontWeight: 700, color: T.orange }}>{stats?.reviews?.received?.total || 0}</span>
                   </div>
                 </div>

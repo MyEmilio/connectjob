@@ -45,7 +45,7 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
           onSuccess?.(data);
         } else if (data.status === 'failed') {
           clearInterval(pollInterval);
-          setError('Plata a eșuat. Te rugăm să încerci din nou.');
+          setError('El pago ha fallado. Por favor, inténtalo de nuevo.');
         }
       } catch (err) {
         console.error('Error polling payment status:', err);
@@ -66,7 +66,7 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
 
   const handlePayment = async () => {
     if (!amount || parseFloat(amount) <= 0) {
-      setError('Te rugăm să introduci o sumă validă');
+      setError('Por favor, introduce un importe válido');
       return;
     }
 
@@ -92,7 +92,7 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
         setPaymentStatus('processing');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Eroare la procesarea plății');
+      setError(err.response?.data?.error || 'Error al procesar el pago');
     } finally {
       setLoading(false);
     }
@@ -122,10 +122,10 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
         }}>
           <div>
             <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 22, fontWeight: 800, color: T.text, margin: '0 0 4px' }}>
-              💳 Plată în Escrow
+              💳 Pago en Escrow
             </h2>
             <p style={{ fontSize: 13, color: T.text3, margin: 0 }}>
-              Fondurile sunt reținute până la finalizarea jobului
+              Los fondos se retienen hasta finalizar el trabajo
             </p>
           </div>
           <button 
@@ -144,10 +144,10 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
             border: `1px solid ${T.border}`,
           }}>
             <div style={{ fontSize: 11, color: T.text3, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 1 }}>
-              Job
+              Empleo
             </div>
             <div style={{ fontSize: 16, fontWeight: 700, color: T.text, marginBottom: 8 }}>
-              {job?.title || 'Job'}
+              {job?.title || 'Empleo'}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{
@@ -158,8 +158,8 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
                 {payee?.initials || '?'}
               </div>
               <div>
-                <div style={{ fontSize: 14, color: T.text, fontWeight: 600 }}>{payee?.name || 'Worker'}</div>
-                <div style={{ fontSize: 12, color: T.text3 }}>Beneficiar</div>
+                <div style={{ fontSize: 14, color: T.text, fontWeight: 600 }}>{payee?.name || 'Trabajador'}</div>
+                <div style={{ fontSize: 12, color: T.text3 }}>Beneficiario</div>
               </div>
             </div>
           </div>
@@ -167,13 +167,13 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
           {/* Amount Input */}
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: T.text2, marginBottom: 8 }}>
-              Sumă de plată (RON)
+              Importe a pagar (€)
             </label>
             <input
               type="number"
               value={amount}
               onChange={e => setAmount(e.target.value)}
-              placeholder="Ex: 500"
+              placeholder="Ej: 500"
               disabled={paymentStatus}
               style={{
                 width: '100%', padding: '14px 16px', borderRadius: 12, fontSize: 18, fontWeight: 700,
@@ -189,17 +189,17 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
             border: `1px solid ${T.green}33`,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 14, color: T.text2 }}>Sumă job</span>
-              <span style={{ fontSize: 14, color: T.text, fontWeight: 600 }}>{amount || '0'} RON</span>
+              <span style={{ fontSize: 14, color: T.text2 }}>Importe del trabajo</span>
+              <span style={{ fontSize: 14, color: T.text, fontWeight: 600 }}>{amount || '0'} €</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 14, color: T.text2 }}>Comision platformă (5%)</span>
-              <span style={{ fontSize: 14, color: T.orange }}>{commission} RON</span>
+              <span style={{ fontSize: 14, color: T.text2 }}>Comisión plataforma (5%)</span>
+              <span style={{ fontSize: 14, color: T.orange }}>{commission} €</span>
             </div>
             <div style={{ height: 1, background: T.border, margin: '12px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 16, color: T.text, fontWeight: 700 }}>Total</span>
-              <span style={{ fontSize: 20, color: T.greenLight, fontWeight: 800 }}>{total} RON</span>
+              <span style={{ fontSize: 20, color: T.greenLight, fontWeight: 800 }}>{total} €</span>
             </div>
           </div>
 
@@ -218,7 +218,7 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
               background: `${T.blue}22`, borderRadius: 10, padding: 12, marginBottom: 16,
               border: `1px solid ${T.blue}44`, color: T.blue, fontSize: 13, textAlign: 'center',
             }}>
-              ⏳ Se procesează plata...
+              ⏳ Procesando el pago...
             </div>
           )}
 
@@ -227,7 +227,7 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
               background: `${T.green}22`, borderRadius: 10, padding: 12, marginBottom: 16,
               border: `1px solid ${T.green}44`, color: T.greenLight, fontSize: 13, textAlign: 'center',
             }}>
-              ✅ Plată reținută cu succes în escrow!
+              ✅ ¡Pago retenido con éxito en escrow!
             </div>
           )}
 
@@ -237,14 +237,14 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
               background: `${T.orange}15`, borderRadius: 10, padding: 12, marginBottom: 16,
               border: `1px solid ${T.orange}33`, fontSize: 12, color: T.orange,
             }}>
-              ⚠️ <strong>Mod demonstrație</strong> - Stripe nu este configurat. Plățile sunt simulate.
+              ⚠️ <strong>Modo demostración</strong> - Stripe no está configurado. Los pagos son simulados.
             </div>
           )}
 
           {/* Info */}
           <div style={{ fontSize: 12, color: T.text3, marginBottom: 20, lineHeight: 1.5 }}>
-            🔒 Fondurile sunt reținute în siguranță până când confirmi finalizarea jobului. 
-            Workerul primește banii doar după ce ești mulțumit de rezultat.
+            🔒 Los fondos se retienen de forma segura hasta que confirmes la finalización del trabajo.
+            El trabajador recibe el dinero solo después de que estés satisfecho con el resultado.
           </div>
         </div>
 
@@ -260,7 +260,7 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
               color: T.text2, cursor: 'pointer',
             }}
           >
-            Anulează
+            Cancelar
           </button>
           <button
             onClick={handlePayment}
@@ -275,7 +275,7 @@ export default function PaymentModal({ job, payee, onClose, onSuccess }) {
               opacity: loading || paymentStatus ? 0.7 : 1,
             }}
           >
-            {loading ? 'Se procesează...' : paymentStatus === 'held' ? '✓ Plătit' : `Plătește ${total} RON`}
+            {loading ? 'Procesando...' : paymentStatus === 'held' ? '✓ Pagado' : `Pagar ${total} €`}
           </button>
         </div>
       </div>

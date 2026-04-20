@@ -26,7 +26,7 @@ export default function AuthCallback() {
       })
       .catch((err) => {
         console.error("Google Auth failed:", err);
-        navigate("/login", { replace: true, state: { error: "Autentificare Google eșuată" } });
+        navigate("/login", { replace: true, state: { error: "Error de autenticación con Google" } });
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -35,7 +35,7 @@ export default function AuthCallback() {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fafaf9" }}>
       <div style={{ textAlign: "center" }}>
         <div style={{ width: 48, height: 48, border: "3px solid #059669", borderTop: "3px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
-        <div style={{ fontFamily: "Outfit,sans-serif", fontSize: 16, fontWeight: 700, color: "#1c1917" }}>Se autentifică cu Google...</div>
+        <div style={{ fontFamily: "Outfit,sans-serif", fontSize: 16, fontWeight: 700, color: "#1c1917" }}>Autenticando con Google...</div>
       </div>
     </div>
   );

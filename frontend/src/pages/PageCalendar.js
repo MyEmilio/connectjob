@@ -117,7 +117,7 @@ export default function PageCalendar({ gs, update }) {
   const deleteEvent = (id) => update({ schedule: events.filter(e => e.id !== id) });
 
   const MONTH_NAMES = t("cal_months",{returnObjects:true,defaultValue:["Ianuarie","Februarie","Martie","Aprilie","Mai","Iunie","Iulie","August","Septembrie","Octombrie","Noiembrie","Decembrie"]});
-  const DAY_SHORT   = t("cal_days_short",{returnObjects:true,defaultValue:["Lu","Ma","Mi","Jo","Vi","Sâ","Du"]});
+  const DAY_SHORT   = t("cal_days_short",{returnObjects:true,defaultValue:["Lu","Ma","Mi","Ju","Vi","Sá","Do"]});
 
   const upcomingCount = events.filter(ev => ev.date >= todayStr).length;
 
@@ -132,7 +132,7 @@ export default function PageCalendar({ gs, update }) {
           <button data-testid="cal-prev-month" onClick={()=>setCurMonth(new Date(year,month-1,1))} style={{width:34,height:34,borderRadius:9,border:`1.5px solid ${T.border}`,background:"#fff",cursor:"pointer",fontSize:16,color:T.text2,display:"flex",alignItems:"center",justifyContent:"center"}}>◀</button>
           <div>
             <div style={{fontFamily:"Outfit,sans-serif",fontSize:17,fontWeight:800,color:T.text,textAlign:"center"}}>{MONTH_NAMES[month]} {year}</div>
-            {upcomingCount>0 && <div style={{fontSize:11,color:T.green,fontWeight:700,textAlign:"center"}}>📅 {upcomingCount} {t("cal_upcoming_count","programări viitoare")}</div>}
+            {upcomingCount>0 && <div style={{fontSize:11,color:T.green,fontWeight:700,textAlign:"center"}}>📅 {upcomingCount} {t("cal_upcoming_count","programaciones próximas")}</div>}
           </div>
           <button data-testid="cal-next-month" onClick={()=>setCurMonth(new Date(year,month+1,1))} style={{width:34,height:34,borderRadius:9,border:`1.5px solid ${T.border}`,background:"#fff",cursor:"pointer",fontSize:16,color:T.text2,display:"flex",alignItems:"center",justifyContent:"center"}}>▶</button>
         </div>
@@ -184,14 +184,14 @@ export default function PageCalendar({ gs, update }) {
             {new Date(selectedDate+"T12:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})}
             {selectedDate === todayStr && <span style={{marginLeft:8,fontSize:11,padding:"2px 8px",borderRadius:20,background:T.green,color:"#fff",fontWeight:700}}>{t("home_today")}</span>}
           </div>
-          <Btn data-testid="cal-add-event-btn" onClick={openAdd} color={T.green} size="sm">+ {t("cal_add","Adaugă")}</Btn>
+          <Btn data-testid="cal-add-event-btn" onClick={openAdd} color={T.green} size="sm">+ {t("cal_add","Añadir")}</Btn>
         </div>
 
         {selectedEvents.length === 0 ? (
           <div style={{textAlign:"center",padding:"28px 0",color:T.text3}}>
             <div style={{fontSize:36,marginBottom:8}}>📭</div>
-            <div style={{fontSize:13}}>{t("cal_no_events","Nicio programare în această zi")}</div>
-            <div style={{fontSize:12,marginTop:4,color:T.text3}}>{t("cal_no_events_hint","Apasă + Adaugă pentru a programa o lucrare")}</div>
+            <div style={{fontSize:13}}>{t("cal_no_events","Sin programaciones este día")}</div>
+            <div style={{fontSize:12,marginTop:4,color:T.text3}}>{t("cal_no_events_hint","Pulsa + Añadir para programar un trabajo")}</div>
           </div>
         ) : selectedEvents.sort((a,b)=>a.time>b.time?1:-1).map(ev => {
           const tp = typeObj(ev.type);
@@ -208,7 +208,7 @@ export default function PageCalendar({ gs, update }) {
                 {ev.notes && <div style={{fontSize:11,color:T.text3,marginTop:3,fontStyle:"italic"}}>{ev.notes}</div>}
                 <div style={{display:"flex",gap:5,marginTop:6,flexWrap:"wrap"}}>
                   <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:tp.color+"18",color:tp.color,fontWeight:700}}>{tp.icon} {tp.label}</span>
-                  {ev.recurring!=="none" && <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:"#fef3c7",color:"#92400e",fontWeight:700}}>🔁 {ev.recurring==="weekly"?t("cal_weekly","Săptămânal"):t("cal_monthly","Lunar")}</span>}
+                  {ev.recurring!=="none" && <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:"#fef3c7",color:"#92400e",fontWeight:700}}>🔁 {ev.recurring==="weekly"?t("cal_weekly","Semanal"):t("cal_monthly","Mensual")}</span>}
                   <span style={{fontSize:10,padding:"2px 7px",borderRadius:20,background:"#ede9fe",color:"#5b21b6",fontWeight:700}}>⏰ -{ev.reminderMin}min</span>
                 </div>
               </div>
@@ -223,7 +223,7 @@ export default function PageCalendar({ gs, update }) {
 
       {events.filter(ev=>ev.date>=todayStr&&ev.date>selectedDate).sort((a,b)=>a.date>b.date?1:a.time>b.time?1:-1).slice(0,5).length > 0 && (
         <Card style={{padding:"16px 18px",marginTop:12}}>
-          <div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,marginBottom:10}}>📆 {t("cal_coming_soon","Urmează în curând")}</div>
+          <div style={{fontFamily:"Outfit,sans-serif",fontSize:14,fontWeight:700,color:T.text,marginBottom:10}}>📆 {t("cal_coming_soon","Próximamente")}</div>
           {events.filter(ev=>ev.date>=todayStr&&ev.date>selectedDate).sort((a,b)=>a.date>b.date?1:a.time>b.time?1:-1).slice(0,5).map(ev=>{
             const tp=typeObj(ev.type);
             const evDate=new Date(ev.date+"T12:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
@@ -245,7 +245,7 @@ export default function PageCalendar({ gs, update }) {
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:9000,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowForm(false)}>
           <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:"20px 20px 0 0",padding:"22px 18px 32px",width:"100%",maxWidth:500,maxHeight:"88vh",overflowY:"auto",animation:"slideUp 0.3s ease"}}>
             <div style={{fontFamily:"Outfit,sans-serif",fontSize:16,fontWeight:800,color:T.text,marginBottom:14,textAlign:"center"}}>
-              {editId ? `✏️ ${t("cal_edit_title","Editează programare")}` : `➕ ${t("cal_add_title","Programare nouă")}`}
+              {editId ? `✏️ ${t("cal_edit_title","Editar programación")}` : `➕ ${t("cal_add_title","Nueva programación")}`}
             </div>
 
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:14}}>
@@ -265,7 +265,7 @@ export default function PageCalendar({ gs, update }) {
             {[
               {label:t("cal_f_title","Titlu / Descriere *"), key:"title", ph:t("cal_f_title_ph","ex: Tuns gazon la Vila Ionescu")},
               {label:t("cal_f_client","Client / Proprietar"), key:"client", ph:t("cal_f_client_ph","ex: Familia Popescu")},
-              {label:t("cal_f_location","Adresă / Locație"), key:"location", ph:t("cal_f_location_ph","ex: Str. Rozelor 12, Cluj")},
+              {label:t("cal_f_location","Dirección / Ubicación"), key:"location", ph:t("cal_f_location_ph","ej: C/ Rosas 12, Madrid")},
               {label:t("cal_f_notes","Note"), key:"notes", ph:t("cal_f_notes_ph","Detalii suplimentare...")},
             ].map(f=>(
               <div key={f.key} style={{marginBottom:10}}>
@@ -287,27 +287,27 @@ export default function PageCalendar({ gs, update }) {
 
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
               <div>
-                <label style={labelSt}>{t("cal_recurring","Recurență")}</label>
+                <label style={labelSt}>{t("cal_recurring","Recurrencia")}</label>
                 <select data-testid="cal-form-recurring" value={form.recurring} onChange={e=>setForm(v=>({...v,recurring:e.target.value}))} style={{...inputSt}}>
-                  <option value="none">{t("cal_once","O singură dată")}</option>
-                  <option value="weekly">{t("cal_weekly","Săptămânal")} 🔁</option>
+                  <option value="none">{t("cal_once","Una sola vez")}</option>
+                  <option value="weekly">{t("cal_weekly","Semanal")} 🔁</option>
                   <option value="monthly">{t("cal_monthly","Lunar")} 🔁</option>
                 </select>
               </div>
               <div>
-                <label style={labelSt}>{t("cal_reminder","Alertă înainte")}</label>
+                <label style={labelSt}>{t("cal_reminder","Alerta antes")}</label>
                 <select data-testid="cal-form-reminder" value={form.reminderMin} onChange={e=>setForm(v=>({...v,reminderMin:parseInt(e.target.value)}))} style={{...inputSt}}>
                   <option value={15}>15 {t("cal_min","minute")}</option>
                   <option value={30}>30 {t("cal_min","minute")}</option>
-                  <option value={60}>1 {t("cal_hour","oră")}</option>
+                  <option value={60}>1 {t("cal_hour","hora")}</option>
                   <option value={120}>2 {t("cal_hours","ore")}</option>
-                  <option value={1440}>1 {t("cal_day_before","zi înainte")}</option>
+                  <option value={1440}>1 {t("cal_day_before","día antes")}</option>
                 </select>
               </div>
             </div>
 
             <Btn data-testid="cal-save-event-btn" onClick={saveEvent} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg" disabled={!form.title?.trim()||!form.date}>
-              {editId ? `💾 ${t("cal_save","Salvează modificările")}` : `✅ ${t("cal_add_event","Adaugă programare")}`}
+              {editId ? `💾 ${t("cal_save","Guardar cambios")}` : `✅ ${t("cal_add_event","Añadir programación")}`}
             </Btn>
           </div>
         </div>

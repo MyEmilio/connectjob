@@ -276,7 +276,7 @@ export default function PageChat({ gs, update, navigate }) {
                 <a key={opt.label} href={opt.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}><Btn color="#25d366" style={{ width: "100%", justifyContent: "center" }}>{opt.icon} {opt.label}</Btn></a>
               ))}
             </div>
-            <Btn variant="outline" onClick={() => setModal(null)} style={{ width: "100%", justifyContent: "center" }}>✕ Închide</Btn>
+            <Btn variant="outline" onClick={() => setModal(null)} style={{ width: "100%", justifyContent: "center" }}>✕ Cerrar</Btn>
           </div>
         </div>
       )}
@@ -293,7 +293,7 @@ export default function PageChat({ gs, update, navigate }) {
                 <a key={p.label} href={p.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", flex: 1 }}><Btn color={p.color} style={{ width: "100%", justifyContent: "center", flexDirection: "column", height: 72, gap: 4 }} size="sm"><span style={{ fontSize: 22 }}>{p.icon}</span>{p.label}</Btn></a>
               ))}
             </div>
-            <Btn variant="outline" onClick={() => setModal(null)} style={{ width: "100%", justifyContent: "center" }}>✕ Închide</Btn>
+            <Btn variant="outline" onClick={() => setModal(null)} style={{ width: "100%", justifyContent: "center" }}>✕ Cerrar</Btn>
           </div>
         </div>
       )}
@@ -306,7 +306,7 @@ export default function PageChat({ gs, update, navigate }) {
                 <div style={{ fontSize: 52, marginBottom: 12 }}>✅</div>
                 <h3 style={{ fontFamily: "Outfit,sans-serif", fontSize: 18, fontWeight: 800, color: T.text, margin: "0 0 8px" }}>{t("chat_report_sent_title")}</h3>
                 <p style={{ fontSize: 13, color: T.text2, marginBottom: 20 }}>{reportStatus}</p>
-                <Btn onClick={() => setModal(null)} color={T.green} style={{ width: "100%", justifyContent: "center" }}>Închide</Btn>
+                <Btn onClick={() => setModal(null)} color={T.green} style={{ width: "100%", justifyContent: "center" }}>Cerrar</Btn>
               </div>
             ) : (
               <>
@@ -315,7 +315,7 @@ export default function PageChat({ gs, update, navigate }) {
                   <h3 style={{ fontFamily: "Outfit,sans-serif", fontSize: 18, fontWeight: 800, color: T.text, margin: "0 0 4px" }}>{t("chat_report_modal_title")}</h3>
                 </div>
                 <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: T.text2, textTransform: "uppercase", marginBottom: 8 }}>Motiv</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: T.text2, textTransform: "uppercase", marginBottom: 8 }}>Motivo</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {[{ k: "limbaj_ofensiv", l: t("chat_report_offensive") }, { k: "rasism", l: t("chat_report_racism") }, { k: "hartuire", l: t("chat_report_harassment") }, { k: "spam", l: t("chat_report_spam") }, { k: "frauda", l: t("chat_report_fraud") }, { k: "altele", l: t("chat_report_other") }].map(r => (
                       <div key={r.k} onClick={() => setReportReason(r.k)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 9, cursor: "pointer", border: reportReason === r.k ? `2px solid ${T.red}` : `1.5px solid ${T.border}`, background: reportReason === r.k ? "#fef2f2" : "#fafaf9" }}>
@@ -331,9 +331,9 @@ export default function PageChat({ gs, update, navigate }) {
                     if (!reportReason) return;
                     const otherId = active ? (String(active.user1_id) === String(gs.user?.id) ? active.user2_id : active.user1_id) : null;
                     if (!otherId) return;
-                    try { const res = await api.post("/reports", { reported_user_id: otherId, reason: reportReason, details: reportDetails }); setReportStatus(res.data.message || t("chat_report_sent_msg")); } catch (e) { setReportStatus(e.response?.data?.error || "Raport trimis."); }
-                  }} disabled={!reportReason} color={T.red} style={{ flex: 1, justifyContent: "center" }}>⚠️ Trimite raport</Btn>
-                  <Btn variant="ghost" onClick={() => setModal(null)} style={{ flex: 1, justifyContent: "center" }}>Anulează</Btn>
+                    try { const res = await api.post("/reports", { reported_user_id: otherId, reason: reportReason, details: reportDetails }); setReportStatus(res.data.message || t("chat_report_sent_msg")); } catch (e) { setReportStatus(e.response?.data?.error || "Informe enviado."); }
+                  }} disabled={!reportReason} color={T.red} style={{ flex: 1, justifyContent: "center" }}>⚠️ Enviar informe</Btn>
+                  <Btn variant="ghost" onClick={() => setModal(null)} style={{ flex: 1, justifyContent: "center" }}>Cancelar</Btn>
                 </div>
               </>
             )}
@@ -403,7 +403,7 @@ export default function PageChat({ gs, update, navigate }) {
                 <button data-testid="chat-whatsapp-btn" onClick={() => setModal("whatsapp")} style={{ width: 34, height: 34, borderRadius: 8, border: "none", cursor: "pointer", fontSize: 18, background: "linear-gradient(135deg,#25d366,#128c7e)", display: "flex", alignItems: "center", justifyContent: "center" }}>💬</button>
                 <button data-testid="chat-video-btn" onClick={() => setModal("video")} style={{ width: 34, height: 34, borderRadius: 8, border: "none", cursor: "pointer", fontSize: 18, background: `linear-gradient(135deg,${T.blue},${T.blueDark})`, display: "flex", alignItems: "center", justifyContent: "center" }}>📹</button>
                 <button data-testid="chat-report-btn" onClick={() => { setReportReason(""); setReportDetails(""); setReportStatus(""); setModal("report"); }} style={{ width: 34, height: 34, borderRadius: 8, cursor: "pointer", fontSize: 16, background: "#fef2f2", border: "1px solid #fecaca", display: "flex", alignItems: "center", justifyContent: "center" }}>⚠️</button>
-                <button data-testid="chat-resize-btn" onClick={() => setExpanded(!expanded)} style={{ width: 34, height: 34, borderRadius: 8, border: `1px solid ${T.border}`, cursor: "pointer", fontSize: 14, background: "#f5f5f4", display: "flex", alignItems: "center", justifyContent: "center" }} title={expanded ? "Minimizează" : "Maximizează"}>
+                <button data-testid="chat-resize-btn" onClick={() => setExpanded(!expanded)} style={{ width: 34, height: 34, borderRadius: 8, border: `1px solid ${T.border}`, cursor: "pointer", fontSize: 14, background: "#f5f5f4", display: "flex", alignItems: "center", justifyContent: "center" }} title={expanded ? "Minimizar" : "Maximizar"}>
                   {expanded ? "⊖" : "⊕"}
                 </button>
               </div>

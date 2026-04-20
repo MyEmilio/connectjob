@@ -142,7 +142,7 @@ export default function ChatPage() {
       {!activeConv ? (
         <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", color:T.text3, flexDirection:"column", gap:8 }}>
           <div style={{ fontSize:48 }}>💬</div>
-          <div style={{ fontSize:16, fontWeight:600 }}>{t("chat_select","Selectează o conversație")}</div>
+          <div style={{ fontSize:16, fontWeight:600 }}>{t("chat_select","Selecciona una conversación")}</div>
         </div>
       ) : (
         <div style={{ flex:1, display:"flex", flexDirection:"column" }}>

@@ -26,14 +26,14 @@ export default function ResetPassword() {
 
   const handle = async (e) => {
     e.preventDefault();
-    if (password !== confirm) { setError("Parolele nu coincid"); return; }
-    if (password.length < 8) { setError("Parola trebuie să aibă cel puțin 8 caractere"); return; }
+    if (password !== confirm) { setError("Las contraseñas no coinciden"); return; }
+    if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres"); return; }
     setError(""); setLoading(true);
     try {
       await api.post("/auth/reset-password", { token, password });
       setStatus("success");
     } catch (err) {
-      setError(err.response?.data?.error || "Eroare la resetare.");
+      setError(err.response?.data?.error || "Error al restablecer.");
     } finally { setLoading(false); }
   };
 
@@ -47,9 +47,9 @@ export default function ResetPassword() {
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:T.bg, padding:16 }}>
       <div style={{ background:T.white, borderRadius:20, padding:"36px 32px", maxWidth:420, width:"100%", textAlign:"center", boxShadow:"0 8px 32px rgba(0,0,0,0.08)", border:`1px solid ${T.border}` }}>
         <div style={{ fontSize:56, marginBottom:12 }}>❌</div>
-        <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.red }}>Token Invalid</h2>
-        <p style={{ color:T.text2, fontSize:14, marginBottom:24 }}>Link-ul de resetare este invalid sau a expirat.</p>
-        <Link to="/forgot-password" style={{ display:"inline-block", padding:"12px 28px", borderRadius:10, background:T.green, color:"#fff", textDecoration:"none", fontWeight:700 }}>Solicită un nou link</Link>
+        <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.red }}>Token Inválido</h2>
+        <p style={{ color:T.text2, fontSize:14, marginBottom:24 }}>El enlace de restablecimiento es inválido o ha expirado.</p>
+        <Link to="/forgot-password" style={{ display:"inline-block", padding:"12px 28px", borderRadius:10, background:T.green, color:"#fff", textDecoration:"none", fontWeight:700 }}>Solicitar un nuevo enlace</Link>
       </div>
     </div>
   );
@@ -60,27 +60,27 @@ export default function ResetPassword() {
         {status === "success" ? (
           <div style={{ textAlign:"center" }}>
             <div style={{ fontSize:56, marginBottom:12 }}>✅</div>
-            <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text }}>Parola Resetată!</h2>
-            <p style={{ color:T.text2, fontSize:14, marginBottom:24 }}>Parola ta a fost schimbată cu succes.</p>
-            <button data-testid="reset-go-login" onClick={() => navigate("/login")} style={{ padding:"12px 28px", borderRadius:10, background:T.green, color:"#fff", border:"none", cursor:"pointer", fontWeight:700, fontSize:14 }}>Autentifică-te</button>
+            <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text }}>¡Contraseña Restablecida!</h2>
+            <p style={{ color:T.text2, fontSize:14, marginBottom:24 }}>Tu contraseña ha sido cambiada con éxito.</p>
+            <button data-testid="reset-go-login" onClick={() => navigate("/login")} style={{ padding:"12px 28px", borderRadius:10, background:T.green, color:"#fff", border:"none", cursor:"pointer", fontWeight:700, fontSize:14 }}>Iniciar sesión</button>
           </div>
         ) : (
           <>
             <div style={{ textAlign:"center", marginBottom:24 }}>
               <div style={{ fontSize:48, marginBottom:8 }}>🔐</div>
-              <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text, margin:"0 0 6px" }}>Parolă Nouă</h2>
-              <p style={{ color:T.text2, fontSize:13 }}>Introdu noua parolă</p>
+              <h2 style={{ fontFamily:"Outfit,sans-serif", fontSize:22, fontWeight:800, color:T.text, margin:"0 0 6px" }}>Nueva Contraseña</h2>
+              <p style={{ color:T.text2, fontSize:13 }}>Introduce la nueva contraseña</p>
             </div>
             <form onSubmit={handle}>
               {error && <div style={{ background:"#fef2f2", border:`1px solid ${T.red}33`, borderRadius:10, padding:"10px 14px", marginBottom:16, color:T.red, fontSize:13 }}>⚠️ {error}</div>}
               <div style={{ marginBottom:14 }}>
-                <label style={{ fontSize:12, fontWeight:700, color:T.text2, textTransform:"uppercase", display:"block", marginBottom:6 }}>Parolă nouă</label>
+                <label style={{ fontSize:12, fontWeight:700, color:T.text2, textTransform:"uppercase", display:"block", marginBottom:6 }}>Nueva contraseña</label>
                 <input data-testid="reset-password-input" type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="Min. 8 caractere, 1 majusculă, 1 cifră"
+                  placeholder="Mín. 8 caracteres, 1 mayúscula, 1 número"
                   style={{ width:"100%", padding:"11px 14px", borderRadius:10, border:`1.5px solid ${T.border}`, fontSize:14, outline:"none", boxSizing:"border-box" }}/>
               </div>
               <div style={{ marginBottom:20 }}>
-                <label style={{ fontSize:12, fontWeight:700, color:T.text2, textTransform:"uppercase", display:"block", marginBottom:6 }}>Confirmă parola</label>
+                <label style={{ fontSize:12, fontWeight:700, color:T.text2, textTransform:"uppercase", display:"block", marginBottom:6 }}>Confirmar contraseña</label>
                 <input data-testid="reset-confirm-input" type="password" required value={confirm} onChange={e => setConfirm(e.target.value)}
                   placeholder={t("auth_repeat_password")}
                   style={{ width:"100%", padding:"11px 14px", borderRadius:10, border:`1.5px solid ${T.border}`, fontSize:14, outline:"none", boxSizing:"border-box" }}/>
@@ -89,7 +89,7 @@ export default function ResetPassword() {
                 width:"100%", padding:"13px", borderRadius:12, border:"none", cursor:loading?"not-allowed":"pointer",
                 background:loading?"#d1d5db":`linear-gradient(135deg,${T.green},${T.greenDark})`,
                 color:"#fff", fontWeight:700, fontSize:14,
-              }}>{loading ? "Se resetează..." : "🔑 Resetează Parola"}</button>
+              }}>{loading ? "Restableciendo..." : "🔑 Restablecer Contraseña"}</button>
             </form>
           </>
         )}

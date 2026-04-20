@@ -177,7 +177,7 @@ export default function MapPage({ navigate, update }) {
 
         {/* Job list */}
         <div data-testid="map-job-list" style={{ flex:1, overflowY:"auto" }}>
-          {loading && <div style={{ padding:20, color:T.text3, fontSize:13 }}>{t("map_loading","Se incarca...")}</div>}
+          {loading && <div style={{ padding:20, color:T.text3, fontSize:13 }}>{t("map_loading","Cargando...")}</div>}
           {!loading && filtered.length === 0 && (
             <div style={{ padding:20, color:T.text3, fontSize:13, textAlign:"center" }}>
               <div style={{ fontSize:28, marginBottom:8 }}>📍</div>

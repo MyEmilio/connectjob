@@ -16,9 +16,9 @@ export default function PageContract({ gs, update, navigate }) {
   if(!job) return (
     <div data-testid="page-contract" style={{textAlign:"center",padding:"60px 24px",color:T.text2}}>
       <div style={{fontSize:52,marginBottom:14}}>📝</div>
-      <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:700,color:T.text,marginBottom:8}}>Niciun job selectat</div>
+      <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:700,color:T.text,marginBottom:8}}>Ningún trabajo seleccionado</div>
       <div style={{fontSize:14,marginBottom:24,color:T.text2}}>{t("contract_select_job")}</div>
-      <Btn onClick={()=>navigate("jobs")} color={T.green} style={{margin:"0 auto"}}>🗂️ Caută joburi</Btn>
+      <Btn onClick={()=>navigate("jobs")} color={T.green} style={{margin:"0 auto"}}>🗂️ Buscar empleos</Btn>
     </div>
   );
   const date=new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
@@ -32,10 +32,10 @@ export default function PageContract({ gs, update, navigate }) {
             <div>
               <div style={{fontSize:10,color:"#64748b",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:3}}>{t("contract_services_title")}</div>
               <div style={{fontFamily:"Outfit,sans-serif",fontSize:18,fontWeight:800,color:"#f1f5f9"}}>ConnectJob</div>
-              <div style={{fontSize:11,color:"#64748b",marginTop:2}}>Nr. {contractId}</div>
+              <div style={{fontSize:11,color:"#64748b",marginTop:2}}>Nº {contractId}</div>
             </div>
             <div style={{textAlign:"right"}}>
-              <div style={{fontSize:10,color:"#64748b"}}>Data emiterii</div>
+              <div style={{fontSize:10,color:"#64748b"}}>Fecha de emisión</div>
               <div style={{fontSize:12,color:"#94a3b8",fontWeight:600}}>{date}</div>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function PageContract({ gs, update, navigate }) {
                 </div>
               ))}
             </div>
-            {[{n:"1.",title:t("contract_clause1_title"),tx:`Prestatorul se obligă să execute serviciul de ${job.title} conform cerințelor angajatorului.`},{n:"2.",title:t("contract_clause2_title"),tx:`Suma de ${job.salary} RON va fi plătită prin Escrow ConnectJob după confirmare.`},{n:"3.",title:t("contract_clause3_title"),tx:t("contract_clause3_text")},{n:"4.",title:t("contract_clause4_title"),tx:t("contract_clause4_text")},{n:"5.",title:t("contract_clause5_title"),tx:t("contract_clause5_text")}].map(c=>(
+            {[{n:"1.",title:t("contract_clause1_title"),tx:`El prestador se compromete a ejecutar el servicio de ${job.title} conforme a los requisitos del empleador.`},{n:"2.",title:t("contract_clause2_title"),tx:`La suma de ${job.salary} € será pagada a través de Escrow ConnectJob después de la confirmación.`},{n:"3.",title:t("contract_clause3_title"),tx:t("contract_clause3_text")},{n:"4.",title:t("contract_clause4_title"),tx:t("contract_clause4_text")},{n:"5.",title:t("contract_clause5_title"),tx:t("contract_clause5_text")}].map(c=>(
               <div key={c.n} style={{marginBottom:10,padding:"11px",background:"#fafaf9",borderRadius:9,border:`1px solid ${T.border}`}}>
                 <div style={{fontSize:13,fontWeight:700,color:T.text,marginBottom:3}}>{c.n} {c.title}</div>
                 <div style={{fontSize:12,color:T.text2,lineHeight:1.7}}>{c.tx}</div>
@@ -87,7 +87,7 @@ export default function PageContract({ gs, update, navigate }) {
               }
               await api.post(`/contracts/${cid}/sign`,{ signature: name });
               setStep(2); update({signedContracts:[...(gs.signedContracts||[]),contractId]});
-            } catch(e){ setApiError(e.response?.data?.error||"Eroare la semnare"); }
+            } catch(e){ setApiError(e.response?.data?.error||"Error al firmar"); }
             finally{ setLoading(false); }
           }} disabled={!name.trim()||!agree||loading} color={T.green} style={{width:"100%",justifyContent:"center"}} size="lg">
             {loading?t("contract_signing"):t("contract_sign_now")}
@@ -102,8 +102,8 @@ export default function PageContract({ gs, update, navigate }) {
           <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 8px"}}>{t("contract_success_title")}</h2>
           <p style={{fontSize:14,color:T.text2,marginBottom:20}}>{t("contract_success_msg")}</p>
           <div style={{display:"flex",gap:10}}>
-            <Btn color={T.green} style={{flex:1,justifyContent:"center"}}>📥 Descarcă PDF</Btn>
-            <Btn onClick={()=>navigate("escrow")} variant="outline" style={{flex:1,justifyContent:"center"}}>🔒 Mergi la Escrow</Btn>
+            <Btn color={T.green} style={{flex:1,justifyContent:"center"}}>📥 Descargar PDF</Btn>
+            <Btn onClick={()=>navigate("escrow")} variant="outline" style={{flex:1,justifyContent:"center"}}>🔒 Ir a Escrow</Btn>
           </div>
         </Card>
       )}
