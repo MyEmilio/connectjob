@@ -826,6 +826,17 @@ const es = {
   error_generic:   "Ha ocurrido un error. Inténtalo de nuevo.",
   ron:             "€",
   km:              "km",
+  // Map additions
+  map_mode_jobs:        "Empleos",
+  map_mode_workers:     "Prestadores",
+  map_workers_count:    "prestadores",
+  map_sort_distance:    "Distancia",
+  map_sort_price_asc:   "Precio ↑",
+  map_sort_price_desc:  "Precio ↓",
+  map_no_workers:       "No hay prestadores en esta zona.",
+  map_privacy:          "Ubicación aproximada ±300m",
+  // Chat additions
+  chat_transcribing:    "Transcribiendo audio...",
 };
 
 export default es;

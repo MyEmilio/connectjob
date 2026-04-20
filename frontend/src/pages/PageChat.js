@@ -149,7 +149,51 @@ export default function PageChat({ gs, update, navigate }) {
     return () => clearInterval(timerRef.current);
   }, [isListening]);
 
-  const startVoice = () => {
+  const startVoice = async () => {
+    // Try MediaRecorder + Whisper first (precise). Fallback to Web Speech API.
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      return startWebSpeech();
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" :
+                       MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" :
+                       MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
+      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      const chunks = [];
+      mr.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      mr.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        setIsListening(false);
+        if (!chunks.length) return;
+        const blob = new Blob(chunks, { type: mimeType || "audio/webm" });
+        try {
+          setInterim(t("chat_transcribing","Transcribiendo...") || "...");
+          const fd = new FormData();
+          fd.append("audio", blob, "voice.webm");
+          fd.append("language", myLang);
+          const res = await api.post("/speech/transcribe", fd, {
+            headers: { "Content-Type": "multipart/form-data" },
+            timeout: 30000,
+          });
+          const txt = (res.data.text || "").trim();
+          if (txt) setInput(p => (p + " " + txt).trim());
+          setInterim("");
+        } catch (err) {
+          setInterim("");
+          // Fallback to browser STT if Whisper fails
+          startWebSpeech();
+        }
+      };
+      recRef.current = mr;
+      mr.start();
+      setIsListening(true);
+    } catch (e) {
+      startWebSpeech();
+    }
+  };
+
+  const startWebSpeech = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
     const r = new SR(); r.lang = myLangObj.speech; r.interimResults = true; r.continuous = false;
@@ -166,7 +210,16 @@ export default function PageChat({ gs, update, navigate }) {
     r.onend = () => { setIsListening(false); setInterim(""); };
     recRef.current = r; r.start();
   };
-  const stopVoice = () => { recRef.current?.stop(); setIsListening(false); setInterim(""); };
+  const stopVoice = () => {
+    try {
+      if (recRef.current?.stop) recRef.current.stop();
+    } catch (_) {}
+    // If MediaRecorder, onstop will handle the rest; if SR, set listening false
+    if (!(recRef.current instanceof window.MediaRecorder)) {
+      setIsListening(false);
+      setInterim("");
+    }
+  };
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];

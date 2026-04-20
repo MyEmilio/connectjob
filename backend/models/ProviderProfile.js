@@ -21,6 +21,9 @@ const providerProfileSchema = new mongoose.Schema(
     },
     total_earnings: { type: Number, default: 0, min: 0 },
     completed_jobs: { type: Number, default: 0, min: 0 },
+    // Location (approximate — shown on map with ±300m offset)
+    lat: { type: Number, default: null },
+    lng: { type: Number, default: null },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
