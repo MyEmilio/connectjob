@@ -33,7 +33,14 @@ ConnectJob is a full-stack job marketplace connecting workers with employers in 
 | Trial Auto-Downgrade | Done | REAL |
 | Cloudinary Cloud Uploads | Done | REAL |
 | Deployment Configs (Railway+Vercel) | Done | READY |
-| Language Fix (Romanian default) | Done | REAL |
+| Language Fix (Spanish default, no RO leak) | Done | REAL |
+| Mobile Map Split Layout (45/55 split) | Done 2026-02 | REAL |
+| Map Mode Toggle (Jobs/Workers) | Done 2026-02 | REAL |
+| Worker Pins on Map (green, initials) | Done 2026-02 | REAL + DEMO fallback |
+| Privacy Offset ±300m on Pins | Done 2026-02 | REAL |
+| Click Pin → Job first in list + actions | Done 2026-02 | REAL |
+| Sort: Distance / Price asc / Price desc | Done 2026-02 | REAL |
+| OpenAI Whisper STT in Chat | Done 2026-02 | REAL (Emergent Key) |
 
 ### External Keys Needed
 | Feature | Status | What's Needed |
@@ -41,12 +48,18 @@ ConnectJob is a full-stack job marketplace connecting workers with employers in 
 | Stripe Payments | Simulated | Real sk_test + pk_test keys |
 
 ### Backlog
-- [ ] Deploy to Railway (backend) + Vercel (frontend) — GUIDE READY
-- [ ] Stripe real keys integration
-- [ ] PDF contract generation
-- [ ] Job bookmarks
-- [ ] Daily email digest for workers
-- [ ] Profile image uploads via Cloudinary
+- [ ] Stripe real keys integration (P1)
+- [ ] PDF contract generation (P1)
+- [ ] In-app notification bell icon + sounds (P1, from review variant 1)
+- [ ] Public profile pages (worker/employer) (P1, from review variant 2)
+- [ ] Worker location form in ProviderProfile (so real workers appear on map) (P1)
+- [ ] Job status machine (Draft/Published/In discussion/.../Finished) with visible chip (P2, from review variant 2)
+- [ ] Matching recommendations (skills-based) (P2)
+- [ ] Gamification badges (Top Worker, 10 jobs, etc.) (P2)
+- [ ] Job bookmarks (P2)
+- [ ] Daily email digest for workers (P2)
+- [ ] Profile image uploads via Cloudinary (P2)
+- [ ] Refactor MapPage into sub-components (~500 lines now) (P3)
 
 ## Tech Stack
 - Frontend: React 19, i18next, Socket.io-client, Axios
