@@ -2,10 +2,8 @@
 
 // ConnectJob Service Worker - Enhanced PWA with Offline Support
 
-const CACHE_NAME = 'connectjob-v2';
+const CACHE_NAME = 'connectjob-v3';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/logo192.png',
   '/logo512.png',
@@ -58,6 +56,14 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       networkFirstWithCache(request)
+    );
+    return;
+  }
+
+  // HTML/navigation requests - ALWAYS network first (prevents stale JS bundles)
+  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(request).catch(() => caches.match('/index.html'))
     );
     return;
   }
