@@ -759,6 +759,62 @@ const es = {
   admin_status_rejected: "❌ Rechazado",
   auth_reset_title: "Restablecer Contraseña",
 
+  // Categories (from theme.js)
+  cat_constructii: "Construcción y Reformas",
+  cat_curatenie: "Limpieza",
+  cat_ingrijire: "Cuidado de Personas",
+  cat_animale: "Mascotas",
+  cat_gradina: "Jardines y Exterior",
+  cat_transport: "Transporte y Entregas",
+  cat_it: "IT y Digital",
+  cat_educatie: "Educación y Cursos",
+  cat_gastronomie: "Gastronomía",
+  cat_frumusete: "Belleza y Bienestar",
+  cat_reparatii: "Reparaciones y Servicio",
+  cat_evenimente: "Eventos y Entretenimiento",
+  // Subcategories
+  sub_masonry:"Albañilería", sub_painting:"Pintura", sub_plumbing:"Fontanería", sub_carpentry:"Carpintería", sub_electrical:"Electricidad", sub_sanitary:"Sanitarios", sub_tiling:"Alicatado",
+  sub_domestic:"Doméstico", sub_offices:"Oficinas", sub_pools:"Piscinas", sub_windows:"Cristales", sub_post_construction:"Post-obra", sub_carpets:"Alfombras",
+  sub_babysitting:"Canguro", sub_elderly:"Mayores", sub_disabled:"Discapacitados", sub_au_pair:"Au pair",
+  sub_walking:"Paseo", sub_care:"Cuidado", sub_training:"Adiestramiento", sub_pet_sitting:"Pet-sitting", sub_vet:"Veterinario",
+  sub_lawn:"Césped", sub_planting:"Plantación", sub_irrigation:"Riego", sub_tree_cutting:"Poda árboles", sub_garden_design:"Diseño jardín",
+  sub_delivery:"Entrega paquetes", sub_taxi:"Taxi", sub_driver:"Chófer", sub_moving:"Mudanzas", sub_courier:"Mensajería",
+  sub_web_app:"Web y App", sub_pc_repair:"Reparación PC", sub_networks:"Redes", sub_seo:"SEO", sub_social_media:"Redes sociales", sub_design:"Diseño",
+  sub_tutoring:"Clases particulares", sub_languages:"Idiomas", sub_music:"Música", sub_sports:"Deporte", sub_arts:"Artes",
+  sub_chef:"Cocinero", sub_waiter:"Camarero", sub_catering:"Catering", sub_bartender:"Barman", sub_pastry:"Pastelería",
+  sub_hairdresser:"Peluquería", sub_aesthetics:"Estética", sub_manicure:"Manicura", sub_massage:"Masaje", sub_makeup:"Maquillaje",
+  sub_auto:"Auto", sub_appliances:"Electrodomésticos", sub_furniture:"Muebles", sub_computers:"Ordenadores", sub_watches:"Relojes",
+  sub_photographer:"Fotógrafo", sub_videographer:"Videógrafo", sub_musician:"Músico", sub_animator:"Animador", sub_organizer:"Organizador",
+
+  // Calendar (override defaults)
+  cal_months: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+  cal_days_short: ["Lu","Ma","Mi","Ju","Vi","Sá","Do"],
+  cal_f_title: "Título / Descripción *",
+  cal_f_title_ph: "ej: Cortar césped en Villa Martínez",
+  cal_f_client: "Cliente / Propietario",
+  cal_f_client_ph: "ej: Familia García",
+
+  // PostJob
+  postjob_title_ph: "ej: Necesito pintor para apartamento",
+  postjob_desc_ph: "Describe el trabajo en detalle...",
+  postjob_salary_ph: "ej: 150",
+  postjob_location_ph: "ej: Calle Mayor 12, Alicante",
+  postjob_error_required: "Título, categoría y salario son obligatorios.",
+  postjob_error_location: "No se pudo detectar la ubicación.",
+
+  // Verify
+  verify_error_sms: "Error al enviar SMS",
+  verify_error_code: "Código inválido o expirado",
+  verify_error_doc: "Error al subir documento",
+  verify_error_verify: "Error al verificar",
+
+  // Register/Login
+  auth_email_invalid: "Email inválido",
+  auth_forgot_link: "¿Olvidé mi contraseña?",
+
+  // PageJobs filter
+  jobs_all_filter: "Todas",
+
   // Common
   btn_back:        "Volver",
   btn_save:        "Guardar",

@@ -21,7 +21,7 @@ export default function PageJobs({ gs, update, navigate }) {
 
   const jobMatchesCat = (job, catKey) => {
     if (catKey === "Toate") return true;
-    if (catKey === "diverse") return !CATEGORIES.some(c => { const jc = (job.category||"").toLowerCase(); return jc === c.key || jc === c.label.toLowerCase() || c.label.toLowerCase().includes(jc) || jc.includes(c.key); });
+    if (catKey === "diverse") return !CATEGORIES.some(c => { const jc = (job.category||"").toLowerCase(); return jc === c.key || jc.includes(c.key); });
     const cat = CATEGORIES.find(c => c.key === catKey);
     if (!cat) return false;
     const jc = (job.category||"").toLowerCase();
@@ -50,7 +50,7 @@ export default function PageJobs({ gs, update, navigate }) {
   const urgentInView   = sorted.filter(j => !j.promoted && j.urgent);
   const regularInView  = sorted.filter(j => !j.promoted && !j.urgent);
 
-  const diverseJobs = category === "Toate" ? allJobs.filter(j => !CATEGORIES.some(c => { const jc = (j.category||"").toLowerCase(); return jc === c.key || jc === c.label.toLowerCase() || c.label.toLowerCase().includes(jc) || jc.includes(c.key); })) : [];
+  const diverseJobs = category === "Toate" ? allJobs.filter(j => !CATEGORIES.some(c => { const jc = (j.category||"").toLowerCase(); return jc === c.key || jc.includes(c.key); })) : [];
 
   const FilterToggle = ({active, onClick, children, color=T.green}) => (
     <button onClick={onClick} style={{ padding:"5px 12px",borderRadius:999,border:"none",cursor:"pointer",background:active?color:"#f5f5f4",color:active?"#fff":T.text2,fontSize:11,fontWeight:600,transition:"all 0.15s",whiteSpace:"nowrap" }}>{children}</button>
@@ -61,7 +61,7 @@ export default function PageJobs({ gs, update, navigate }) {
       <div style={{ marginBottom:20 }}>
         <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:16,flexWrap:"wrap" }}>
           <h1 style={{ fontFamily:"Outfit,sans-serif",fontSize:22,fontWeight:800,color:T.text,margin:0 }}>
-            {selectedCatObj ? `${selectedCatObj.icon} ${t(`cat_${selectedCatObj.key}`,{defaultValue:selectedCatObj.label})}` : category==="diverse"?t("jobs_title_diverse"):t("jobs_title_all")}
+            {selectedCatObj ? `${selectedCatObj.icon} ${t(`cat_${selectedCatObj.key}`)}` : category==="diverse"?t("jobs_title_diverse"):t("jobs_title_all")}
           </h1>
           <Badge color={T.green}>{sorted.length} {t("jobs_ads_label")}</Badge>
           <button data-testid="jobs-toggle-demo" onClick={toggleDemo} style={{padding:"4px 10px",borderRadius:8,border:`1px solid ${hideDemo?"#86efac":T.border}`,background:hideDemo?"#f0fdf4":"#f8fafc",color:hideDemo?"#166534":T.text3,fontSize:10,fontWeight:600,cursor:"pointer",transition:"all 0.15s"}}>
@@ -76,14 +76,14 @@ export default function PageJobs({ gs, update, navigate }) {
         <div style={{ overflowX:"auto",paddingBottom:4,marginBottom:10 }}>
           <div style={{ display:"flex",gap:6,minWidth:"max-content" }}>
             <FilterToggle active={category==="Toate"} onClick={()=>{setCategory("Toate");setSubcategory("");}}>{t("jobs_all_tab")}</FilterToggle>
-            {CATEGORIES.map(cat=>(<FilterToggle key={cat.key} active={category===cat.key} onClick={()=>{setCategory(cat.key);setSubcategory("");}} color={cat.color}>{cat.icon} {t(`cat_${cat.key}`,{defaultValue:cat.label})}</FilterToggle>))}
+            {CATEGORIES.map(cat=>(<FilterToggle key={cat.key} active={category===cat.key} onClick={()=>{setCategory(cat.key);setSubcategory("");}} color={cat.color}>{cat.icon} {t(`cat_${cat.key}`)}</FilterToggle>))}
             <FilterToggle active={category==="diverse"} onClick={()=>{setCategory("diverse");setSubcategory("");}} color={T.text3}>{t("jobs_diverse_tab")}</FilterToggle>
           </div>
         </div>
         {selectedCatObj && (
           <div style={{ display:"flex",gap:5,flexWrap:"wrap",marginBottom:10 }}>
             <button onClick={()=>setSubcategory("")} style={{ padding:"3px 10px",borderRadius:999,border:`1px solid ${subcategory===""?selectedCatObj.color:T.border}`,cursor:"pointer",background:subcategory===""?`${selectedCatObj.color}15`:"transparent",color:subcategory===""?selectedCatObj.color:T.text3,fontSize:11,fontWeight:600 }}>{t("jobs_all_tab")}</button>
-            {(t(`cat_${selectedCatObj.key}_sub`,{returnObjects:true,defaultValue:selectedCatObj.sub})||selectedCatObj.sub).map(s=>(<button key={s} onClick={()=>setSubcategory(subcategory===s?"":s)} style={{ padding:"3px 10px",borderRadius:999,border:`1px solid ${subcategory===s?selectedCatObj.color:T.border}`,cursor:"pointer",background:subcategory===s?`${selectedCatObj.color}15`:"transparent",color:subcategory===s?selectedCatObj.color:T.text3,fontSize:11 }}>{s}</button>))}
+            {(selectedCatObj.subKeys||[]).map(sk=>(<button key={sk} onClick={()=>setSubcategory(subcategory===sk?"":sk)} style={{ padding:"3px 10px",borderRadius:999,border:`1px solid ${subcategory===sk?selectedCatObj.color:T.border}`,cursor:"pointer",background:subcategory===sk?`${selectedCatObj.color}15`:"transparent",color:subcategory===sk?selectedCatObj.color:T.text3,fontSize:11 }}>{t(sk,sk)}</button>))}
           </div>
         )}
         <Card style={{ padding:"10px 14px" }}>

@@ -114,7 +114,7 @@ function NotificationPreferencesModal({ onClose }) {
                     const isSelected=isCategorySelected(cat.key);
                     return (<button key={cat.key} onClick={()=>toggleFavoriteCategory(cat.key)} disabled={saving} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",background:isSelected?`${cat.color}22`:T.dark3,border:isSelected?`2px solid ${cat.color}`:"2px solid transparent",borderRadius:10,cursor:saving?"wait":"pointer",transition:"all 0.2s",opacity:saving?0.6:1}}>
                       <span style={{fontSize:18}}>{cat.icon}</span>
-                      <span style={{fontSize:12,fontWeight:600,color:isSelected?cat.color:T.text2,textAlign:"left",flex:1}}>{cat.label.split(" ")[0]}</span>
+                      <span style={{fontSize:12,fontWeight:600,color:isSelected?cat.color:T.text2,textAlign:"left",flex:1}}>{t(`cat_${cat.key}`).split(" ")[0]}</span>
                       {isSelected && <span style={{color:cat.color,fontSize:14}}>✓</span>}
                     </button>);
                   })}
@@ -151,7 +151,7 @@ export default function PageHome({ gs, update, navigate }) {
   const recentJobs = filteredJobs.slice(0, 6);
   const [searchFilters, setSearchFilters] = useState({});
   const { isSupported, isSubscribed, loading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
-  const getCatCount = (cat) => allJobs.filter(j => { const jc = (j.category||"").toLowerCase(); return jc === cat.key || jc === cat.label.toLowerCase() || cat.label.toLowerCase().includes(jc) || jc.includes(cat.key); }).length;
+  const getCatCount = (cat) => allJobs.filter(j => { const jc = (j.category||"").toLowerCase(); return jc === cat.key || jc.includes(cat.key); }).length;
   const handleNotificationToggle = async () => { if (isSubscribed) { await unsubscribe(); } else { const success = await subscribe(); if (success) setShowNotifPrefs(true); } };
 
   return (
