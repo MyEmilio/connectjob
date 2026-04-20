@@ -152,11 +152,11 @@ export default function PageChat({ gs, update, navigate }) {
   const startVoice = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
-    const r = new SR(); r.lang = myLangObj.speech; r.interimResults = true; r.continuous = true;
+    const r = new SR(); r.lang = myLangObj.speech; r.interimResults = true; r.continuous = false;
     r.onstart = () => setIsListening(true);
     r.onresult = (e) => {
       let fin = "", int = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
+      for (let i = 0; i < e.results.length; i++) {
         if (e.results[i].isFinal) fin += e.results[i][0].transcript + " ";
         else int += e.results[i][0].transcript;
       }
