@@ -840,6 +840,8 @@ const es = {
   map_search_ph_jobs:   "Buscar empleo o categoría…",
   map_search_ph_workers: "Buscar prestador o habilidad…",
   home_search_placeholder: "Buscar empleo, categoría, ubicación…",
+  home_recent_searches:    "Búsquedas recientes",
+  home_recent_clear:       "Borrar",
   // Work duration labels
   work_dur_ore:         "horas",
   work_dur_zile:        "días",

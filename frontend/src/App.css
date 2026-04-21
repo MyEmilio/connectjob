@@ -107,6 +107,28 @@
     grid-template-columns: 1fr !important;
   }
 
+  /* Home search toolbar — stays compact on mobile */
+  [data-testid="home-search-toolbar"] {
+    gap: 6px !important;
+  }
+  [data-testid="home-search-toolbar"] > div:first-child {
+    flex: 1 1 100% !important; /* search takes full width */
+    height: 40px !important;
+  }
+  [data-testid="home-search-toolbar"] > div:not(:first-child),
+  [data-testid="home-search-toolbar"] > button {
+    flex: 1 1 auto !important;
+    height: 38px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+  }
+  [data-testid="home-cat-popover"] {
+    width: calc(100vw - 32px) !important;
+    max-width: 360px !important;
+    right: 0 !important;
+    left: auto !important;
+  }
+
   /* All cards and containers — full width */
   .jc-home-grid > div,
   .jc-notification-btn {

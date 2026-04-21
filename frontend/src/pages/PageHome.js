@@ -142,8 +142,35 @@ export default function PageHome({ gs, update, navigate }) {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [showCatPopover, setShowCatPopover] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [recentSearches, setRecentSearches] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("jc_recent_searches") || "[]"); }
+    catch { return []; }
+  });
   const [hideDemo, setHideDemo] = useState(() => localStorage.getItem("jc_hide_demo") === "true");
   const catPopRef = React.useRef(null);
+
+  const saveSearch = (q) => {
+    const query = q.trim();
+    if (!query) return;
+    setRecentSearches(prev => {
+      const next = [query, ...prev.filter(s => s.toLowerCase() !== query.toLowerCase())].slice(0, 5);
+      try { localStorage.setItem("jc_recent_searches", JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const doSearch = (q) => {
+    const query = (q || "").trim();
+    if (!query) { update({ jobsCategory:"", jobsSearch:"" }); navigate("jobs"); return; }
+    saveSearch(query);
+    update({ jobsCategory:"", jobsSearch: query });
+    navigate("jobs");
+  };
+
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    try { localStorage.removeItem("jc_recent_searches"); } catch {}
+  };
 
   // Close popover on outside click
   useEffect(() => {
@@ -259,10 +286,7 @@ export default function PageHome({ gs, update, navigate }) {
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
             onKeyDown={e => {
-              if (e.key === "Enter" && searchText.trim()) {
-                update({ jobsCategory:"", jobsSearch: searchText.trim() });
-                navigate("jobs");
-              }
+              if (e.key === "Enter") doSearch(searchText);
             }}
             placeholder={t("home_search_placeholder","Buscar empleo, categoría, ubicación…")}
             style={{
@@ -278,10 +302,7 @@ export default function PageHome({ gs, update, navigate }) {
           )}
           <button
             data-testid="home-search-go"
-            onClick={() => {
-              update({ jobsCategory:"", jobsSearch: searchText.trim() });
-              navigate("jobs");
-            }}
+            onClick={() => doSearch(searchText)}
             style={{
               border:"none", background:T.green, color:"#fff",
               padding:"7px 14px", borderRadius:8, fontSize:12, fontWeight:700,
@@ -424,6 +445,45 @@ export default function PageHome({ gs, update, navigate }) {
           🗺️ {t("home_on_map_btn","Mapa")}
         </button>
       </div>
+
+      {/* Recent searches chips — shown only when no input text */}
+      {!searchText.trim() && recentSearches.length > 0 && (
+        <div data-testid="home-recent-searches" style={{
+          display:"flex", flexWrap:"wrap", alignItems:"center", gap:6,
+          marginBottom:16, marginTop:-8, padding:"0 2px",
+        }}>
+          <span style={{ fontSize:10, fontWeight:700, color:T.text3, textTransform:"uppercase", letterSpacing:"0.05em", marginRight:4 }}>
+            🕒 {t("home_recent_searches","Búsquedas recientes")}:
+          </span>
+          {recentSearches.map((q, i) => (
+            <button
+              data-testid={`home-recent-${i}`}
+              key={q + i}
+              onClick={() => { setSearchText(q); doSearch(q); }}
+              style={{
+                background:"#f5f5f4", border:`1px solid ${T.border}`, borderRadius:999,
+                padding:"4px 11px 4px 10px", fontSize:11, fontWeight:600,
+                color:T.text2, cursor:"pointer", display:"flex", alignItems:"center", gap:4,
+                transition:"all 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#e7e5e4"; e.currentTarget.style.borderColor = T.green; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#f5f5f4"; e.currentTarget.style.borderColor = T.border; }}
+            >
+              <span style={{ fontSize:10, opacity:0.6 }}>↻</span> {q}
+            </button>
+          ))}
+          <button
+            data-testid="home-recent-clear"
+            onClick={clearRecentSearches}
+            title={t("home_recent_clear","Borrar historial")}
+            style={{
+              background:"transparent", border:"none", cursor:"pointer",
+              color:T.text3, fontSize:11, padding:"4px 8px", fontWeight:600,
+              textDecoration:"underline", marginLeft:4,
+            }}
+          >✕ {t("home_recent_clear","Borrar")}</button>
+        </div>
+      )}
 
       {/* Two columns */}
       <div className="jc-home-grid" style={{ display:"grid",gridTemplateColumns:"1fr minmax(0,320px)",gap:16 }}>
