@@ -111,16 +111,18 @@ const db = {
     let conv = await Conversation.findOne(filter).lean({ virtuals: true });
     if (!conv) {
       const created = await Conversation.create({ user1_id, user2_id, job_id: job_id || null });
-      conv = created.toJSON();
+      conv = { ...created.toJSON(), id: String(created._id) };
       // Welcome / anti-evasion system message
       try {
         await Message.create({
-          conversation_id: conv.id,
+          conversation_id: created._id,
           sender_id: user1_id,
           is_system: true,
           text: "🛡️ ConnectJob te protege con Escrow y seguros. Compartir teléfono, email o enlaces, o proponer pagos fuera de la plataforma = strike + pérdida de protección. Todas las transacciones deben permanecer aquí.",
         });
       } catch (_) { /* non-critical */ }
+    } else {
+      conv.id = conv.id || String(conv._id);
     }
     return conv;
   },
@@ -134,11 +136,12 @@ const db = {
       .lean({ virtuals: true });
 
     const results = await Promise.all(convs.map(async (c) => {
-      const msgs    = await Message.find({ conversation_id: c.id }).sort({ created_at: 1 }).lean({ virtuals: true });
+      const msgs    = await Message.find({ conversation_id: c._id }).sort({ created_at: 1 }).lean({ virtuals: true });
       const lastMsg = msgs[msgs.length - 1];
       const unread  = msgs.filter(m => String(m.sender_id) !== String(userId) && !m.read).length;
       return {
         ...c,
+        id: String(c._id),
         user1_name:     c.user1_id?.name,
         user1_initials: c.user1_id?.initials,
         user2_name:     c.user2_id?.name,
