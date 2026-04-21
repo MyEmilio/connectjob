@@ -837,6 +837,8 @@ const es = {
   map_privacy:          "Ubicación aproximada ±300m",
   map_online_now:       "Disponible",
   map_online_only:      "Solo online",
+  map_search_ph_jobs:   "Buscar empleo o categoría…",
+  map_search_ph_workers: "Buscar prestador o habilidad…",
   // Work duration labels
   work_dur_ore:         "horas",
   work_dur_zile:        "días",

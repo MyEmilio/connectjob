@@ -105,8 +105,20 @@ export default function MapPage({ navigate, update }) {
   const [loading, setLoading]   = useState(true);
   const [radius, setRadius]     = useState(50);
   const [onlineOnly, setOnlineOnly] = useState(false);
+  const [search, setSearch]     = useState("");
+  const [showSuggest, setShowSuggest] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const listItemRefs = useRef({});
+  const searchBoxRef = useRef(null);
+
+  // Close suggest when clicking outside
+  useEffect(() => {
+    const onClick = (e) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) setShowSuggest(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
@@ -151,6 +163,27 @@ export default function MapPage({ navigate, update }) {
     return ["all", ...new Set(jobs.map(j => j.category).filter(Boolean))];
   }, [jobs, workers, mode]);
 
+  // Text matcher for search
+  const matchesSearch = (item, q) => {
+    if (!q) return true;
+    const qq = q.toLowerCase();
+    if (mode === "workers") {
+      return (item.name || "").toLowerCase().includes(qq)
+        || (item.skills || []).some(s => s.toLowerCase().includes(qq));
+    }
+    return (item.title || "").toLowerCase().includes(qq)
+      || (item.description || "").toLowerCase().includes(qq)
+      || (item.category || "").toLowerCase().includes(qq)
+      || (item.employer || "").toLowerCase().includes(qq);
+  };
+
+  // Autosuggest list (top 6 matches, items with lat/lng only)
+  const suggestions = useMemo(() => {
+    if (!search.trim()) return [];
+    return sourceList.filter(i => i.lat && i.lng && matchesSearch(i, search)).slice(0, 6);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceList, search, mode]);
+
   // Filter + sort list
   const filtered = useMemo(() => {
     let list = sourceList.filter(i => i.lat && i.lng);
@@ -160,6 +193,9 @@ export default function MapPage({ navigate, update }) {
       } else {
         list = list.filter(j => j.category === filter);
       }
+    }
+    if (search.trim()) {
+      list = list.filter(i => matchesSearch(i, search));
     }
     // Sort
     const priceKey = mode === "workers" ? "hourly_rate" : "salary";
@@ -178,7 +214,8 @@ export default function MapPage({ navigate, update }) {
       ];
     }
     return list;
-  }, [sourceList, filter, sort, selected, mode]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceList, filter, sort, selected, mode, search]);
 
   // Auto-scroll selected into view
   useEffect(() => {
@@ -342,20 +379,98 @@ export default function MapPage({ navigate, update }) {
   // ============ FILTERS BAR (shared) ============
   const FiltersBar = () => (
     <div style={{ padding:"10px 12px", borderBottom:`1px solid ${T.border}`, background:"#fff" }}>
-      {/* Mode toggle */}
-      <div style={{ display:"flex", gap:6, marginBottom:8, background:"#f5f5f4", borderRadius:10, padding:3 }}>
-        <button data-testid="map-mode-jobs" onClick={() => setMode("jobs")} style={{
-          flex:1, padding:"7px", borderRadius:8, border:"none", cursor:"pointer",
-          background: mode === "jobs" ? T.blue : "transparent",
-          color: mode === "jobs" ? "#fff" : T.text2,
-          fontWeight:700, fontSize:12, transition:"all 0.15s",
-        }}>📍 {t("map_mode_jobs","Empleos")}</button>
-        <button data-testid="map-mode-workers" onClick={() => setMode("workers")} style={{
-          flex:1, padding:"7px", borderRadius:8, border:"none", cursor:"pointer",
-          background: mode === "workers" ? T.green : "transparent",
-          color: mode === "workers" ? "#fff" : T.text2,
-          fontWeight:700, fontSize:12, transition:"all 0.15s",
-        }}>👷 {t("map_mode_workers","Prestadores")}</button>
+      {/* Search box with autosuggest + mode toggle on same row */}
+      <div style={{ display:"flex", gap:6, marginBottom:8, alignItems:"stretch" }}>
+        <div ref={searchBoxRef} style={{ flex:1, position:"relative" }}>
+          <div style={{
+            display:"flex", alignItems:"center",
+            height:32, borderRadius:9,
+            border:`1.5px solid ${showSuggest && suggestions.length > 0 ? modeColor : T.border}`,
+            background:"#fff", padding:"0 8px 0 10px", transition:"border-color 0.15s",
+          }}>
+            <span style={{ fontSize:13, color:T.text3, marginRight:5 }}>🔍</span>
+            <input
+              data-testid="map-search-input"
+              value={search}
+              onChange={e => { setSearch(e.target.value); setShowSuggest(true); }}
+              onFocus={() => setShowSuggest(true)}
+              placeholder={mode === "workers" ? t("map_search_ph_workers","Buscar prestador o habilidad…") : t("map_search_ph_jobs","Buscar empleo o categoría…")}
+              style={{
+                flex:1, border:"none", outline:"none", background:"transparent",
+                fontSize:12, color:T.text, fontFamily:"DM Sans, sans-serif",
+                padding:0, minWidth:0,
+              }}
+            />
+            {search && (
+              <button data-testid="map-search-clear" onClick={() => { setSearch(""); setShowSuggest(false); }} style={{
+                border:"none", background:"transparent", cursor:"pointer",
+                color:T.text3, fontSize:14, padding:"0 2px",
+              }}>✕</button>
+            )}
+          </div>
+          {/* Autosuggest dropdown */}
+          {showSuggest && search.trim() && suggestions.length > 0 && (
+            <div data-testid="map-search-suggest" style={{
+              position:"absolute", top:"calc(100% + 4px)", left:0, right:0, zIndex:950,
+              background:"#fff", borderRadius:10, border:`1px solid ${T.border}`,
+              boxShadow:"0 8px 24px rgba(0,0,0,0.12)", overflow:"hidden",
+              maxHeight:280, overflowY:"auto",
+            }}>
+              {suggestions.map(s => {
+                const sid = idOf(s);
+                const isW = mode === "workers";
+                return (
+                  <div
+                    data-testid={`map-suggest-${sid}`}
+                    key={sid}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => { setSelected(s); setSearch(""); setShowSuggest(false); }}
+                    style={{
+                      padding:"8px 10px", display:"flex", alignItems:"center", gap:8,
+                      cursor:"pointer", borderBottom:`1px solid ${T.border}`,
+                      transition:"background 0.1s",
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = "#f5f5f4"}
+                    onMouseLeave={e => e.currentTarget.style.background = "#fff"}
+                  >
+                    <div style={{
+                      width:28, height:28, borderRadius: isW ? "50%" : 8,
+                      background: isW ? T.green : (s.color || T.blue), color:"#fff",
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      fontSize: isW ? 11 : 14, fontWeight:800, flexShrink:0,
+                    }}>{isW ? (s.initials || "??") : (s.icon || "💼")}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:12, fontWeight:700, color:T.text, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        {isW ? s.name : s.title}
+                      </div>
+                      <div style={{ fontSize:10, color:T.text3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        {isW ? ((s.skills || []).slice(0,2).join(" · ")) : (s.category || s.employer || "")}
+                      </div>
+                    </div>
+                    <div style={{ fontSize:11, fontWeight:800, color:modeColor, whiteSpace:"nowrap" }}>
+                      {isW ? `${s.hourly_rate}€/h` : `${s.salary}€`}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        {/* Mode toggle compact */}
+        <div style={{ display:"flex", background:"#f5f5f4", borderRadius:9, padding:2, gap:1 }}>
+          <button data-testid="map-mode-jobs" onClick={() => setMode("jobs")} title={t("map_mode_jobs","Empleos")} style={{
+            padding:"0 9px", borderRadius:7, border:"none", cursor:"pointer",
+            background: mode === "jobs" ? T.blue : "transparent",
+            color: mode === "jobs" ? "#fff" : T.text3,
+            fontWeight:700, fontSize:13, transition:"all 0.15s",
+          }}>📍</button>
+          <button data-testid="map-mode-workers" onClick={() => setMode("workers")} title={t("map_mode_workers","Prestadores")} style={{
+            padding:"0 9px", borderRadius:7, border:"none", cursor:"pointer",
+            background: mode === "workers" ? T.green : "transparent",
+            color: mode === "workers" ? "#fff" : T.text3,
+            fontWeight:700, fontSize:13, transition:"all 0.15s",
+          }}>👷</button>
+        </div>
       </div>
 
       {/* Stats + sort */}
