@@ -101,7 +101,7 @@ export function JobCardRow({ job, promoted=false, navigate, update, t }) {
           {job.urgent&&<Badge color={T.red}>{tr("job_urgent_badge")}</Badge>}
           {job.second_job&&<Badge color={T.blue}>💼 2nd job</Badge>}
         </div>
-        <div style={{ fontSize:11,color:T.text3 }}>👤 {job.employer||"—"} · 📂 {job.category||tr("job_diverse_cat")} · {job.type==="full-time"?tr("job_fulltime"):tr("job_parttime")}{job.work_duration?` · ${job.work_duration}`:""}</div>
+        <div style={{ fontSize:11,color:T.text3 }}>👤 {job.employer||"—"} · 📂 {job.category||tr("job_diverse_cat")} · {job.type==="full-time"?tr("job_fulltime"):tr("job_parttime")}{job.work_duration?` · ${tr(`work_dur_${job.work_duration}`,job.work_duration)}`:""}</div>
         <div style={{ display:"flex",gap:4,marginTop:4,flexWrap:"wrap" }}>
           {(job.skills||[]).slice(0,3).map(s=><Badge key={s} color={job.color||T.green}>{s}</Badge>)}
         </div>

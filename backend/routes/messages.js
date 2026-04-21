@@ -68,7 +68,7 @@ router.post(
         conversationId: conv.id,
         userId: req.user.id,
       });
-      res.json({ id: conv.id });
+      res.json({ id: conv.id || conv._id });
     } catch (err) {
       logger.error("Create conversation error", {
         userId: req.user.id,

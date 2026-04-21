@@ -837,6 +837,12 @@ const es = {
   map_privacy:          "Ubicación aproximada ±300m",
   map_online_now:       "Disponible",
   map_online_only:      "Solo online",
+  // Work duration labels
+  work_dur_ore:         "horas",
+  work_dur_zile:        "días",
+  work_dur_saptamani:   "semanas",
+  work_dur_luni:        "meses",
+  work_dur_permanent:   "permanente",
   // Dual Mode
   role_worker:          "Prestador",
   role_employer:        "Cliente",
