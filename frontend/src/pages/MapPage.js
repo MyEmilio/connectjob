@@ -54,9 +54,9 @@ const jobIcon = (color, emoji) => L.divIcon({
   iconAnchor: [18, 36],
 });
 
-const workerIcon = (initials, highlight) => L.divIcon({
+const workerIcon = (initials, highlight, isOnline) => L.divIcon({
   className: "",
-  html: `<div style="background:${highlight?T.greenDark:T.green};color:#fff;border-radius:50%;width:${highlight?42:36}px;height:${highlight?42:36}px;display:flex;align-items:center;justify-content:center;font-size:${highlight?14:12}px;font-weight:800;box-shadow:0 3px 10px rgba(5,150,105,0.4),0 0 0 ${highlight?4:0}px rgba(5,150,105,0.25);border:3px solid #fff;">${initials}</div>`,
+  html: `<div style="position:relative;background:${highlight?T.greenDark:T.green};color:#fff;border-radius:50%;width:${highlight?42:36}px;height:${highlight?42:36}px;display:flex;align-items:center;justify-content:center;font-size:${highlight?14:12}px;font-weight:800;box-shadow:0 3px 10px rgba(5,150,105,0.4),0 0 0 ${highlight?4:0}px rgba(5,150,105,0.25);border:3px solid #fff;">${initials}${isOnline ? `<span style="position:absolute;top:-2px;right:-2px;background:#22c55e;border:2px solid #fff;border-radius:50%;width:12px;height:12px;box-shadow:0 0 0 2px rgba(34,197,94,0.35);"></span>` : ""}</div>`,
   iconSize: [36, 36],
   iconAnchor: [18, 18],
 });
@@ -104,6 +104,7 @@ export default function MapPage({ navigate, update }) {
   const [userPos, setUserPos]   = useState(null);
   const [loading, setLoading]   = useState(true);
   const [radius, setRadius]     = useState(50);
+  const [onlineOnly, setOnlineOnly] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const listItemRefs = useRef({});
 
@@ -119,6 +120,7 @@ export default function MapPage({ navigate, update }) {
     setSelected(null);
     const params = {};
     if (userPos) { params.lat = userPos[0]; params.lng = userPos[1]; params.radius = radius; }
+    if (mode === "workers" && onlineOnly) params.online_only = "true";
 
     const endpoint = mode === "workers" ? "/workers/available" : "/jobs";
     api.get(endpoint, { params })
@@ -131,7 +133,7 @@ export default function MapPage({ navigate, update }) {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [userPos, radius, mode]);
+  }, [userPos, radius, mode, onlineOnly]);
 
   // Normalize id across jobs (_id) and workers (id)
   const idOf = (item) => item._id || item.id;
@@ -202,7 +204,7 @@ export default function MapPage({ navigate, update }) {
         key={iid}
         position={[lat, lng]}
         icon={mode === "workers"
-          ? workerIcon(item.initials || "??", isSelected)
+          ? workerIcon(item.initials || "??", isSelected, item.is_online)
           : jobIcon(item.color || T.blue, item.icon || "💼")}
         eventHandlers={{ click: () => setSelected(item) }}
       >
@@ -248,15 +250,29 @@ export default function MapPage({ navigate, update }) {
             background: isWorker ? T.green : (item.color || T.blue),
             display:"flex", alignItems:"center", justifyContent:"center",
             fontSize: isWorker ? 13 : 18, fontWeight: 800,
-            flexShrink:0, color:"#fff",
+            flexShrink:0, color:"#fff", position:"relative",
           }}>
             {isWorker ? (item.initials || "??") : (item.icon || "💼")}
+            {isWorker && item.is_online && (
+              <span data-testid={`worker-online-dot-${iid}`} style={{
+                position:"absolute", top:-2, right:-2,
+                background:"#22c55e", border:"2px solid #fff", borderRadius:"50%",
+                width:12, height:12, boxShadow:"0 0 0 2px rgba(34,197,94,0.3)",
+              }}/>
+            )}
           </div>
           <div style={{ minWidth:0, flex:1 }}>
             <div style={{ fontWeight:700, fontSize:13, color:T.text, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
               {isWorker ? item.name : item.title}
               {item.is_demo && <span style={{ marginLeft:6, background:"#94a3b8", color:"#fff", borderRadius:999, padding:"1px 6px", fontSize:8, fontWeight:700, verticalAlign:"middle" }}>DEMO</span>}
               {isWorker && item.verified && <span style={{ marginLeft:6, color:T.green, fontSize:11 }}>✓</span>}
+              {isWorker && item.is_online && (
+                <span style={{
+                  marginLeft:6, background:"#dcfce7", color:"#166534",
+                  borderRadius:999, padding:"1px 7px", fontSize:9, fontWeight:800,
+                  verticalAlign:"middle", whiteSpace:"nowrap",
+                }}>🟢 {t("map_online_now","Disponible")}</span>
+              )}
             </div>
             <div style={{ fontSize:11, color:T.text3, display:"flex", alignItems:"center", gap:6, marginTop:2 }}>
               {isWorker ? (
@@ -343,10 +359,25 @@ export default function MapPage({ navigate, update }) {
       </div>
 
       {/* Stats + sort */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8, gap:6 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8, gap:6, flexWrap:"wrap" }}>
         <div data-testid="map-count" style={{ fontSize:11, fontWeight:700, color:modeColor, background:`${modeColor}12`, borderRadius:999, padding:"3px 10px" }}>
           {itemCount} {mode === "workers" ? t("map_workers_count","prestadores") : (itemCount === 1 ? t("map_job_singular","empleo") : t("map_job_plural","empleos"))}
         </div>
+        {mode === "workers" && (
+          <button data-testid="map-online-only-toggle" onClick={() => setOnlineOnly(v => !v)} style={{
+            padding:"4px 9px", borderRadius:999, border:`1.5px solid ${onlineOnly ? "#16a34a" : T.border}`,
+            background: onlineOnly ? "#dcfce7" : "#fff", cursor:"pointer",
+            fontSize:10, fontWeight:700, color: onlineOnly ? "#166534" : T.text3,
+            display:"flex", alignItems:"center", gap:4, transition:"all 0.15s",
+          }}>
+            <span style={{
+              width:7, height:7, borderRadius:"50%",
+              background: onlineOnly ? "#22c55e" : "#cbd5e1",
+              boxShadow: onlineOnly ? "0 0 0 2px rgba(34,197,94,0.25)" : "none",
+            }}/>
+            {t("map_online_only","Solo online")}
+          </button>
+        )}
         <select data-testid="map-sort" value={sort} onChange={e => setSort(e.target.value)} style={{
           padding:"4px 8px", borderRadius:7, border:`1px solid ${T.border}`, fontSize:11,
           background:"#fff", fontWeight:600, color:T.text2, outline:"none", cursor:"pointer",

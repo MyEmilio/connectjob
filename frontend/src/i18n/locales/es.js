@@ -835,6 +835,8 @@ const es = {
   map_sort_price_desc:  "Precio ↓",
   map_no_workers:       "No hay prestadores en esta zona.",
   map_privacy:          "Ubicación aproximada ±300m",
+  map_online_now:       "Disponible",
+  map_online_only:      "Solo online",
   // Chat additions
   chat_transcribing:    "Transcribiendo audio...",
 };

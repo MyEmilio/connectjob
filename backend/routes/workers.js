@@ -27,24 +27,26 @@ function privacyOffset(userId) {
   return { dLat: Math.sin(angle) * dist, dLng: Math.cos(angle) * dist };
 }
 
+const ONLINE_WINDOW_MS = 15 * 60 * 1000;
+
 // Demo workers for map when DB is empty (España / Alicante area)
 const DEMO_WORKERS = [
-  { id: "demo-w1", name: "María García", initials: "MG", rating: 4.8, reviews_count: 24, skills: ["Limpieza", "Jardinería"], hourly_rate: 12, lat: 38.3452, lng: -0.4810, verified: true, is_demo: true },
-  { id: "demo-w2", name: "Carlos Ruiz", initials: "CR", rating: 4.9, reviews_count: 31, skills: ["Construcción", "Electricidad"], hourly_rate: 18, lat: 38.3520, lng: -0.4900, verified: true, is_demo: true },
-  { id: "demo-w3", name: "Ana López", initials: "AL", rating: 4.7, reviews_count: 12, skills: ["Cuidado niños", "Cocina"], hourly_rate: 10, lat: 38.3380, lng: -0.4720, verified: true, is_demo: true },
-  { id: "demo-w4", name: "Javier Moreno", initials: "JM", rating: 4.6, reviews_count: 18, skills: ["Transporte", "Mudanzas"], hourly_rate: 15, lat: 38.3580, lng: -0.4650, verified: true, is_demo: true },
-  { id: "demo-w5", name: "Laura Vila", initials: "LV", rating: 5.0, reviews_count: 8, skills: ["Paseo perros", "Cuidado mascotas"], hourly_rate: 8, lat: 38.3420, lng: -0.4890, verified: true, is_demo: true },
+  { id: "demo-w1", name: "María García", initials: "MG", rating: 4.8, reviews_count: 24, skills: ["Limpieza", "Jardinería"], hourly_rate: 12, lat: 38.3452, lng: -0.4810, verified: true, is_demo: true, is_online: true },
+  { id: "demo-w2", name: "Carlos Ruiz", initials: "CR", rating: 4.9, reviews_count: 31, skills: ["Construcción", "Electricidad"], hourly_rate: 18, lat: 38.3520, lng: -0.4900, verified: true, is_demo: true, is_online: false },
+  { id: "demo-w3", name: "Ana López", initials: "AL", rating: 4.7, reviews_count: 12, skills: ["Cuidado niños", "Cocina"], hourly_rate: 10, lat: 38.3380, lng: -0.4720, verified: true, is_demo: true, is_online: true },
+  { id: "demo-w4", name: "Javier Moreno", initials: "JM", rating: 4.6, reviews_count: 18, skills: ["Transporte", "Mudanzas"], hourly_rate: 15, lat: 38.3580, lng: -0.4650, verified: true, is_demo: true, is_online: false },
+  { id: "demo-w5", name: "Laura Vila", initials: "LV", rating: 5.0, reviews_count: 8, skills: ["Paseo perros", "Cuidado mascotas"], hourly_rate: 8, lat: 38.3420, lng: -0.4890, verified: true, is_demo: true, is_online: true },
 ];
 
 // GET /api/workers/available — returns verified workers with approximate location
 router.get("/available", auth, async (req, res) => {
   try {
-    const { lat, lng, radius = 50, limit = 50, category } = req.query;
+    const { lat, lng, radius = 50, limit = 50, category, online_only } = req.query;
 
     // Get verified workers with approximate location derived from jobs they've applied to (or profile coords later)
     // For now: return users with role=worker & verified=true
     const users = await User.find({ role: "worker", verified: true, status: "active" })
-      .select("name initials rating reviews_count skills avatar verified")
+      .select("name initials rating reviews_count skills avatar verified last_seen")
       .lean();
 
     // Get provider profiles for hourly_rate, categories
@@ -56,13 +58,13 @@ router.get("/available", auth, async (req, res) => {
     profiles.forEach(p => { profilesMap[String(p.user_id)] = p; });
 
     // Build workers list — only those with a location can appear on map
-    // We derive location from the most recent job they applied to (fallback) or profile.
-    // For demo simplicity: attach synthetic positions around España only if they have geo info on profile.
+    const now = Date.now();
     let workers = users
       .map(u => {
         const profile = profilesMap[String(u._id)];
         if (!profile || !profile.lat || !profile.lng) return null;
         const off = privacyOffset(u._id);
+        const isOnline = u.last_seen && (now - new Date(u.last_seen).getTime() < ONLINE_WINDOW_MS);
         return {
           id: String(u._id),
           name: u.name,
@@ -76,6 +78,7 @@ router.get("/available", auth, async (req, res) => {
           lat: profile.lat + off.dLat,
           lng: profile.lng + off.dLng,
           is_demo: false,
+          is_online: !!isOnline,
         };
       })
       .filter(Boolean);
@@ -92,6 +95,11 @@ router.get("/available", auth, async (req, res) => {
       );
     }
 
+    // Filter online only
+    if (online_only === "true" || online_only === "1") {
+      workers = workers.filter(w => w.is_online);
+    }
+
     // Compute distance & filter by radius
     if (lat && lng) {
       const uLat = parseFloat(lat), uLng = parseFloat(lng);
@@ -100,7 +108,11 @@ router.get("/available", auth, async (req, res) => {
         .filter(w => w.distance <= parseFloat(radius));
     }
 
-    workers.sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999));
+    workers.sort((a, b) => {
+      // Online users first, then by distance
+      if (a.is_online !== b.is_online) return a.is_online ? -1 : 1;
+      return (a.distance ?? 999) - (b.distance ?? 999);
+    });
 
     res.json({
       workers: workers.slice(0, parseInt(limit)),

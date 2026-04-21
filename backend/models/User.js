@@ -85,6 +85,8 @@ const userSchema = new mongoose.Schema(
     notify_new_jobs: { type: Boolean, default: true },
     notify_messages: { type: Boolean, default: true },
     notify_applications: { type: Boolean, default: true },
+    // Online presence — touched by auth middleware (throttled ~60s)
+    last_seen: { type: Date, default: null },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
@@ -93,6 +95,7 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ status: 1 });
 userSchema.index({ role: 1 });
+userSchema.index({ last_seen: -1 });
 
 userSchema.set("toJSON", {
   virtuals: true,

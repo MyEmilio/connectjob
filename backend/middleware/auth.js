@@ -1,6 +1,10 @@
 const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
 
+// Throttle map: last update per user (60s window)
+const lastTouch = new Map();
+const TOUCH_THROTTLE_MS = 60 * 1000;
+
 module.exports = async (req, res, next) => {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
@@ -18,6 +22,14 @@ module.exports = async (req, res, next) => {
     }
     if (user?.status === "suspended") {
       return res.status(403).json({ error: "Contul tau este temporar suspendat. Contacteaza support@connectjob.ro pentru detalii." });
+    }
+
+    // Touch last_seen (throttled, fire-and-forget)
+    const now = Date.now();
+    const prev = lastTouch.get(decoded.id) || 0;
+    if (now - prev > TOUCH_THROTTLE_MS) {
+      lastTouch.set(decoded.id, now);
+      User.updateOne({ _id: decoded.id }, { $set: { last_seen: new Date(now) } }).catch(() => {});
     }
 
     next();
