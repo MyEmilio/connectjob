@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: {
         values: ["worker", "employer", "admin"],
-        message: "Rol invalid",
+        message: "Rol inválido",
       },
       default: "worker",
     },

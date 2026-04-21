@@ -58,7 +58,7 @@ router.get("/preferences", auth, async (req, res) => {
       .select("favorite_categories notify_new_jobs notify_messages notify_applications push_subscription")
       .lean();
     
-    if (!user) return res.status(404).json({ error: "User negăsit" });
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
     res.json({
       favorite_categories: user.favorite_categories || [],

@@ -128,7 +128,7 @@ router.get("/jobs/:id", auth, async (req, res) => {
     const job = await Job.findById(req.params.id).lean();
     if (!job) return res.status(404).json({ error: "Job negăsit" });
     if (String(job.employer_id) !== String(req.user.id)) {
-      return res.status(403).json({ error: "Acces interzis" });
+      return res.status(403).json({ error: "Acceso denegado" });
     }
 
     const applications = await Application.find({ job_id: req.params.id })

@@ -180,7 +180,7 @@ router.get("/verify-email/:token", async (req, res) => {
 router.post("/resend-verification", authMiddleware, async (req, res) => {
   try {
     const user = await db.findUserById(req.user.id);
-    if (!user) return res.status(404).json({ error: "User negasit" });
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
     if (user.email_verified) return res.json({ message: "Email deja verificat" });
 
     await Token.deleteMany({ user_id: user.id || user._id, type: "email_verify" });
@@ -295,7 +295,7 @@ router.post("/login", validate(loginSchema), async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
   try {
     const user = await db.findUserById(req.user.id);
-    if (!user) return res.status(404).json({ error: "User negasit" });
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
     const { password: _, ...safeUser } = user;
     res.json(safeUser);
   } catch (err) {
@@ -324,7 +324,7 @@ router.post("/switch-role", authMiddleware, async (req, res) => {
   try {
     const { role } = req.body || {};
     if (!["worker", "employer"].includes(role)) {
-      return res.status(400).json({ error: "Rol invalid" });
+      return res.status(400).json({ error: "Rol inválido" });
     }
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ error: "User no encontrado" });

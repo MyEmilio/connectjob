@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { T, CATEGORIES } from "../constants/theme";
 import { Btn, Card, JobCardRow } from "../components/shared";
@@ -139,7 +140,19 @@ export default function PageHome({ gs, update, navigate }) {
   const [showNotifPrefs, setShowNotifPrefs] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [showCatPopover, setShowCatPopover] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const [hideDemo, setHideDemo] = useState(() => localStorage.getItem("jc_hide_demo") === "true");
+  const catPopRef = React.useRef(null);
+
+  // Close popover on outside click
+  useEffect(() => {
+    const onClick = (e) => {
+      if (catPopRef.current && !catPopRef.current.contains(e.target)) setShowCatPopover(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
 
   const allJobs = gs.jobs || [];
   const toggleDemo = () => {
@@ -209,8 +222,6 @@ export default function PageHome({ gs, update, navigate }) {
             </p>
           </div>
           <div className="jc-hero-btns" style={{ display:"flex",gap:8,flexWrap:"wrap",alignItems:"center" }}>
-            <Btn onClick={()=>navigate("map")} color={T.green} size="sm">{t("home_on_map_btn")}</Btn>
-            <Btn onClick={()=>{ update({jobsCategory:""}); navigate("jobs"); }} color={T.blue} size="sm">{t("home_search_btn")}</Btn>
             {isSupported && (
               <Btn onClick={handleNotificationToggle} color={isSubscribed?"#059669":"#6366f1"} size="sm" style={{opacity:notifLoading?0.6:1}}>
                 {isSubscribed?"🔔":"🔕"} {isSubscribed?t("home_notif_on"):t("home_notif_off")}
@@ -230,26 +241,188 @@ export default function PageHome({ gs, update, navigate }) {
         <button data-testid="advanced-search-btn" onClick={()=>setShowAdvancedSearch(true)}/>
       </div>
 
-      {/* Category grid */}
-      <div style={{ marginBottom:28 }}>
-        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14 }}>
-          <div><h2 style={{ fontFamily:"Outfit,sans-serif",fontSize:20,fontWeight:800,color:T.text,margin:"0 0 2px" }}>{t("home_categories_title")}</h2><p style={{ fontSize:12,color:T.text3,margin:0 }}>{t("home_categories_subtitle")}</p></div>
-          <Btn variant="ghost" size="sm" onClick={()=>navigate("jobs")}>{t("home_see_all_arrow")}</Btn>
+      {/* 🔍 Compact search + category filter — replaces old full-width category grid */}
+      <div data-testid="home-search-toolbar" style={{
+        display:"flex", gap:8, marginBottom:20, alignItems:"stretch", flexWrap:"wrap",
+      }}>
+        {/* Search input */}
+        <div style={{
+          flex:"1 1 260px", minWidth:0, display:"flex", alignItems:"center",
+          height:42, borderRadius:12, border:`1.5px solid ${T.border}`,
+          background:"#fff", padding:"0 10px 0 14px",
+          boxShadow:"0 1px 3px rgba(0,0,0,0.04)",
+          transition:"border-color 0.15s",
+        }}>
+          <span style={{ fontSize:16, color:T.text3, marginRight:8 }}>🔍</span>
+          <input
+            data-testid="home-search-input"
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === "Enter" && searchText.trim()) {
+                update({ jobsCategory:"", jobsSearch: searchText.trim() });
+                navigate("jobs");
+              }
+            }}
+            placeholder={t("home_search_placeholder","Buscar empleo, categoría, ubicación…")}
+            style={{
+              flex:1, border:"none", outline:"none", background:"transparent",
+              fontSize:13, color:T.text, fontFamily:"DM Sans, sans-serif", minWidth:0,
+            }}
+          />
+          {searchText && (
+            <button onClick={() => setSearchText("")} style={{
+              border:"none", background:"transparent", cursor:"pointer",
+              color:T.text3, fontSize:15, padding:"0 4px",
+            }}>✕</button>
+          )}
+          <button
+            data-testid="home-search-go"
+            onClick={() => {
+              update({ jobsCategory:"", jobsSearch: searchText.trim() });
+              navigate("jobs");
+            }}
+            style={{
+              border:"none", background:T.green, color:"#fff",
+              padding:"7px 14px", borderRadius:8, fontSize:12, fontWeight:700,
+              cursor:"pointer", whiteSpace:"nowrap",
+            }}
+          >{t("home_search_btn","Buscar")}</button>
         </div>
-        <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:10 }}>
-          {CATEGORIES.map(cat=>{
-            const cnt=getCatCount(cat);
-            const label=t(`cat_${cat.key}`,{defaultValue:cat.label});
-            return (<div key={cat.key} onClick={()=>{update({jobsCategory:cat.key});navigate("jobs");}} style={{background:T.white,borderRadius:14,border:`1.5px solid ${T.border}`,padding:"14px 16px",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:12,position:"relative",overflow:"hidden"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=cat.color+"88";e.currentTarget.style.background=cat.color+"08";e.currentTarget.style.transform="translateY(-2px)";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;e.currentTarget.style.background=T.white;e.currentTarget.style.transform="";}}>
-              <div style={{width:44,height:44,borderRadius:12,background:`${cat.color}15`,border:`1.5px solid ${cat.color}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{cat.icon}</div>
-              <div style={{minWidth:0}}><div style={{fontWeight:700,fontSize:12,color:T.text,lineHeight:1.3}}>{label}</div>{cnt>0&&<div style={{fontSize:11,color:cat.color,fontWeight:600,marginTop:2}}>{cnt} {t("jobs_ads_label")}</div>}</div>
-            </div>);
-          })}
-          <div onClick={()=>{update({jobsCategory:"diverse"});navigate("jobs");}} style={{background:"#f8fafc",borderRadius:14,border:`1.5px dashed ${T.border}`,padding:"14px 16px",cursor:"pointer",transition:"all 0.2s",display:"flex",alignItems:"center",gap:12}} onMouseEnter={e=>{e.currentTarget.style.borderColor="#94a3b8";}} onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;}}>
-            <div style={{width:44,height:44,borderRadius:12,background:"#e2e8f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>✨</div>
-            <div><div style={{fontWeight:700,fontSize:12,color:T.text,lineHeight:1.3}}>{t("home_diverse_label")}</div><div style={{fontSize:11,color:T.text3,marginTop:2}}>{t("home_diverse_sublabel")}</div></div>
-          </div>
+
+        {/* Categories popover trigger */}
+        <div ref={catPopRef} style={{ position:"relative" }}>
+          <button
+            data-testid="home-cat-toggle"
+            onClick={() => setShowCatPopover(v => !v)}
+            style={{
+              height:42, padding:"0 14px", borderRadius:12,
+              border:`1.5px solid ${showCatPopover ? T.green : T.border}`,
+              background: showCatPopover ? "#f0fdf4" : "#fff",
+              color: showCatPopover ? T.green : T.text2,
+              fontSize:13, fontWeight:700, cursor:"pointer",
+              display:"flex", alignItems:"center", gap:7, whiteSpace:"nowrap",
+              transition:"all 0.15s",
+              boxShadow: showCatPopover ? "0 2px 6px rgba(5,150,105,0.15)" : "0 1px 3px rgba(0,0,0,0.04)",
+            }}
+          >
+            <span style={{ fontSize:16 }}>📂</span>
+            {t("home_categories_title","Categorías")}
+            <span style={{
+              background: showCatPopover ? T.green : "#e7e5e4",
+              color: showCatPopover ? "#fff" : T.text2,
+              borderRadius:999, padding:"1px 7px", fontSize:10, fontWeight:800,
+              marginLeft:2,
+            }}>{CATEGORIES.length}</span>
+            <span style={{ fontSize:10, marginLeft:2 }}>{showCatPopover ? "▲" : "▼"}</span>
+          </button>
+
+          {/* Categories popover */}
+          {showCatPopover && (
+            <div data-testid="home-cat-popover" style={{
+              position:"absolute", top:"calc(100% + 6px)", right:0, zIndex:950,
+              background:"#fff", borderRadius:14, border:`1px solid ${T.border}`,
+              boxShadow:"0 12px 32px rgba(0,0,0,0.15)", padding:14,
+              width:"min(92vw, 540px)",
+              maxHeight:420, overflowY:"auto",
+            }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:10 }}>
+                <div style={{ fontSize:12, fontWeight:800, color:T.text, textTransform:"uppercase", letterSpacing:"0.05em" }}>
+                  {t("home_categories_subtitle","Elige una categoría")}
+                </div>
+                <button onClick={() => setShowCatPopover(false)} style={{
+                  border:"none", background:"transparent", cursor:"pointer",
+                  color:T.text3, fontSize:16, padding:2,
+                }}>✕</button>
+              </div>
+              <div style={{
+                display:"grid",
+                gridTemplateColumns:"repeat(auto-fill, minmax(155px, 1fr))",
+                gap:8,
+              }}>
+                {CATEGORIES.map(cat => {
+                  const cnt = getCatCount(cat);
+                  const label = t(`cat_${cat.key}`, { defaultValue: cat.label });
+                  return (
+                    <div
+                      key={cat.key}
+                      data-testid={`home-cat-item-${cat.key}`}
+                      onClick={() => {
+                        update({ jobsCategory: cat.key });
+                        setShowCatPopover(false);
+                        navigate("jobs");
+                      }}
+                      style={{
+                        background:"#fafaf9", borderRadius:10,
+                        border:`1.5px solid ${T.border}`,
+                        padding:"9px 11px", cursor:"pointer",
+                        transition:"all 0.15s",
+                        display:"flex", alignItems:"center", gap:9,
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = cat.color + "88";
+                        e.currentTarget.style.background = cat.color + "08";
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = T.border;
+                        e.currentTarget.style.background = "#fafaf9";
+                      }}
+                    >
+                      <div style={{
+                        width:32, height:32, borderRadius:9,
+                        background: `${cat.color}15`,
+                        border: `1.5px solid ${cat.color}33`,
+                        display:"flex", alignItems:"center", justifyContent:"center",
+                        fontSize:16, flexShrink:0,
+                      }}>{cat.icon}</div>
+                      <div style={{ minWidth:0, flex:1 }}>
+                        <div style={{ fontSize:12, fontWeight:700, color:T.text, lineHeight:1.2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{label}</div>
+                        {cnt > 0 && (
+                          <div style={{ fontSize:10, color:cat.color, fontWeight:600, marginTop:2 }}>
+                            {cnt} {t("jobs_ads_label","anuncios")}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <div
+                  onClick={() => {
+                    update({ jobsCategory: "diverse" });
+                    setShowCatPopover(false);
+                    navigate("jobs");
+                  }}
+                  style={{
+                    background:"#f8fafc", borderRadius:10,
+                    border:`1.5px dashed ${T.border}`,
+                    padding:"9px 11px", cursor:"pointer",
+                    display:"flex", alignItems:"center", gap:9,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "#94a3b8"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = T.border}
+                >
+                  <div style={{ width:32, height:32, borderRadius:9, background:"#e2e8f0", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, flexShrink:0 }}>✨</div>
+                  <div style={{ fontSize:12, fontWeight:700, color:T.text }}>{t("home_diverse_label","Otros")}</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Map shortcut */}
+        <button
+          data-testid="home-map-shortcut"
+          onClick={() => navigate("map")}
+          style={{
+            height:42, padding:"0 14px", borderRadius:12,
+            border:`1.5px solid ${T.border}`, background:"#fff",
+            color:T.text2, fontSize:13, fontWeight:700, cursor:"pointer",
+            display:"flex", alignItems:"center", gap:7, whiteSpace:"nowrap",
+            boxShadow:"0 1px 3px rgba(0,0,0,0.04)",
+          }}
+        >
+          🗺️ {t("home_on_map_btn","Mapa")}
+        </button>
       </div>
 
       {/* Two columns */}

@@ -11,7 +11,7 @@ export default function PageJobs({ gs, update, navigate }) {
   const [workDuration, setWorkDuration] = useState("");
   const [secondJob, setSecondJob]       = useState(false);
   const [sortBy, setSortBy]             = useState("recent");
-  const [searchText, setSearchText]     = useState("");
+  const [searchText, setSearchText]     = useState(gs.jobsSearch || "");
   const [hideDemo, setHideDemo]         = useState(() => localStorage.getItem("jc_hide_demo") === "true");
 
   const toggleDemo = () => { const next = !hideDemo; setHideDemo(next); localStorage.setItem("jc_hide_demo", String(next)); };

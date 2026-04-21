@@ -28,7 +28,7 @@ const registerValidator = [
     .isLength({ min: 8 }).withMessage("Parola trebuie sa aiba minim 8 caractere"),
   body("role")
     .optional()
-    .isIn(["worker", "employer"]).withMessage("Rol invalid"),
+    .isIn(["worker", "employer"]).withMessage("Rol inválido"),
   validate,
 ];
 

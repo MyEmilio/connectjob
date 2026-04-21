@@ -8,7 +8,7 @@ const TOUCH_THROTTLE_MS = 60 * 1000;
 module.exports = async (req, res, next) => {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Token lipsa" });
+    return res.status(401).json({ error: "Token ausente" });
   }
   const token = header.split(" ")[1];
   try {
@@ -18,10 +18,10 @@ module.exports = async (req, res, next) => {
     // Verifica daca contul e activ (nu suspendat/banat)
     const user = await User.findById(decoded.id).select("status").lean();
     if (user?.status === "banned") {
-      return res.status(403).json({ error: "Contul tau a fost suspendat permanent pentru incalcarea termenilor ConnectJob." });
+      return res.status(403).json({ error: "Tu cuenta ha sido suspendida permanentemente por violación de los términos de ConnectJob." });
     }
     if (user?.status === "suspended") {
-      return res.status(403).json({ error: "Contul tau este temporar suspendat. Contacteaza support@connectjob.ro pentru detalii." });
+      return res.status(403).json({ error: "Tu cuenta está temporalmente suspendida. Contacta con support@connectjob.es para más detalles." });
     }
 
     // Touch last_seen (throttled, fire-and-forget)
@@ -34,6 +34,6 @@ module.exports = async (req, res, next) => {
 
     next();
   } catch {
-    res.status(401).json({ error: "Token invalid sau expirat" });
+    res.status(401).json({ error: "Token inválido o expirado" });
   }
 };

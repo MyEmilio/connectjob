@@ -14,7 +14,7 @@ const {
 const otpLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
-  message: { error: "Limita de SMS depasita. Incearca din nou dupa o ora." },
+  message: { error: "Límite de SMS superado. Inténtalo de nuevo en una hora." },
   standardHeaders: true,
   legacyHeaders: false,
 });

@@ -57,7 +57,7 @@ router.post("/:id/sign", auth, signContractValidator, async (req, res) => {
     const isWorker = String(contract.worker_id) === String(req.user.id);
     const isEmployer = String(contract.employer_id) === String(req.user.id);
     if (!isWorker && !isEmployer)
-      return res.status(403).json({ error: "Acces interzis" });
+      return res.status(403).json({ error: "Acceso denegado" });
 
     let newStatus;
     if (isWorker) {

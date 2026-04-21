@@ -34,12 +34,12 @@ router.get(
   async (req, res) => {
     try {
       const conv = await db.findConversationById(req.params.id);
-      if (!conv) return res.status(404).json({ error: "Conversatie negasita" });
+      if (!conv) return res.status(404).json({ error: "Conversación no encontrada" });
       if (
         String(conv.user1_id) !== String(req.user.id) &&
         String(conv.user2_id) !== String(req.user.id)
       )
-        return res.status(403).json({ error: "Acces interzis" });
+        return res.status(403).json({ error: "Acceso denegado" });
       res.json(await db.getConversationMessages(req.params.id, req.user.id));
     } catch (err) {
       logger.error("Get conversation error", {
@@ -89,12 +89,12 @@ router.post(
     try {
       const { text, attachment } = req.body;
       const conv = await db.findConversationById(req.params.id);
-      if (!conv) return res.status(404).json({ error: "Conversatie negasita" });
+      if (!conv) return res.status(404).json({ error: "Conversación no encontrada" });
       if (
         String(conv.user1_id) !== String(req.user.id) &&
         String(conv.user2_id) !== String(req.user.id)
       )
-        return res.status(403).json({ error: "Acces interzis" });
+        return res.status(403).json({ error: "Acceso denegado" });
 
       // Chat moderation — check text for contact info sharing / evasion (AI-powered)
       if (text && text.trim()) {

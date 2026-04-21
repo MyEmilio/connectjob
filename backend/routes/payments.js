@@ -253,7 +253,7 @@ router.post("/:id/release", auth, async (req, res) => {
     const payment = await db.findPaymentById(req.params.id);
     if (!payment) return res.status(404).json({ error: "Plata negasita" });
     if (String(payment.payer_id) !== String(req.user.id))
-      return res.status(403).json({ error: "Acces interzis" });
+      return res.status(403).json({ error: "Acceso denegado" });
     if (
       stripe &&
       payment.stripe_pi_id &&
@@ -389,7 +389,7 @@ router.get("/:id/status", auth, async (req, res) => {
       String(payment.payer_id) !== String(req.user.id) &&
       String(payment.payee_id) !== String(req.user.id)
     ) {
-      return res.status(403).json({ error: "Acces interzis" });
+      return res.status(403).json({ error: "Acceso denegado" });
     }
 
     // If stripe is configured and we have a real payment intent, check status

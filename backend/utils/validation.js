@@ -2,13 +2,13 @@ const { z } = require("zod");
 
 // ── Auth ─────────────────────────────────────────────────────
 const loginSchema = z.object({
-  email: z.string().email("Email invalid"),
+  email: z.string().email("Email inválido"),
   password: z.string().min(1, "Parola este obligatorie"),
 });
 
 const registerSchema = z.object({
   name: z.string().min(2, "Numele trebuie să aibă cel puțin 2 caractere").max(100),
-  email: z.string().email("Email invalid"),
+  email: z.string().email("Email inválido"),
   password: z.string().min(8, "Parola trebuie să aibă cel puțin 8 caractere")
     .regex(/[A-Z]/, "Parola trebuie să conțină cel puțin o majusculă")
     .regex(/[0-9]/, "Parola trebuie să conțină cel puțin o cifră"),
@@ -16,7 +16,7 @@ const registerSchema = z.object({
 });
 
 const resetRequestSchema = z.object({
-  email: z.string().email("Email invalid"),
+  email: z.string().email("Email inválido"),
 });
 
 const resetPasswordSchema = z.object({

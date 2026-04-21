@@ -65,7 +65,7 @@ app.use(
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
-  message: { error: "Prea multe cereri. Incearca din nou mai tarziu." },
+  message: { error: "Demasiadas peticiones. Inténtalo de nuevo más tarde." },
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => req.path === "/api/health", // Skip health checks
@@ -75,7 +75,7 @@ const generalLimiter = rateLimit({
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
-  message: { error: "Prea multe incercari. Incearca din nou dupa 15 minute." },
+  message: { error: "Demasiados intentos. Inténtalo de nuevo en 15 minutos." },
   standardHeaders: true,
   legacyHeaders: false,
   validate: { xForwardedForHeader: false },
@@ -84,7 +84,7 @@ const authLimiter = rateLimit({
 const otpLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
-  message: { error: "Limita de SMS depasita. Incearca din nou dupa o ora." },
+  message: { error: "Límite de SMS superado. Inténtalo de nuevo en una hora." },
   standardHeaders: true,
   legacyHeaders: false,
   validate: { xForwardedForHeader: false },
@@ -202,7 +202,7 @@ app.use((err, req, res, next) => {
 // ── 404 Handler ────────────────────────────────────────────────
 app.use((req, res) => {
   logger.warn("Route not found", { path: req.path, method: req.method });
-  res.status(404).json({ error: "Ruta negasita" });
+  res.status(404).json({ error: "Ruta no encontrada" });
 });
 
 // ── Socket.io — Real-time Messaging ────────────────────────────

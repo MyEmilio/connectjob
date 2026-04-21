@@ -77,7 +77,7 @@ router.post("/block/:userId", auth, mongoIdValidator("userId"), async (req, res)
     logger.info("User blocked", { userId: req.user.id, blockedId: targetId });
     res.json({
       success: true,
-      message: "Utilizator blocat. Nu vei mai primi mesaje de la acesta.",
+      message: "Usuario bloqueado. Ya no recibirás mensajes de él.",
     });
   } catch (err) {
     logger.error("Block user error", {

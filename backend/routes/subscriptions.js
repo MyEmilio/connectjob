@@ -300,7 +300,7 @@ router.get("/checkout/status/:sessionId", auth, async (req, res) => {
     if (!tx) return res.status(404).json({ error: "Sesiune negasita" });
 
     if (String(tx.user_id) !== String(req.user.id)) {
-      return res.status(403).json({ error: "Acces interzis" });
+      return res.status(403).json({ error: "Acceso denegado" });
     }
 
     // If already processed, return cached status
