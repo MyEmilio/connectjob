@@ -21,6 +21,8 @@ const messageSchema = new mongoose.Schema(
       trim: true,
     },
     read: { type: Boolean, default: false },
+    // System messages (platform warnings, info banners) — sender_id is sender but rendered distinctly
+    is_system: { type: Boolean, default: false },
     // File attachment
     attachment: {
       url: { type: String, default: "" },
@@ -37,11 +39,10 @@ const messageSchema = new mongoose.Schema(
 messageSchema.index({ conversation_id: 1, created_at: -1 });
 
 // Validate: must have text or attachment
-messageSchema.pre("validate", function (next) {
+messageSchema.pre("validate", async function () {
   if (!this.text && !this.attachment?.url) {
     this.invalidate("text", "El mensaje debe tener texto o archivo adjunto");
   }
-  next();
 });
 
 messageSchema.set("toJSON", {

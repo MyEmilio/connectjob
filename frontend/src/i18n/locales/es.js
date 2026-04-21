@@ -837,6 +837,17 @@ const es = {
   map_privacy:          "Ubicación aproximada ±300m",
   map_online_now:       "Disponible",
   map_online_only:      "Solo online",
+  // Dual Mode
+  role_worker:          "Prestador",
+  role_employer:        "Cliente",
+  role_switch_hint:     "Cambiar a {{other}}",
+  // Moderation
+  mod_warning_title:    "Advertencia de plataforma",
+  mod_banned_title:     "Cuenta temporalmente suspendida",
+  mod_banned_msg:       "Has violado las reglas de ConnectJob. Suspensión activa hasta {{date}}.",
+  // Escrow mandatory
+  escrow_required_title: "Pago en Escrow obligatorio",
+  escrow_required_msg:   "Tus primeros 3 trabajos deben pagarse a través de Escrow ConnectJob. Te quedan {{remaining}} por completar antes de poder usar pagos directos.",
   // Chat additions
   chat_transcribing:    "Transcribiendo audio...",
 };

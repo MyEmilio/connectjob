@@ -6,6 +6,7 @@ import api from "./services/api";
 import { T } from "./constants/theme";
 import { Avatar, Loader } from "./components/shared";
 import LanguageSwitcher from "./components/LanguageSwitcher";
+import RoleSwitcher from "./components/RoleSwitcher";
 import "./App.css";
 
 // ── Pages ─────────────────────────────────────────────────────
@@ -100,7 +101,9 @@ function ConnectJobApp() {
           initials: user.initials || user.name?.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2),
           verified: !!user.verified,
           rating: user.rating || 0,
-          role: user.role,
+          role: user.active_role || user.role,
+          roles: user.roles || [user.role || "worker"],
+          active_role: user.active_role || user.role || "worker",
           subscription_plan: user.subscription_plan || "free",
         }
       });
@@ -136,9 +139,9 @@ function ConnectJobApp() {
     { key:"reviews",   icon:"⭐", label:t("nav_reviews") },
     { key:"analytics", icon:"📊", label:t("nav_analytics") },
     { key:"pricing",  icon:"💎", label:t("nav_pricing","Planes") },
-    { key:"post_job",  icon:"➕", label:t("nav_post_job"),  hidden: gs.user.role !== "employer" },
+    { key:"post_job",  icon:"➕", label:t("nav_post_job"),  hidden: gs.user.active_role !== "employer" },
     { key:"verify",    icon: gs.user.verified?"✅":"🛡️", label: gs.user.verified?t("nav_verified"):t("nav_verify"), badge: gs.user.verified?null:"!" },
-    { key:"admin",     icon:"🛡️", label:t("nav_admin"),         hidden: gs.user.role !== "admin" },
+    { key:"admin",     icon:"🛡️", label:t("nav_admin"),         hidden: gs.user.active_role !== "admin" },
   ].filter(item => !item.hidden);
 
   const PAGE_TITLES = {
@@ -271,6 +274,18 @@ function ConnectJobApp() {
               )}
             </div>
           </div>
+          {/* Role Switcher (Dual Mode) — only for non-admin */}
+          {gs.user.active_role !== "admin" && (
+            <RoleSwitcher
+              activeRole={gs.user.active_role}
+              onSwitched={(newRole, newRoles) => {
+                updateGs({ user: { ...gs.user, active_role: newRole, role: newRole, roles: newRoles } });
+                // If user was on a role-restricted page (post_job, admin), navigate home
+                if (page === "post_job" && newRole !== "employer") navigate("home");
+                if (page === "admin" && newRole !== "admin") navigate("home");
+              }}
+            />
+          )}
           {/* Selector de limba */}
           <LanguageSwitcher/>
           {/* Logout */}

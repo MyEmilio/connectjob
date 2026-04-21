@@ -29,6 +29,17 @@ const userSchema = new mongoose.Schema(
       },
       default: "worker",
     },
+    // Dual Mode: a user can have both worker + employer roles and switch instantly
+    roles: {
+      type: [String],
+      enum: ["worker", "employer", "admin"],
+      default: undefined, // populated from `role` on first read if missing (backward compat)
+    },
+    active_role: {
+      type: String,
+      enum: ["worker", "employer", "admin"],
+      default: undefined,
+    },
     initials: {
       type: String,
       default: "",
@@ -65,6 +76,14 @@ const userSchema = new mongoose.Schema(
     },
     warnings_count: { type: Number, default: 0, min: 0 },
     blocked_users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
+    // ── Anti-evasion / moderation state ──
+    moderation_strikes: { type: Number, default: 0, min: 0 },
+    moderation_ban_until: { type: Date, default: null },
+    moderation_last_strike_at: { type: Date, default: null },
+
+    // Track how many paid-via-escrow jobs the user has completed (for escrow-mandatory rule)
+    completed_paid_jobs: { type: Number, default: 0, min: 0 },
     // Subscription & Stripe
     subscription_plan: {
       type: String,
@@ -95,7 +114,18 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ status: 1 });
 userSchema.index({ role: 1 });
+userSchema.index({ active_role: 1 });
 userSchema.index({ last_seen: -1 });
+
+// Normalize roles/active_role (backward-compat with old `role` single field)
+userSchema.pre("save", async function () {
+  if (!this.roles || this.roles.length === 0) {
+    this.roles = [this.role || "worker"];
+  }
+  if (!this.active_role) {
+    this.active_role = this.role || this.roles[0];
+  }
+});
 
 userSchema.set("toJSON", {
   virtuals: true,

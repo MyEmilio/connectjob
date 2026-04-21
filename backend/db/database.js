@@ -15,10 +15,20 @@ const db = {
     return user.toJSON();
   },
   async findUserByEmail(email) {
-    return User.findOne({ email }).lean({ virtuals: true });
+    const u = await User.findOne({ email }).lean({ virtuals: true });
+    if (u) {
+      if (!u.roles || u.roles.length === 0) u.roles = [u.role || "worker"];
+      if (!u.active_role) u.active_role = u.role || u.roles[0];
+    }
+    return u;
   },
   async findUserById(id) {
-    return User.findById(id).lean({ virtuals: true });
+    const u = await User.findById(id).lean({ virtuals: true });
+    if (u) {
+      if (!u.roles || u.roles.length === 0) u.roles = [u.role || "worker"];
+      if (!u.active_role) u.active_role = u.role || u.roles[0];
+    }
+    return u;
   },
   async updateUser(id, patch) {
     await User.findByIdAndUpdate(id, patch);
@@ -102,6 +112,15 @@ const db = {
     if (!conv) {
       const created = await Conversation.create({ user1_id, user2_id, job_id: job_id || null });
       conv = created.toJSON();
+      // Welcome / anti-evasion system message
+      try {
+        await Message.create({
+          conversation_id: conv.id,
+          sender_id: user1_id,
+          is_system: true,
+          text: "🛡️ ConnectJob te protege con Escrow y seguros. Compartir teléfono, email o enlaces, o proponer pagos fuera de la plataforma = strike + pérdida de protección. Todas las transacciones deben permanecer aquí.",
+        });
+      } catch (_) { /* non-critical */ }
     }
     return conv;
   },

@@ -314,4 +314,41 @@ router.put("/profile", authMiddleware, async (req, res) => {
   }
 });
 
+// ══════════════════════════════════════════════════════════════
+//  DUAL MODE — switch active role / add role
+// ══════════════════════════════════════════════════════════════
+const User = require("../models/User");
+
+// POST /api/auth/switch-role  { role: "worker" | "employer" }
+router.post("/switch-role", authMiddleware, async (req, res) => {
+  try {
+    const { role } = req.body || {};
+    if (!["worker", "employer"].includes(role)) {
+      return res.status(400).json({ error: "Rol invalid" });
+    }
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User no encontrado" });
+
+    // Ensure roles array includes the target role; auto-add if first switch
+    if (!user.roles || user.roles.length === 0) user.roles = [user.role || "worker"];
+    if (!user.roles.includes(role)) {
+      // Auto-enroll user into new role (frictionless switching)
+      user.roles.push(role);
+    }
+    user.active_role = role;
+    // Legacy `role` keeps the most recently active non-admin role for older flows
+    if (role !== "admin") user.role = role;
+    await user.save();
+
+    res.json({
+      success: true,
+      active_role: user.active_role,
+      roles: user.roles,
+    });
+  } catch (err) {
+    console.error("switch-role error:", err);
+    res.status(500).json({ error: err.message || String(err) });
+  }
+});
+
 module.exports = router;

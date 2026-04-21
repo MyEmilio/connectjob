@@ -8,7 +8,7 @@ const {
   mongoIdValidator,
 } = require("../utils/validators");
 const { sendPushNotification, notifications } = require("../utils/pushService");
-const { moderateMessage } = require("../utils/chatModerationService");
+const { moderateMessage, applyStrike, isUserBanned } = require("../utils/chatModerationService");
 const User = require("../models/User");
 
 const router = express.Router();
@@ -96,15 +96,37 @@ router.post(
       )
         return res.status(403).json({ error: "Acces interzis" });
 
-      // Chat moderation — check text for contact info sharing
+      // Chat moderation — check text for contact info sharing / evasion (AI-powered)
       if (text && text.trim()) {
         const sender = await User.findById(req.user.id).lean();
-        const modResult = moderateMessage(text.trim(), sender?.subscription_plan || "free");
+
+        // First: check if user is currently banned from chat
+        const banStatus = isUserBanned(sender);
+        if (banStatus.banned) {
+          return res.status(403).json({
+            error: banStatus.permanent
+              ? "Tu cuenta ha sido suspendida permanentemente por evadir la plataforma."
+              : `Tu cuenta está temporalmente suspendida hasta ${new Date(banStatus.until).toLocaleString("es-ES")}.`,
+            moderation: true,
+            banned: true,
+            permanent: banStatus.permanent,
+          });
+        }
+
+        const modResult = await moderateMessage(text.trim(), sender?.subscription_plan || "free");
         if (!modResult.allowed) {
+          // Apply strike
+          const strike = await applyStrike(req.user.id, modResult.category);
           return res.status(403).json({
             error: modResult.reason,
             moderation: true,
             category: modResult.category,
+            strike: {
+              count: strike.strikes,
+              banned: strike.banned,
+              permanent: strike.permanent,
+              banUntil: strike.banUntil,
+            },
           });
         }
       }
@@ -149,6 +171,7 @@ router.post(
       });
       res.json(msg);
     } catch (err) {
+      console.error("Send message error stack:", err);
       logger.error("Send message error", {
         conversationId: req.params.id,
         error: err.message,

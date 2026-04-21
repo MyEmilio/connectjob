@@ -238,16 +238,32 @@ io.on("connection", (socket) => {
       )
         return;
 
-      // Chat moderation
-      const { moderateMessage } = require("./utils/chatModerationService");
+      // Chat moderation (AI + strikes)
+      const { moderateMessage, applyStrike, isUserBanned } = require("./utils/chatModerationService");
       const User = require("./models/User");
       const sender = await User.findById(userId).lean();
-      const modResult = moderateMessage(text.trim(), sender?.subscription_plan || "free");
+
+      const banStatus = isUserBanned(sender);
+      if (banStatus.banned) {
+        socket.emit("message_blocked", {
+          conversation_id,
+          reason: banStatus.permanent
+            ? "Cuenta suspendida permanentemente."
+            : "Cuenta suspendida temporalmente.",
+          banned: true,
+          permanent: banStatus.permanent,
+        });
+        return;
+      }
+
+      const modResult = await moderateMessage(text.trim(), sender?.subscription_plan || "free");
       if (!modResult.allowed) {
+        const strike = await applyStrike(userId, modResult.category);
         socket.emit("message_blocked", {
           conversation_id,
           reason: modResult.reason,
           category: modResult.category,
+          strike: { count: strike.strikes, banned: strike.banned, permanent: strike.permanent },
         });
         return;
       }

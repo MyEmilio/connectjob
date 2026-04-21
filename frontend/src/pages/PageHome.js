@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { T, CATEGORIES } from "../constants/theme";
 import { Btn, Card, JobCardRow } from "../components/shared";
@@ -6,6 +6,7 @@ import usePushNotifications from "../hooks/usePushNotifications";
 import useNotificationPreferences from "../hooks/useNotificationPreferences";
 import DashboardStats from "../components/DashboardStats";
 import AdvancedSearch from "../components/AdvancedSearch";
+import api from "../services/api";
 
 function HowItWorksModal({ onClose }) {
   const { t } = useTranslation("t");
@@ -151,6 +152,12 @@ export default function PageHome({ gs, update, navigate }) {
   const recentJobs = filteredJobs.slice(0, 6);
   const [searchFilters, setSearchFilters] = useState({});
   const { isSupported, isSubscribed, loading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
+
+  // Escrow-mandatory info (for new users)
+  const [escrowInfo, setEscrowInfo] = useState(null);
+  useEffect(() => {
+    api.get("/payments/escrow-status").then(r => setEscrowInfo(r.data)).catch(() => {});
+  }, []);
   const getCatCount = (cat) => allJobs.filter(j => { const jc = (j.category||"").toLowerCase(); return jc === cat.key || jc.includes(cat.key); }).length;
   const handleNotificationToggle = async () => { if (isSubscribed) { await unsubscribe(); } else { const success = await subscribe(); if (success) setShowNotifPrefs(true); } };
 
@@ -160,6 +167,35 @@ export default function PageHome({ gs, update, navigate }) {
       {showNotifPrefs && <NotificationPreferencesModal onClose={()=>setShowNotifPrefs(false)}/>}
       {showDashboard && <DashboardStats onClose={()=>setShowDashboard(false)}/>}
       {showAdvancedSearch && <AdvancedSearch filters={searchFilters} onFilterChange={setSearchFilters} onClose={()=>setShowAdvancedSearch(false)}/>}
+
+      {/* Escrow mandatory banner (hides after 3 completed escrow jobs + rating>=4.5 OR premium) */}
+      {escrowInfo?.mandatory && (
+        <div data-testid="escrow-mandatory-banner" style={{
+          background: "linear-gradient(135deg,#fef3c7,#fde68a)",
+          border: "1.5px solid #f59e0b",
+          borderRadius: 14,
+          padding: "14px 18px",
+          marginBottom: 16,
+          display: "flex", alignItems: "center", gap: 14,
+          boxShadow: "0 4px 14px rgba(245,158,11,0.15)",
+        }}>
+          <div style={{ fontSize: 30, flexShrink: 0 }}>🔒</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#78350f", marginBottom: 3 }}>
+              {t("escrow_required_title","Pago en Escrow obligatorio")}
+            </div>
+            <div style={{ fontSize: 12, color: "#92400e", lineHeight: 1.5 }}>
+              {t("escrow_required_msg","Tus primeros 3 trabajos deben pagarse a través de Escrow ConnectJob. Te quedan {{remaining}} por completar antes de poder usar pagos directos.", { remaining: escrowInfo.remaining })}
+            </div>
+          </div>
+          <div style={{
+            background: "#fff", borderRadius: 10, padding: "6px 12px",
+            border: "1.5px solid #f59e0b", fontSize: 18, fontWeight: 800, color: "#d97706", flexShrink: 0,
+          }}>
+            {escrowInfo.completed_paid_jobs}/{escrowInfo.threshold}
+          </div>
+        </div>
+      )}
 
       {/* Compact hero */}
       <div className="jc-hero" style={{ background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`, borderRadius:18, padding:"22px 26px", marginBottom:24, position:"relative", overflow:"hidden" }}>

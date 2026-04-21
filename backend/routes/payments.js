@@ -266,6 +266,17 @@ router.post("/:id/release", auth, async (req, res) => {
       released_at: new Date(),
     });
 
+    // Anti-evasion: increment completed_paid_jobs counter on both parties
+    try {
+      const User = require("../models/User");
+      await Promise.all([
+        User.updateOne({ _id: payment.payer_id }, { $inc: { completed_paid_jobs: 1 } }),
+        User.updateOne({ _id: payment.payee_id }, { $inc: { completed_paid_jobs: 1 } }),
+      ]);
+    } catch (incErr) {
+      logger.warn("Could not increment completed_paid_jobs", { error: incErr.message });
+    }
+
     // Send email notification to worker
     try {
       const User = require("../models/User");
@@ -432,6 +443,31 @@ router.get("/stripe-config", (req, res) => {
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
     configured: !!stripe,
   });
+});
+
+// GET /api/payments/escrow-status — tells frontend whether user must use escrow
+router.get("/escrow-status", auth, async (req, res) => {
+  try {
+    const User = require("../models/User");
+    const u = await User.findById(req.user.id).select("completed_paid_jobs rating subscription_plan").lean();
+    const completed = u?.completed_paid_jobs || 0;
+    const rating = u?.rating || 0;
+    const isPremium = u?.subscription_plan === "premium";
+    const THRESHOLD = 3;
+    // Rule: escrow mandatory until 3 completed escrow-paid jobs AND rating >= 4.5
+    // Premium users skip the requirement (paid tier).
+    const mandatory = !isPremium && (completed < THRESHOLD || rating < 4.5);
+    res.json({
+      mandatory,
+      completed_paid_jobs: completed,
+      threshold: THRESHOLD,
+      remaining: Math.max(0, THRESHOLD - completed),
+      rating,
+      premium_override: isPremium,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

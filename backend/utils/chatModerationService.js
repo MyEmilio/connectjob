@@ -1,107 +1,162 @@
 const logger = require("./logger");
+const axios = require("axios");
+const User = require("../models/User");
 
-// Regex patterns for detecting contact info sharing
-const PATTERNS = {
-  // Phone numbers: international and local formats
-  phone: [
-    /(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}/g,
-    /\b0\d{9}\b/g, // Romanian format: 0722123456
-    /\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b/g,
-    /(?:tel|telefon|phone|nr|numar|suna|apel)[\s.:;-]*\+?\d[\d\s.-]{6,}/gi,
-  ],
-  // Email addresses
-  email: [
-    /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-    /[a-zA-Z0-9._%+-]+\s*(?:\[at\]|@|la)\s*[a-zA-Z0-9.-]+\s*(?:\[dot\]|\.)\s*[a-zA-Z]{2,}/gi,
-    /(?:email|mail|scrie-mi)[\s.:;-]*[a-zA-Z0-9._%+-]+@/gi,
-  ],
-  // URLs and websites
-  url: [
-    /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi,
-    /www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi,
-    /[a-zA-Z0-9.-]+\.(?:com|ro|net|org|eu|io|info|biz)\b/gi,
-  ],
-  // Social media handles
-  social: [
-    /(?:facebook|fb|insta|instagram|whatsapp|telegram|viber|tiktok|linkedin|twitter|snap|snapchat)[\s.:;/@-]*[a-zA-Z0-9._]{2,}/gi,
-    /@[a-zA-Z0-9._]{3,}/g,
-  ],
-  // Obfuscation attempts (writing digits as words or splitting)
-  obfuscated: [
-    /\b(?:zero|unu|doi|trei|patru|cinci|sase|sapte|opt|noua)(?:\s+(?:zero|unu|doi|trei|patru|cinci|sase|sapte|opt|noua)){5,}\b/gi,
-    /\d\s+\d\s+\d\s+\d\s+\d\s+\d/g, // spaced digits: 0 7 2 2 1 2 3
-  ],
-};
-
-// Words/phrases that indicate intent to share contact info
-const INTENT_PHRASES = [
-  /(?:da-mi|dami|trimite-mi|scrie-mi)\s+(?:numarul|nr|telefonul|emailul|mailul)/gi,
-  /(?:contacteaza-ma|suna-ma|scrie-mi)\s+(?:pe|la)\s+/gi,
-  /(?:numarul\s+meu|mailul\s+meu|emailul\s+meu)\s+(?:este|e)\s/gi,
+// ── Fast regex pre-filter (catches obvious cases before hitting LLM) ──
+const FAST_PATTERNS = [
+  /\+?\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}/g, // phone numbers
+  /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,              // email
+  /https?:\/\/\S+/gi,                                              // urls
+  /www\.\S+\.\S+/gi,                                               // www urls
+  /\b(?:whatsapp|telegram|viber|instagram|facebook|signal|snap|snapchat)\b[\s:@]+[\w.@]+/gi,
 ];
 
+const SYSTEM_PROMPT = `You are an expert chat moderator for ConnectJob, a job marketplace.
+Your task: detect if a user is trying to share contact info, evade the platform, or propose off-platform payments.
+Block messages that:
+- Share or request phone numbers (even in words like "siete dos dos cinco" or "șapte doi doi cinci")
+- Share or request email addresses (even obfuscated like "nume at gmail punct com")
+- Link to external services (WhatsApp, Telegram, Signal, Instagram DMs)
+- Propose payment outside the platform (cash, bank transfer, crypto, meeting outside escrow)
+- Reveal physical address or meeting point meant to bypass the platform
+Allow: normal job discussions, scheduling, skill descriptions, even friendly chat.
+Respond ONLY in JSON: {"block": boolean, "category": "phone"|"email"|"url"|"social"|"off_platform_payment"|"address_reveal"|"other"|null, "confidence": 0-1, "reason_short": "spanish text max 100 chars"}`;
+
+const STRIKE_ACTIONS = {
+  1: { warn: true, banHours: 0 },     // warning only
+  2: { warn: true, banHours: 24 },    // 24h freeze
+  3: { warn: true, banHours: 7 * 24 },// 7 days
+  4: { warn: true, banHours: -1 },    // permanent
+};
+
 /**
- * Moderates a message for contact information sharing
- * @param {string} text - The message text to check
- * @param {string} userPlan - The user's subscription plan
- * @returns {{ allowed: boolean, reason: string|null, category: string|null }}
+ * Moderates a message using fast regex + AI (GPT-4o-mini via Emergent LLM Key)
+ * @param {string} text
+ * @param {string} userPlan
+ * @returns {{ allowed:boolean, reason:string|null, category:string|null, aiChecked:boolean }}
  */
-function moderateMessage(text, userPlan = "free") {
-  // Premium users bypass moderation
+async function moderateMessage(text, userPlan = "free") {
+  // Premium users bypass moderation entirely
   if (userPlan === "premium") {
-    return { allowed: true, reason: null, category: null };
+    return { allowed: true, reason: null, category: null, aiChecked: false };
   }
 
-  const trimmed = text.trim();
-  if (!trimmed) {
-    return { allowed: true, reason: null, category: null };
+  const trimmed = (text || "").trim();
+  if (!trimmed || trimmed.length < 3) {
+    return { allowed: true, reason: null, category: null, aiChecked: false };
   }
 
-  // Check each pattern category
-  for (const [category, patterns] of Object.entries(PATTERNS)) {
-    for (const pattern of patterns) {
-      // Reset lastIndex for global regexes
-      pattern.lastIndex = 0;
-      if (pattern.test(trimmed)) {
-        logger.info("Chat moderation blocked message", {
-          category,
-          textPreview: trimmed.substring(0, 50),
-        });
-        return {
-          allowed: false,
-          reason: getBlockReason(category),
-          category,
-        };
-      }
+  // Stage 1: Fast regex pre-filter (blocks 80% of cases instantly, no API cost)
+  for (const pattern of FAST_PATTERNS) {
+    pattern.lastIndex = 0;
+    if (pattern.test(trimmed)) {
+      logger.info("Chat moderation (regex) blocked message", { textPreview: trimmed.substring(0, 80) });
+      return {
+        allowed: false,
+        reason: "No se permite compartir datos de contacto o enlaces externos en el chat. Usa el sistema de pago integrado para tu seguridad.",
+        category: "regex_hit",
+        aiChecked: false,
+      };
     }
   }
 
-  // Check intent phrases (only for free users)
-  if (userPlan === "free") {
-    for (const pattern of INTENT_PHRASES) {
-      pattern.lastIndex = 0;
-      if (pattern.test(trimmed)) {
-        return {
-          allowed: false,
-          reason: "Partajarea datelor de contact nu este permisa in planul Free. Upgrade la Pro sau Premium pentru a comunica liber.",
-          category: "intent",
-        };
-      }
-    }
+  // Stage 2: AI moderation for nuanced cases (words, obfuscation, intent)
+  const apiKey = process.env.EMERGENT_LLM_KEY;
+  if (!apiKey) {
+    return { allowed: true, reason: null, category: null, aiChecked: false };
   }
 
-  return { allowed: true, reason: null, category: null };
+  try {
+    const endpoint = "https://integrations.emergentagent.com/llm/chat/completions";
+    const resp = await axios.post(
+      endpoint,
+      {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: trimmed.slice(0, 500) },
+        ],
+        temperature: 0,
+        response_format: { type: "json_object" },
+        max_tokens: 150,
+      },
+      { headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" }, timeout: 8000 }
+    );
+
+    const raw = resp.data?.choices?.[0]?.message?.content || "{}";
+    let parsed = {};
+    try { parsed = JSON.parse(raw); } catch { /* ignore */ }
+
+    if (parsed.block === true && (parsed.confidence ?? 0) >= 0.6) {
+      logger.info("Chat moderation (AI) blocked message", {
+        category: parsed.category,
+        confidence: parsed.confidence,
+        textPreview: trimmed.substring(0, 80),
+      });
+      return {
+        allowed: false,
+        reason: parsed.reason_short || "Este mensaje intenta evadir la plataforma. No se permite.",
+        category: parsed.category || "ai_blocked",
+        aiChecked: true,
+      };
+    }
+    return { allowed: true, reason: null, category: null, aiChecked: true };
+  } catch (err) {
+    // If AI fails, fail-open (don't block user on infra hiccup)
+    logger.warn("AI moderation skipped:", err.message);
+    return { allowed: true, reason: null, category: null, aiChecked: false };
+  }
 }
 
-function getBlockReason(category) {
-  const reasons = {
-    phone: "Numere de telefon nu sunt permise in chat. Foloseste sistemul de plata integrat pentru siguranta ta.",
-    email: "Adresele de email nu sunt permise in chat. Comunicarea ramane sigura prin platforma.",
-    url: "Link-urile externe nu sunt permise in chat. Toate tranzactiile trebuie sa ramana pe platforma.",
-    social: "Conturile de social media nu sunt permise in chat. Protejeaza-ti datele personale.",
-    obfuscated: "Mesajul pare sa contina informatii de contact ascunse. Te rugam sa folosesti platforma pentru comunicare.",
+/**
+ * Apply a strike to a user after a moderation hit. Returns the action taken.
+ * @param {string} userId
+ * @param {string} category - what triggered the strike
+ * @returns {Promise<{strikes:number, banUntil:Date|null, banned:boolean, permanent:boolean}>}
+ */
+async function applyStrike(userId, category) {
+  const user = await User.findById(userId);
+  if (!user) return { strikes: 0, banUntil: null, banned: false, permanent: false };
+
+  const now = new Date();
+  user.moderation_strikes = (user.moderation_strikes || 0) + 1;
+  user.moderation_last_strike_at = now;
+
+  const tier = Math.min(user.moderation_strikes, 4);
+  const action = STRIKE_ACTIONS[tier];
+  let banned = false, permanent = false;
+
+  if (action.banHours > 0) {
+    user.moderation_ban_until = new Date(now.getTime() + action.banHours * 3600 * 1000);
+    banned = true;
+  } else if (action.banHours === -1) {
+    user.moderation_ban_until = new Date("2099-12-31");
+    user.status = "banned";
+    banned = true;
+    permanent = true;
+  }
+
+  await user.save();
+  logger.warn(`Moderation strike ${tier} applied`, { userId: String(userId), category, banned, permanent });
+
+  return {
+    strikes: user.moderation_strikes,
+    banUntil: user.moderation_ban_until,
+    banned,
+    permanent,
   };
-  return reasons[category] || "Mesajul contine informatii de contact care nu sunt permise.";
 }
 
-module.exports = { moderateMessage };
+/**
+ * Check if a user is currently banned from sending messages.
+ */
+function isUserBanned(user) {
+  if (!user) return { banned: false };
+  if (user.status === "banned") return { banned: true, permanent: true, until: null };
+  if (user.moderation_ban_until && new Date(user.moderation_ban_until) > new Date()) {
+    return { banned: true, permanent: false, until: user.moderation_ban_until };
+  }
+  return { banned: false };
+}
+
+module.exports = { moderateMessage, applyStrike, isUserBanned };

@@ -40,7 +40,7 @@ export default function PageChat({ gs, update, navigate }) {
   const [translations, setTranslations] = useState({});
   const [translating, setTranslating] = useState(false);
   const [expanded, setExpanded] = useState(true);
-  const [moderationAlert, setModerationAlert] = useState(null);
+  const [moderationAlert, setModerationAlert] = useState(null); // { reason, strike, banned, permanent, banUntil }
   const [uploadingFile, setUploadingFile] = useState(false);
   const [pendingFile, setPendingFile] = useState(null);
   const fileInputRef = useRef(null);
@@ -134,9 +134,10 @@ export default function PageChat({ gs, update, navigate }) {
     };
     socket.on("new_message", onMsg);
     socket.on("typing", onTyping);
-    const onBlocked = ({ reason }) => {
-      setModerationAlert(reason);
-      setTimeout(() => setModerationAlert(null), 6000);
+    const onBlocked = (data) => {
+      const { reason, strike, banned, permanent, banUntil } = data || {};
+      setModerationAlert({ reason, strike, banned, permanent, banUntil });
+      setTimeout(() => setModerationAlert(null), 10000);
     };
     socket.on("message_blocked", onBlocked);
     return () => { socket.off("new_message", onMsg); socket.off("typing", onTyping); socket.off("message_blocked", onBlocked); };
@@ -274,8 +275,9 @@ export default function PageChat({ gs, update, navigate }) {
         setPendingFile(null);
       }).catch((err) => {
         if (err.response?.data?.moderation) {
-          setModerationAlert(err.response.data.error);
-          setTimeout(() => setModerationAlert(null), 6000);
+          const d = err.response.data;
+          setModerationAlert({ reason: d.error, strike: d.strike, banned: d.banned, permanent: d.permanent });
+          setTimeout(() => setModerationAlert(null), 10000);
         }
       });
     }
@@ -307,8 +309,9 @@ export default function PageChat({ gs, update, navigate }) {
     if (socket) socket.emit("send_message", { conversation_id: activeId, text: txt });
     else api.post(`/messages/conversations/${activeId}/send`, { text: txt }).then(r => setMessages(p => [...p, r.data])).catch((err) => {
       if (err.response?.data?.moderation) {
-        setModerationAlert(err.response.data.error);
-        setTimeout(() => setModerationAlert(null), 6000);
+        const d = err.response.data;
+        setModerationAlert({ reason: d.error, strike: d.strike, banned: d.banned, permanent: d.permanent });
+        setTimeout(() => setModerationAlert(null), 10000);
       }
     });
   };
@@ -497,6 +500,23 @@ export default function PageChat({ gs, update, navigate }) {
           {/* Messages */}
           <div style={{ flex: 1, overflowY: "auto", padding: "10px 12px 6px", display: "flex", flexDirection: "column", gap: 5 }}>
             {messages.map((msg) => {
+              // Platform system message (anti-evasion banner, etc.)
+              if (msg.is_system) {
+                return (
+                  <div key={msg.id} data-testid="chat-system-msg" style={{
+                    alignSelf:"center", maxWidth:"92%",
+                    background: "linear-gradient(135deg,#eef2ff,#dbeafe)",
+                    border: "1px solid #93c5fd",
+                    borderRadius: 12, padding: "8px 14px",
+                    margin: "6px 0",
+                    fontSize: 11.5, color: "#1e3a8a", lineHeight: 1.5,
+                    fontWeight: 500, textAlign: "center",
+                    animation: "fadeIn 0.2s ease",
+                  }}>
+                    {msg.text}
+                  </div>
+                );
+              }
               const isMe = isDemo ? msg.sender_id === "me" : String(msg.sender_id) === String(gs.user?.id);
               const timeStr = msg.created_at ? new Date(msg.created_at).toLocaleTimeString(i18n.language, { hour: "2-digit", minute: "2-digit" }) : "";
               const tr = !isMe ? translations[`${msg.id}_${myLang}`] : null;
@@ -556,15 +576,43 @@ export default function PageChat({ gs, update, navigate }) {
 
           {/* Input area */}
           <div style={{ padding: "8px 12px 12px", background: T.white, borderTop: `1.5px solid ${T.border}` }}>
-            {/* Moderation alert */}
+            {/* Moderation alert with strike + ban info */}
             {moderationAlert && (
-              <div data-testid="moderation-alert" style={{ marginBottom: 8, padding: "8px 12px", borderRadius: 10, background: "#fef2f2", border: "1px solid #fecaca", display: "flex", alignItems: "center", gap: 8, animation: "fadeIn 0.2s ease" }}>
-                <span style={{ fontSize: 16, flexShrink: 0 }}>🛡️</span>
+              <div data-testid="moderation-alert" style={{
+                marginBottom: 8,
+                padding: "10px 14px",
+                borderRadius: 10,
+                background: moderationAlert.banned ? "#7f1d1d" : "#fef2f2",
+                border: `1px solid ${moderationAlert.banned ? "#991b1b" : "#fecaca"}`,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                animation: "fadeIn 0.2s ease",
+              }}>
+                <span style={{ fontSize: 20, flexShrink: 0 }}>{moderationAlert.banned ? "🚫" : "🛡️"}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#991b1b", marginBottom: 2 }}>{t("chat_msg_blocked")}</div>
-                  <div style={{ fontSize: 10, color: "#b91c1c", lineHeight: 1.4 }}>{moderationAlert}</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: moderationAlert.banned ? "#fff" : "#991b1b", marginBottom: 3 }}>
+                    {moderationAlert.banned
+                      ? (moderationAlert.permanent ? "🚫 Cuenta suspendida permanentemente" : "⏸️ Cuenta temporalmente bloqueada")
+                      : t("chat_msg_blocked")}
+                  </div>
+                  <div style={{ fontSize: 11, color: moderationAlert.banned ? "#fee2e2" : "#b91c1c", lineHeight: 1.5 }}>{moderationAlert.reason}</div>
+                  {moderationAlert.strike && !moderationAlert.banned && (
+                    <div data-testid="strike-counter" style={{
+                      marginTop: 6, display: "inline-block",
+                      padding: "2px 8px", borderRadius: 999,
+                      background: moderationAlert.strike.count >= 2 ? "#fbbf24" : "#fef3c7",
+                      color: moderationAlert.strike.count >= 2 ? "#78350f" : "#92400e",
+                      fontSize: 10, fontWeight: 800,
+                    }}>
+                      ⚠️ Advertencia {moderationAlert.strike.count}/4 · Próximo aviso = bloqueo temporal
+                    </div>
+                  )}
                 </div>
-                <button onClick={() => setModerationAlert(null)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#b91c1c", padding: 2 }}>✕</button>
+                <button onClick={() => setModerationAlert(null)} style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  fontSize: 16, color: moderationAlert.banned ? "#fff" : "#b91c1c", padding: 2,
+                }}>✕</button>
               </div>
             )}
             {interim && <div style={{ marginBottom: 7, padding: "6px 12px", borderRadius: 8, background: "#f0fdf4", border: "1px solid #86efac", fontSize: 12, color: "#166534", fontStyle: "italic" }}>🎙️ "{interim}"</div>}
