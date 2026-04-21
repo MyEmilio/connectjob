@@ -24,6 +24,8 @@ const providerProfileSchema = new mongoose.Schema(
     // Location (approximate — shown on map with ±300m offset)
     lat: { type: Number, default: null },
     lng: { type: Number, default: null },
+    city: { type: String, default: "", maxlength: 120 },
+    description: { type: String, default: "", maxlength: 500 },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );

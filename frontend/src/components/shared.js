@@ -16,7 +16,7 @@ export function Avatar({ initials, color=T.green, size=36, online=false }) {
   );
 }
 
-export function Btn({ children, onClick, variant="primary", size="md", color=T.green, disabled=false, style={} }) {
+export function Btn({ children, onClick, variant="primary", size="md", color=T.green, disabled=false, style={}, ...rest }) {
   const sizes = { sm:"8px 14px", md:"11px 20px", lg:"14px 28px" };
   const base = {
     border:"none", borderRadius:10, cursor:disabled?"not-allowed":"pointer",
@@ -25,10 +25,10 @@ export function Btn({ children, onClick, variant="primary", size="md", color=T.g
     padding: sizes[size], transition:"all 0.2s", display:"inline-flex",
     alignItems:"center", justifyContent:"center", gap:6, ...style,
   };
-  if (variant==="primary") return <button onClick={onClick} disabled={disabled} style={{ ...base, background:disabled?"#e7e5e4":`linear-gradient(135deg,${color},${color}cc)`, color:disabled?"#a8a29e":"#fff", boxShadow:disabled?"none":`0 4px 12px ${color}44` }}>{children}</button>;
-  if (variant==="outline") return <button onClick={onClick} disabled={disabled} style={{ ...base, background:"#fff", border:`1.5px solid ${T.border}`, color:T.text2 }}>{children}</button>;
-  if (variant==="ghost")   return <button onClick={onClick} disabled={disabled} style={{ ...base, background:"transparent", color:T.text3 }}>{children}</button>;
-  return <button onClick={onClick} disabled={disabled} style={base}>{children}</button>;
+  if (variant==="primary") return <button {...rest} onClick={onClick} disabled={disabled} style={{ ...base, background:disabled?"#e7e5e4":`linear-gradient(135deg,${color},${color}cc)`, color:disabled?"#a8a29e":"#fff", boxShadow:disabled?"none":`0 4px 12px ${color}44` }}>{children}</button>;
+  if (variant==="outline") return <button {...rest} onClick={onClick} disabled={disabled} style={{ ...base, background:"#fff", border:`1.5px solid ${T.border}`, color:T.text2 }}>{children}</button>;
+  if (variant==="ghost")   return <button {...rest} onClick={onClick} disabled={disabled} style={{ ...base, background:"transparent", color:T.text3 }}>{children}</button>;
+  return <button {...rest} onClick={onClick} disabled={disabled} style={base}>{children}</button>;
 }
 
 export function Card({ children, style={}, onClick }) {

@@ -140,6 +140,8 @@ app.use("/api/subscriptions", require("./routes/subscriptions"));
 app.use("/api/uploads", require("./routes/uploads"));
 app.use("/api/workers", require("./routes/workers"));
 app.use("/api/speech", require("./routes/speech"));
+app.use("/api/provider-profile", require("./routes/providerProfile"));
+app.use("/api/contracts/pdf", require("./routes/contractPdf"));
 
 // ── Health Check ───────────────────────────────────────────────
 const startTime = Date.now();

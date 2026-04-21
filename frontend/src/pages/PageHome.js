@@ -7,6 +7,7 @@ import usePushNotifications from "../hooks/usePushNotifications";
 import useNotificationPreferences from "../hooks/useNotificationPreferences";
 import DashboardStats from "../components/DashboardStats";
 import AdvancedSearch from "../components/AdvancedSearch";
+import ProviderLocationModal from "../components/ProviderLocationModal";
 import api from "../services/api";
 
 function HowItWorksModal({ onClose }) {
@@ -141,6 +142,7 @@ export default function PageHome({ gs, update, navigate }) {
   const [showDashboard, setShowDashboard] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [showCatPopover, setShowCatPopover] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [recentSearches, setRecentSearches] = useState(() => {
     try { return JSON.parse(localStorage.getItem("jc_recent_searches") || "[]"); }
@@ -255,6 +257,11 @@ export default function PageHome({ gs, update, navigate }) {
               </Btn>
             )}
             {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>{t("home_verify_btn")}</Btn>}
+            {gs.user.active_role === "worker" && (
+              <Btn data-testid="home-my-location-btn" onClick={() => setShowLocationModal(true)} color="#3b82f6" size="sm">
+                📍 {t("home_my_location_btn","Mi ubicación")}
+              </Btn>
+            )}
             <button onClick={()=>setShowHowItWorks(true)} style={{ padding:"7px 13px",borderRadius:10,border:"1.5px solid rgba(52,211,153,0.35)",background:"rgba(52,211,153,0.08)",color:T.greenLight,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontFamily:"DM Sans,sans-serif",transition:"all 0.2s" }}>
               <span style={{ fontSize:15 }}>💡</span> {t("home_hiw_btn")}
             </button>
@@ -526,6 +533,13 @@ export default function PageHome({ gs, update, navigate }) {
           </Card>
         </div>
       </div>
+
+      {/* Provider Location Modal */}
+      <ProviderLocationModal
+        open={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onSaved={() => { /* could refresh data if needed */ }}
+      />
     </div>
   );
 }

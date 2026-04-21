@@ -102,7 +102,33 @@ export default function PageContract({ gs, update, navigate }) {
           <h2 style={{fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:T.text,margin:"0 0 8px"}}>{t("contract_success_title")}</h2>
           <p style={{fontSize:14,color:T.text2,marginBottom:20}}>{t("contract_success_msg")}</p>
           <div style={{display:"flex",gap:10}}>
-            <Btn color={T.green} style={{flex:1,justifyContent:"center"}}>📥 Descargar PDF</Btn>
+            <Btn
+              data-testid="contract-download-pdf-btn"
+              onClick={async () => {
+                try {
+                  const jobId = job._id || job.id;
+                  const token = localStorage.getItem("jc_token");
+                  const apiUrl = (process.env.REACT_APP_API_URL || "").replace(/\/$/, "");
+                  const response = await fetch(`${apiUrl}/contracts/pdf/${jobId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  if (!response.ok) throw new Error("download failed");
+                  const blob = await response.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `Contrato-${contractId}.pdf`;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  setTimeout(() => URL.revokeObjectURL(url), 1000);
+                } catch (e) {
+                  alert(t("contract_pdf_error","Error al descargar el PDF"));
+                }
+              }}
+              color={T.green}
+              style={{flex:1,justifyContent:"center"}}
+            >📥 {t("contract_download_pdf","Descargar PDF")}</Btn>
             <Btn onClick={()=>navigate("escrow")} variant="outline" style={{flex:1,justifyContent:"center"}}>🔒 Ir a Escrow</Btn>
           </div>
         </Card>
