@@ -187,7 +187,7 @@
 /* Extra small mobile: max-width 480px */
 @media (max-width: 480px) {
   .jc-main-content {
-    padding: 10px 8px 80px !important;
+    padding: 62px 8px 80px !important;
   }
   
   .jc-hero {

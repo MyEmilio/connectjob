@@ -73,7 +73,7 @@ const it = {
   or_google:"o continua con",
 
   nav_admin:"Moderazione",
-  home_jobs_available:"annunci disponibili nella tua zona",
+  home_jobs_available:"disponibili nella tua zona",
   home_no_jobs_hero:"Trova servizi e lavori nella tua zona",
   home_on_map_btn:"🗺️ Sulla mappa",
   home_search_btn:"🔍 Cerca lavori",
@@ -333,6 +333,10 @@ const it = {
   admin_action_suspended:"Account sospeso",
   admin_action_banned:"Account bannato",
   admin_action_dismissed:"Segnalazione rifiutata",
+  home_search_placeholder: "Cerca lavoro, categoria, luogo…",
+  home_my_location_btn: "La mia posizione",
+  escrow_required_title: "Pagamento Escrow obbligatorio",
+  escrow_required_msg:   "I tuoi primi 3 lavori devono essere pagati tramite Escrow ConnectJob. Ti restano {{remaining}} prima di poter usare pagamenti diretti.",
 };
 
 export default it;

@@ -126,7 +126,7 @@ const en = {
   register_google:"Sign up with Google",
   or_google:"or continue with",
   nav_admin:"Moderation",
-  home_jobs_available:"listings available in your area",
+  home_jobs_available:"available in your area",
   home_no_jobs_hero:"Find services and jobs near you",
   home_on_map_btn:"🗺️ On map",
   home_search_btn:"🔍 Search jobs",
@@ -372,6 +372,10 @@ const en = {
   admin_action_suspended:"Account suspended",
   admin_action_banned:"Account banned",
   admin_action_dismissed:"Report dismissed",
+  home_search_placeholder: "Search jobs, category, location…",
+  home_my_location_btn: "My location",
+  escrow_required_title: "Mandatory Escrow Payment",
+  escrow_required_msg:   "Your first 3 jobs must be paid through ConnectJob Escrow. You have {{remaining}} left before you can use direct payments.",
 };
 
 export default en;

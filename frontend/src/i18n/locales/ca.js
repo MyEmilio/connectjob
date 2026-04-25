@@ -87,7 +87,7 @@ const ca = {
   or_google:"o continua amb",
 
   nav_admin:"Moderació",
-  home_jobs_available:"anuncis disponibles a la teva zona",
+  home_jobs_available:"disponibles a la teva zona",
   home_no_jobs_hero:"Troba serveis i feines a la teva zona",
   home_on_map_btn:"🗺️ Al mapa",
   home_search_btn:"🔍 Cercar feines",
@@ -347,6 +347,10 @@ const ca = {
   admin_action_suspended:"Compte suspès",
   admin_action_banned:"Compte banat",
   admin_action_dismissed:"Informe rebutjat",
+  home_search_placeholder: "Cerca feina, categoria, ubicació…",
+  home_my_location_btn: "La meva ubicació",
+  escrow_required_title: "Pagament Escrow obligatori",
+  escrow_required_msg:   "Els teus 3 primers treballs s'han de pagar via Escrow ConnectJob. Et queden {{remaining}} per completar abans de poder usar pagaments directes.",
 };
 
 export default ca;

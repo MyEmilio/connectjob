@@ -73,7 +73,7 @@ const ar = {
   or_google:"أو تابع مع",
 
   nav_admin:"الإشراف",
-  home_jobs_available:"إعلانات متاحة في منطقتك",
+  home_jobs_available:"متاحة في منطقتك",
   home_no_jobs_hero:"ابحث عن خدمات ووظائف في منطقتك",
   home_on_map_btn:"🗺️ على الخريطة",
   home_search_btn:"🔍 البحث عن وظائف",
@@ -333,6 +333,10 @@ const ar = {
   admin_action_suspended:"تم إيقاف الحساب",
   admin_action_banned:"تم حظر الحساب",
   admin_action_dismissed:"تم رفض البلاغ",
+  home_search_placeholder: "ابحث عن عمل، فئة، موقع…",
+  home_my_location_btn: "موقعي",
+  escrow_required_title: "دفع Escrow إلزامي",
+  escrow_required_msg:   "يجب دفع أول 3 وظائف لك عبر Escrow ConnectJob. تبقّى لديك {{remaining}} قبل أن تتمكن من استخدام الدفع المباشر.",
 };
 
 export default ar;

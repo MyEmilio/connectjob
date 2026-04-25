@@ -197,9 +197,12 @@ export default function PageHome({ gs, update, navigate }) {
 
   // Escrow-mandatory info (for new users)
   const [escrowInfo, setEscrowInfo] = useState(null);
+  const [escrowExpanded, setEscrowExpanded] = useState(false);
+  const [escrowDismissed, setEscrowDismissed] = useState(localStorage.getItem("jc_escrow_dismissed") === "1");
   useEffect(() => {
     api.get("/payments/escrow-status").then(r => setEscrowInfo(r.data)).catch(() => {});
   }, []);
+  const dismissEscrow = (e) => { e.stopPropagation(); setEscrowDismissed(true); localStorage.setItem("jc_escrow_dismissed", "1"); };
   const getCatCount = (cat) => allJobs.filter(j => { const jc = (j.category||"").toLowerCase(); return jc === cat.key || jc.includes(cat.key); }).length;
   const handleNotificationToggle = async () => { if (isSubscribed) { await unsubscribe(); } else { const success = await subscribe(); if (success) setShowNotifPrefs(true); } };
 
@@ -210,32 +213,58 @@ export default function PageHome({ gs, update, navigate }) {
       {showDashboard && <DashboardStats onClose={()=>setShowDashboard(false)}/>}
       {showAdvancedSearch && <AdvancedSearch filters={searchFilters} onFilterChange={setSearchFilters} onClose={()=>setShowAdvancedSearch(false)}/>}
 
-      {/* Escrow mandatory banner (hides after 3 completed escrow jobs + rating>=4.5 OR premium) */}
-      {escrowInfo?.mandatory && (
-        <div data-testid="escrow-mandatory-banner" style={{
-          background: "linear-gradient(135deg,#fef3c7,#fde68a)",
-          border: "1.5px solid #f59e0b",
-          borderRadius: 14,
-          padding: "14px 18px",
-          marginBottom: 16,
-          display: "flex", alignItems: "center", gap: 14,
-          boxShadow: "0 4px 14px rgba(245,158,11,0.15)",
-        }}>
-          <div style={{ fontSize: 30, flexShrink: 0 }}>🔒</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: "#78350f", marginBottom: 3 }}>
-              {t("escrow_required_title","Pago en Escrow obligatorio")}
+      {/* Escrow mandatory banner — compact + dismissible (hides after 3 completed escrow jobs + rating>=4.5 OR premium) */}
+      {escrowInfo?.mandatory && !escrowDismissed && (
+        <div
+          data-testid="escrow-mandatory-banner"
+          onClick={() => setEscrowExpanded(v => !v)}
+          style={{
+            background: "linear-gradient(135deg,#fef3c7,#fde68a)",
+            border: "1.5px solid #f59e0b",
+            borderRadius: 12,
+            padding: "10px 12px",
+            marginBottom: 14,
+            display: "flex", alignItems: "center", gap: 10,
+            boxShadow: "0 4px 14px rgba(245,158,11,0.15)",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          <div style={{ fontSize: 22, flexShrink: 0 }}>🔒</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 12, fontWeight: 800, color: "#78350f",
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {t("escrow_required_title","Pago en Escrow obligatorio")}
+              </span>
+              <span style={{
+                background: "#fff", borderRadius: 8, padding: "1px 7px",
+                border: "1px solid #f59e0b", fontSize: 11, fontWeight: 800, color: "#d97706", flexShrink: 0,
+              }}>
+                {escrowInfo.completed_paid_jobs}/{escrowInfo.threshold}
+              </span>
+              <span style={{ marginLeft: "auto", fontSize: 12, color: "#92400e", flexShrink: 0 }}>
+                {escrowExpanded ? "▲" : "▼"}
+              </span>
             </div>
-            <div style={{ fontSize: 12, color: "#92400e", lineHeight: 1.5 }}>
-              {t("escrow_required_msg","Tus primeros 3 trabajos deben pagarse a través de Escrow ConnectJob. Te quedan {{remaining}} por completar antes de poder usar pagos directos.", { remaining: escrowInfo.remaining })}
-            </div>
+            {escrowExpanded && (
+              <div style={{ fontSize: 11, color: "#92400e", lineHeight: 1.5, marginTop: 6 }}>
+                {t("escrow_required_msg","Tus primeros 3 trabajos deben pagarse a través de Escrow ConnectJob. Te quedan {{remaining}} por completar antes de poder usar pagos directos.", { remaining: escrowInfo.remaining })}
+              </div>
+            )}
           </div>
-          <div style={{
-            background: "#fff", borderRadius: 10, padding: "6px 12px",
-            border: "1.5px solid #f59e0b", fontSize: 18, fontWeight: 800, color: "#d97706", flexShrink: 0,
-          }}>
-            {escrowInfo.completed_paid_jobs}/{escrowInfo.threshold}
-          </div>
+          <button
+            data-testid="escrow-banner-dismiss"
+            onClick={dismissEscrow}
+            aria-label="Dismiss"
+            style={{
+              background: "transparent", border: "none", cursor: "pointer",
+              fontSize: 14, color: "#92400e", padding: 4, flexShrink: 0,
+              borderRadius: 6,
+            }}
+          >✕</button>
         </div>
       )}
 

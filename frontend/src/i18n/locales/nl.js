@@ -73,7 +73,7 @@ const nl = {
   or_google:"of doorgaan met",
 
   nav_admin:"Moderatie",
-  home_jobs_available:"advertenties beschikbaar in uw buurt",
+  home_jobs_available:"beschikbaar in uw buurt",
   home_no_jobs_hero:"Vind diensten en vacatures in uw buurt",
   home_on_map_btn:"🗺️ Op de kaart",
   home_search_btn:"🔍 Vacatures zoeken",
@@ -333,6 +333,10 @@ const nl = {
   admin_action_suspended:"Account gesuspendeerd",
   admin_action_banned:"Account verbannen",
   admin_action_dismissed:"Rapport afgewezen",
+  home_search_placeholder: "Zoek klus, categorie, locatie…",
+  home_my_location_btn: "Mijn locatie",
+  escrow_required_title: "Verplichte Escrow-betaling",
+  escrow_required_msg:   "Je eerste 3 klussen moeten via ConnectJob Escrow worden betaald. Je hebt nog {{remaining}} te gaan voordat je directe betalingen kunt gebruiken.",
 };
 
 export default nl;

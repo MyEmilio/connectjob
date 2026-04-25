@@ -41,6 +41,10 @@ ConnectJob is a full-stack job marketplace connecting workers with employers in 
 | Click Pin → Job first in list + actions | Done 2026-02 | REAL |
 | Sort: Distance / Price asc / Price desc | Done 2026-02 | REAL |
 | OpenAI Whisper STT in Chat | Done 2026-02 | REAL (Emergent Key) |
+| Mobile padding fix (480px) | Done 2026-02 | REAL |
+| Escrow banner: compact + dismissible + i18n | Done 2026-02 | REAL |
+| home_search_placeholder + home_my_location_btn i18n | Done 2026-02 | REAL |
+| Fixed duplicate "anuncios anuncios" in jobs counter | Done 2026-02 | REAL |
 
 ### External Keys Needed
 | Feature | Status | What's Needed |

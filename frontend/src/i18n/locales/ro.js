@@ -112,7 +112,7 @@ const ro = {
   register_google:"Înregistrare cu Google",
   or_google:"sau continuă cu",
   nav_admin:"Moderare",
-  home_jobs_available:"anunțuri disponibile în zona ta",
+  home_jobs_available:"disponibile în zona ta",
   home_no_jobs_hero:"Găsește servicii și joburi în zona ta",
   home_on_map_btn:"🗺️ Pe hartă",
   home_search_btn:"🔍 Caută joburi",
@@ -521,6 +521,11 @@ const ro = {
   auth_email_invalid: "Email invalid",
   auth_forgot_link: "Am uitat parola",
   jobs_all_filter: "Toate",
+  home_search_placeholder: "Caută job, categorie, locație…",
+  home_my_location_btn: "Locația mea",
+  // Escrow mandatory banner
+  escrow_required_title: "Plată Escrow obligatorie",
+  escrow_required_msg:   "Primele 3 lucrări trebuie plătite prin Escrow ConnectJob. Mai ai {{remaining}} de finalizat înainte de a putea folosi plăți directe.",
 };
 
 export default ro;

@@ -220,7 +220,7 @@ const es = {
   nav_admin:       "Moderación",
 
   // Home page new
-  home_jobs_available: "anuncios disponibles en tu zona",
+  home_jobs_available: "disponibles en tu zona",
   home_no_jobs_hero:   "Encuentra servicios y empleos en tu zona",
   home_on_map_btn:     "🗺️ En el mapa",
   home_search_btn:     "🔍 Buscar empleos",

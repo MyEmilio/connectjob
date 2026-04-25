@@ -73,7 +73,7 @@ const ru = {
   or_google:"или продолжить с",
 
   nav_admin:"Модерация",
-  home_jobs_available:"объявлений доступно в вашем районе",
+  home_jobs_available:"доступно в вашем районе",
   home_no_jobs_hero:"Найдите услуги и работу в вашем районе",
   home_on_map_btn:"🗺️ На карте",
   home_search_btn:"🔍 Поиск работы",
@@ -333,6 +333,10 @@ const ru = {
   admin_action_suspended:"Аккаунт заблокирован",
   admin_action_banned:"Аккаунт забанен",
   admin_action_dismissed:"Жалоба отклонена",
+  home_search_placeholder: "Поиск работы, категории, места…",
+  home_my_location_btn: "Моё местоположение",
+  escrow_required_title: "Обязательная оплата через Escrow",
+  escrow_required_msg:   "Ваши первые 3 заказа должны быть оплачены через ConnectJob Escrow. Осталось {{remaining}} до того, как вы сможете использовать прямые платежи.",
 };
 
 export default ru;

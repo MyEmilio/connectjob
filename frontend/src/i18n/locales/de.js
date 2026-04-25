@@ -87,7 +87,7 @@ const de = {
   or_google:"oder weiter mit",
 
   nav_admin:"Moderation",
-  home_jobs_available:"Angebote in Ihrer Nähe verfügbar",
+  home_jobs_available:"in Ihrer Nähe verfügbar",
   home_no_jobs_hero:"Finden Sie Dienstleistungen und Jobs in Ihrer Nähe",
   home_on_map_btn:"🗺️ Auf der Karte",
   home_search_btn:"🔍 Jobs suchen",
@@ -347,6 +347,10 @@ const de = {
   admin_action_suspended:"Konto gesperrt",
   admin_action_banned:"Konto gebannt",
   admin_action_dismissed:"Bericht abgelehnt",
+  home_search_placeholder: "Job, Kategorie, Ort suchen…",
+  home_my_location_btn: "Mein Standort",
+  escrow_required_title: "Escrow-Zahlung verpflichtend",
+  escrow_required_msg:   "Deine ersten 3 Aufträge müssen über ConnectJob Escrow bezahlt werden. Du hast noch {{remaining}} bis Direktzahlungen möglich sind.",
 };
 
 export default de;
