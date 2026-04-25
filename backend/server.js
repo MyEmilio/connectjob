@@ -114,6 +114,13 @@ app.use(
   })
 );
 
+// ── Stripe Webhook (MUST be mounted BEFORE express.json() to preserve raw body) ──
+// Stripe requires the raw request body to verify webhook signatures.
+app.post("/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  require("./routes/stripeWebhook")
+);
+
 // ── Body Parsing with Size Limits ──────────────────────────────
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));

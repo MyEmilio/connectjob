@@ -238,10 +238,14 @@ const db = {
     return payment.toJSON();
   },
   async findPaymentById(id) {
-    return Payment.findById(id).lean({ virtuals: true });
+    const p = await Payment.findById(id).lean();
+    if (!p) return null;
+    p.id = p._id.toString();
+    return p;
   },
   async updatePayment(id, patch) {
-    await Payment.findByIdAndUpdate(id, patch);
+    if (!id) throw new Error("updatePayment: id is required");
+    return Payment.findByIdAndUpdate(id, patch, { new: true });
   },
   async getUserPayments(userId) {
     const payments = await Payment.find({
@@ -249,9 +253,10 @@ const db = {
     })
       .populate("job_id",   "title")
       .populate("payee_id", "name")
-      .lean({ virtuals: true });
+      .lean();
     return payments.map(p => ({
       ...p,
+      id: p._id.toString(),
       job_title:  p.job_id?.title,
       payee_name: p.payee_id?.name,
     }));
