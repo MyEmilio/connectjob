@@ -92,7 +92,7 @@ export function JobCardRow({ job, promoted=false, navigate, update, t }) {
       onMouseEnter={e=>{ e.currentTarget.style.borderColor=promoted?T.amber:job.color+"66"; e.currentTarget.style.background="#fafffe"; e.currentTarget.style.boxShadow=`0 4px 16px ${job.color}22`; }}
       onMouseLeave={e=>{ e.currentTarget.style.borderColor=promoted?T.amber:T.border; e.currentTarget.style.background=T.white; e.currentTarget.style.boxShadow=promoted?`0 4px 16px ${T.amber}22`:"none"; }}
     >
-      {promoted && <div style={{ position:"absolute",top:-7,left:12,background:`linear-gradient(135deg,${T.amber},${T.amberDark})`,color:"#fff",borderRadius:999,padding:"2px 9px",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.08em" }}>⭐ {tr("home_stats_promoted")}</div>}
+      {promoted && <div style={{ position:"absolute",top:-7,left:12,background:`linear-gradient(135deg,${T.amber},${T.amberDark})`,color:"#fff",borderRadius:999,padding:"2px 9px",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.08em" }}>{tr("home_stats_promoted")}</div>}
       {job.is_demo && <div data-testid="demo-badge" style={{ position:"absolute",top:-7,right:12,background:"linear-gradient(135deg,#94a3b8,#64748b)",color:"#fff",borderRadius:999,padding:"2px 9px",fontSize:9,fontWeight:800,textTransform:"uppercase",letterSpacing:"0.08em" }}>{tr("demo_badge")}</div>}
       <div style={{ width:46,height:46,borderRadius:12,background:`${job.color||T.green}15`,border:`1.5px solid ${job.color||T.green}33`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0 }}>{job.icon||"💼"}</div>
       <div style={{ flex:1,minWidth:0 }}>

@@ -7,6 +7,8 @@ import { T } from "./constants/theme";
 import { Avatar, Loader } from "./components/shared";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import RoleSwitcher from "./components/RoleSwitcher";
+import Icon from "./components/Icon";
+import { isFeatureEnabled } from "./constants/features";
 import "./App.css";
 
 // ── Pages ─────────────────────────────────────────────────────
@@ -129,24 +131,24 @@ function ConnectJobApp() {
   const update = useCallback((patch) => updateGs(patch), [updateGs]);
 
   const NAV = [
-    { key:"home",      icon:"🏠", label:t("nav_home") },
-    { key:"jobs",      icon:"🗂️", label:t("nav_jobs") },
-    { key:"map",       icon:"🗺️", label:t("nav_map"),      badge: null },
-    { key:"chat",      icon:"💬", label:t("nav_chat"),     badge: gs.unreadMessages },
-    { key:"escrow",    icon:"🔒", label:t("nav_escrow") },
-    { key:"calendar",   icon:"📅", label:t("nav_calendar","Agenda") },
-    { key:"contract",  icon:"📝", label:t("nav_contract") },
-    { key:"reviews",   icon:"⭐", label:t("nav_reviews") },
-    { key:"analytics", icon:"📊", label:t("nav_analytics") },
-    { key:"pricing",  icon:"💎", label:t("nav_pricing","Planes") },
-    { key:"post_job",  icon:"➕", label:t("nav_post_job"),  hidden: gs.user.active_role !== "employer" },
-    { key:"verify",    icon: gs.user.verified?"✅":"🛡️", label: gs.user.verified?t("nav_verified"):t("nav_verify"), badge: gs.user.verified?null:"!" },
-    { key:"admin",     icon:"🛡️", label:t("nav_admin"),         hidden: gs.user.active_role !== "admin" },
+    { key:"home",     label:t("nav_home") },
+    { key:"jobs",     label:t("nav_jobs") },
+    { key:"map",      label:t("nav_map"),     badge: null },
+    { key:"chat",     label:t("nav_chat"),    badge: gs.unreadMessages },
+    { key:"escrow",   label:t("nav_escrow") },
+    { key:"calendar", label:t("nav_calendar","Agenda"),    hidden: !isFeatureEnabled("calendar") },
+    { key:"contract", label:t("nav_contract"),             hidden: !isFeatureEnabled("contract") },
+    { key:"reviews",  label:t("nav_reviews"),              hidden: !isFeatureEnabled("reviews") },
+    { key:"analytics",label:t("nav_analytics"),            hidden: !isFeatureEnabled("analytics") },
+    { key:"pricing",  label:t("nav_pricing","Planes") },
+    { key:"post_job", label:t("nav_post_job"),             hidden: gs.user.active_role !== "employer" },
+    { key:"verify",   label: gs.user.verified?t("nav_verified"):t("nav_verify"), badge: gs.user.verified?null:"!" },
+    { key:"admin",    label:t("nav_admin"),                hidden: gs.user.active_role !== "admin" || !isFeatureEnabled("admin") },
   ].filter(item => !item.hidden);
 
   const PAGE_TITLES = {
     home:      t("nav_home"),
-    jobs:      `🗂️ ${t("nav_jobs")}`,
+    jobs:      t("nav_jobs"),
     map:       t("nav_map"),
     chat:      t("nav_chat"),
     escrow:    t("nav_escrow"),
@@ -154,15 +156,23 @@ function ConnectJobApp() {
     contract:  t("nav_contract"),
     reviews:   t("nav_reviews"),
     analytics: t("nav_analytics"),
-    pricing:   t("nav_pricing_title","💎 Planes y Precios"),
+    pricing:   t("nav_pricing_title","Planes y Precios"),
     post_job:  t("nav_post_job"),
     verify:    t("nav_verify"),
-    admin:     `🛡️ ${t("nav_admin")}`,
+    admin:     t("nav_admin"),
   };
 
   const renderPage = () => {
     const props = { gs, update, navigate };
     if(loadingPage) return <Loader text={t("loading","Cargando...")}/>;
+    // Block routes for features hidden via feature flag
+    if(!isFeatureEnabled(page)) {
+      // Allow direct admin URL access for admins (escape hatch)
+      if(page === "admin" && gs.user.active_role === "admin") {
+        return <PageAdmin {...props}/>;
+      }
+      return <PageHome {...props}/>;
+    }
     switch(page) {
       case "home":      return <PageHome      {...props}/>;
       case "jobs":      return <PageJobs      {...props}/>;
@@ -260,7 +270,9 @@ function ConnectJobApp() {
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           {/* Notifications */}
           <div style={{position:"relative"}}>
-            <button data-testid="notifications-btn" style={{width:34,height:34,borderRadius:9,background:"#f5f5f4",border:`1.5px solid ${T.border}`,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>🔔</button>
+            <button data-testid="notifications-btn" style={{width:34,height:34,borderRadius:9,background:"#f5f5f4",border:`1.5px solid ${T.border}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:T.text2}}>
+              <Icon name="bell" size={16}/>
+            </button>
             {gs.notifications>0&&<div style={{position:"absolute",top:-4,right:-4,width:16,height:16,borderRadius:"50%",background:T.red,border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700,color:"#fff"}}>{gs.notifications}</div>}
           </div>
           {/* Avatar */}
@@ -289,7 +301,9 @@ function ConnectJobApp() {
           {/* Selector de limba */}
           <LanguageSwitcher/>
           {/* Logout */}
-          <button data-testid="logout-btn" onClick={logout} title={t("btn_logout")} style={{width:32,height:32,borderRadius:9,background:"#fef2f2",border:"1.5px solid #fecaca",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>🚪</button>
+          <button data-testid="logout-btn" onClick={logout} title={t("btn_logout")} style={{width:32,height:32,borderRadius:9,background:"#fef2f2",border:"1.5px solid #fecaca",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#dc2626"}}>
+            <Icon name="logout" size={15}/>
+          </button>
         </div>
       </nav>
 
@@ -310,7 +324,6 @@ function ConnectJobApp() {
               onMouseEnter={e=>{if(page!==item.key)e.currentTarget.style.background="#f5f5f4";}}
               onMouseLeave={e=>{if(page!==item.key)e.currentTarget.style.background="transparent";}}
             >
-              <span style={{fontSize:17,flexShrink:0}}>{item.icon}</span>
               <span style={{fontSize:13,fontWeight:page===item.key?700:500,color:page===item.key?T.green:T.text2}}>{item.label}</span>
               {item.badge&&<div style={{marginLeft:"auto",background:item.badge==="!"?T.amber:T.red,color:"#fff",borderRadius:999,minWidth:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700}}>{item.badge}</div>}
             </div>
@@ -318,25 +331,13 @@ function ConnectJobApp() {
 
           {/* Quick Actions in sidebar */}
           <div style={{marginTop:12,padding:"10px",background:`${T.amber}06`,borderRadius:10,border:`1px solid ${T.amber}22`}}>
-            <div style={{fontSize:10,fontWeight:700,color:T.amber,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:8}}>🚀 {t("home_quick_actions","Acciones rápidas")}</div>
+            <div style={{fontSize:10,fontWeight:700,color:T.amber,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:8}}>{t("home_quick_actions","Acciones rápidas")}</div>
             {[
-              {key:"dashboard",icon:"📊",label:t("home_dashboard","Dashboard"),testid:"dashboard-stats-btn"},
-              {key:"search",icon:"🔍",label:t("home_adv_search","Búsqueda Avanzada"),testid:"advanced-search-btn"},
+              {key:"dashboard",label:t("home_dashboard","Dashboard"),testid:"dashboard-stats-btn"},
+              {key:"search",label:t("home_adv_search","Búsqueda Avanzada"),testid:"advanced-search-btn"},
             ].map(a=>(
               <div key={a.key} onClick={()=>{navigate("home");setTimeout(()=>{const el=document.querySelector(`[data-testid="${a.testid}"]`);if(el)el.click();},300);}} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 4px",cursor:"pointer",borderRadius:6,transition:"background 0.12s"}} onMouseEnter={e=>e.currentTarget.style.background=`${T.amber}10`} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <span style={{fontSize:14}}>{a.icon}</span>
                 <span style={{fontSize:11,fontWeight:500,color:T.text2}}>{a.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick stats in sidebar */}
-          <div style={{marginTop:16,padding:"10px",background:`${T.green}08`,borderRadius:10,border:`1px solid ${T.green}22`}}>
-            <div style={{fontSize:10,fontWeight:700,color:T.green,textTransform:"uppercase",letterSpacing:"0.07em",marginBottom:8}}>{t("sidebar_today")}</div>
-            {[{l:t("sidebar_views_label"),v:"47"},{l:t("sidebar_new_msgs"),v:`${gs.unreadMessages}`},{l:t("sidebar_matching"),v:"3"}].map(s=>(
-              <div key={s.l} style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4}}>
-                <span style={{color:T.text3}}>{s.l}</span>
-                <span style={{fontWeight:700,color:T.text}}>{s.v}</span>
               </div>
             ))}
           </div>
@@ -397,11 +398,11 @@ function ConnectJobApp() {
         alignItems:"stretch", boxShadow:"0 -4px 20px rgba(0,0,0,0.08)",
       }}>
         {[
-          { key:"home",  icon:"🏠", label:t("nav_home") },
-          { key:"jobs",  icon:"🗂️", label:t("nav_jobs") },
-          { key:"map",   icon:"🗺️", label:t("nav_map") },
-          { key:"chat",  icon:"💬", label:t("nav_chat"), badge: gs.unreadMessages },
-          { key:"verify",icon: gs.user.verified?"✅":"👤", label:t("nav_profile") },
+          { key:"home",   label:t("nav_home") },
+          { key:"jobs",   label:t("nav_jobs") },
+          { key:"map",    label:t("nav_map") },
+          { key:"chat",   label:t("nav_chat"), badge: gs.unreadMessages },
+          { key:"verify", label:t("nav_profile") },
         ].map(item=>(
           <button key={item.key} onClick={()=>navigate(item.key)} data-testid={`bottom-nav-${item.key}`} style={{
             flex:1, background:"none", border:"none", cursor:"pointer",
@@ -410,9 +411,8 @@ function ConnectJobApp() {
             borderTop: page===item.key ? `2px solid ${T.green}` : "2px solid transparent",
             transition:"all 0.15s",
           }}>
-            <span style={{ fontSize:20 }}>{item.icon}</span>
-            <span style={{ fontSize:10, fontWeight:page===item.key?700:500, color:page===item.key?T.green:T.text3 }}>{item.label}</span>
-            {item.badge>0 && <div style={{ position:"absolute",top:6,right:"25%",width:14,height:14,borderRadius:"50%",background:T.red,border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,color:"#fff" }}>{item.badge}</div>}
+            <span style={{ fontSize:12, fontWeight:page===item.key?700:500, color:page===item.key?T.green:T.text3 }}>{item.label}</span>
+            {item.badge>0 && <div style={{ position:"absolute",top:8,right:"22%",width:14,height:14,borderRadius:"50%",background:T.red,border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,color:"#fff" }}>{item.badge}</div>}
           </button>
         ))}
       </nav>

@@ -282,17 +282,17 @@ export default function PageHome({ gs, update, navigate }) {
           <div className="jc-hero-btns" style={{ display:"flex",gap:8,flexWrap:"wrap",alignItems:"center" }}>
             {isSupported && (
               <Btn onClick={handleNotificationToggle} color={isSubscribed?"#059669":"#6366f1"} size="sm" style={{opacity:notifLoading?0.6:1}}>
-                {isSubscribed?"🔔":"🔕"} {isSubscribed?t("home_notif_on"):t("home_notif_off")}
+                {isSubscribed?t("home_notif_on"):t("home_notif_off")}
               </Btn>
             )}
             {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>{t("home_verify_btn")}</Btn>}
             {gs.user.active_role === "worker" && (
               <Btn data-testid="home-my-location-btn" onClick={() => setShowLocationModal(true)} color="#3b82f6" size="sm">
-                📍 {t("home_my_location_btn","Mi ubicación")}
+                {t("home_my_location_btn","Mi ubicación")}
               </Btn>
             )}
             <button onClick={()=>setShowHowItWorks(true)} style={{ padding:"7px 13px",borderRadius:10,border:"1.5px solid rgba(52,211,153,0.35)",background:"rgba(52,211,153,0.08)",color:T.greenLight,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontFamily:"DM Sans,sans-serif",transition:"all 0.2s" }}>
-              <span style={{ fontSize:15 }}>💡</span> {t("home_hiw_btn")}
+              {t("home_hiw_btn")}
             </button>
           </div>
         </div>
@@ -543,14 +543,8 @@ export default function PageHome({ gs, update, navigate }) {
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           <Card style={{padding:"16px 18px"}}>
             <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:"0 0 12px"}}>{t("home_stats_title")}</h3>
-            {[{icon:"📋",label:t("home_stats_active"),value:allJobs.length,color:T.green},{icon:"🔥",label:t("home_stats_urgent"),value:allJobs.filter(j=>j.urgent).length,color:T.red},{icon:"⭐",label:t("home_stats_promoted"),value:promotedJobs.length,color:T.amber},{icon:"📂",label:t("home_stats_cats"),value:new Set(allJobs.map(j=>j.category||t("home_diverse_label")).filter(Boolean)).size,color:T.blue}].map(s=>(
-              <div key={s.label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:`1px solid ${T.border}`}}><span style={{fontSize:12,color:T.text2}}>{s.icon} {s.label}</span><span style={{fontWeight:800,color:s.color,fontSize:15,fontFamily:"Outfit,sans-serif"}}>{s.value||"—"}</span></div>
-            ))}
-          </Card>
-          <Card style={{padding:"16px 18px"}}>
-            <h3 style={{fontFamily:"Outfit,sans-serif",fontSize:15,fontWeight:700,color:T.text,margin:"0 0 14px"}}>{t("home_activity_title")}</h3>
-            {[{icon:"💬",text:t("home_activity_1"),time:"2 min",color:T.green},{icon:"👁️",text:t("home_activity_2"),time:"1h",color:T.blue},{icon:"🎯",text:t("home_activity_3"),time:"2h",color:T.purple}].map((a,i)=>(
-              <div key={i} style={{display:"flex",gap:10,padding:"8px 0",borderBottom:i<2?`1px solid ${T.border}`:"none"}}><div style={{width:30,height:30,borderRadius:8,background:`${a.color}15`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>{a.icon}</div><div style={{flex:1}}><div style={{fontSize:12,color:T.text,fontWeight:500}}>{a.text}</div><div style={{fontSize:10,color:T.text3,marginTop:2}}>{a.time}</div></div></div>
+            {[{label:t("home_stats_active"),value:allJobs.length,color:T.green},{label:t("home_stats_urgent"),value:allJobs.filter(j=>j.urgent).length,color:T.red},{label:t("home_stats_promoted"),value:promotedJobs.length,color:T.amber},{label:t("home_stats_cats"),value:new Set(allJobs.map(j=>j.category||t("home_diverse_label")).filter(Boolean)).size,color:T.blue}].map(s=>(
+              <div key={s.label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:`1px solid ${T.border}`}}><span style={{fontSize:12,color:T.text2}}>{s.label}</span><span style={{fontWeight:800,color:s.color,fontSize:15,fontFamily:"Outfit,sans-serif"}}>{s.value||"—"}</span></div>
             ))}
           </Card>
           <Card style={{padding:"16px 18px"}}>

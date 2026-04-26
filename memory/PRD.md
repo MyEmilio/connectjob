@@ -45,6 +45,13 @@ ConnectJob is a full-stack job marketplace connecting workers with employers in 
 | Escrow banner: compact + dismissible + i18n | Done 2026-02 | REAL |
 | home_search_placeholder + home_my_location_btn i18n | Done 2026-02 | REAL |
 | Fixed duplicate "anuncios anuncios" in jobs counter | Done 2026-02 | REAL |
+| Stripe webhook fix (raw body before express.json) | Done 2026-02 | REAL |
+| Payment release status update fix (lean+id virtual) | Done 2026-02 | REAL |
+| **MVP-Focus refactor**: hidden Analytics/Calendar/Contracts/Reviews/Admin via feature flag | Done 2026-02 | REAL |
+| **Sober UI Phase 1**: stripped emojis from navbar, bottom-nav, login button, sidebar widgets | Done 2026-02 | REAL |
+| **Removed mock "Activity recent" widget** (fake "Profilul vizualizat de 12 ori") | Done 2026-02 | REAL |
+| **Cleaned 167 emoji-prefixed translation keys** across 11 locales | Done 2026-02 | REAL |
+| Inline SVG icon component (`/components/Icon.js`) replacing emojis in critical UI | Done 2026-02 | REAL |
 
 ### External Keys Needed
 | Feature | Status | What's Needed |

@@ -105,7 +105,7 @@ export default function Login() {
               boxShadow:loading?"none":`0 4px 16px ${T.green}44`, transition:"all 0.2s",
               marginBottom:10,
             }}>
-              {loading ? <span>⏳ {t("login_loading")}</span> : `🔑 ${t("login_btn")}`}
+              {loading ? t("login_loading") : t("login_btn")}
             </button>
             <div style={{ textAlign:"right", marginBottom:16 }}>
               <Link to="/forgot-password" data-testid="forgot-password-link" style={{ fontSize:12, color:T.green, fontWeight:600, textDecoration:"none" }}>
