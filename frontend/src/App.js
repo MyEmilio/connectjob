@@ -261,9 +261,24 @@ function ConnectJobApp() {
           <span style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:18,color:T.text,letterSpacing:"-0.02em"}}>Connect<span style={{color:T.green}}>Job</span></span>
         </div>
 
-        {/* Page title - hidden on mobile */}
-        <div className="jc-page-title" style={{fontFamily:"Outfit,sans-serif",fontWeight:700,fontSize:15,color:T.text2}}>
-          {PAGE_TITLES[page]}
+        {/* Center area — page title on desktop, role switcher on mobile (uses free space) */}
+        <div className="jc-navbar-center" style={{ display:"flex", alignItems:"center", gap:10, flex:1, justifyContent:"center", minWidth:0 }}>
+          <div className="jc-page-title" style={{ fontFamily:"Outfit,sans-serif", fontWeight:700, fontSize:15, color:T.text2 }}>
+            {PAGE_TITLES[page]}
+          </div>
+          {/* Role Switcher placed in center on mobile — visible everywhere */}
+          {gs.user.active_role !== "admin" && (
+            <div className="jc-role-mobile-slot">
+              <RoleSwitcher
+                activeRole={gs.user.active_role}
+                onSwitched={(newRole, newRoles) => {
+                  updateGs({ user: { ...gs.user, active_role: newRole, role: newRole, roles: newRoles } });
+                  if (page === "post_job" && newRole !== "employer") navigate("home");
+                  if (page === "admin" && newRole !== "admin") navigate("home");
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* User area */}
@@ -286,17 +301,18 @@ function ConnectJobApp() {
               )}
             </div>
           </div>
-          {/* Role Switcher (Dual Mode) — only for non-admin */}
+          {/* Role Switcher (Desktop only — mobile shows it in center slot above) */}
           {gs.user.active_role !== "admin" && (
-            <RoleSwitcher
-              activeRole={gs.user.active_role}
-              onSwitched={(newRole, newRoles) => {
-                updateGs({ user: { ...gs.user, active_role: newRole, role: newRole, roles: newRoles } });
-                // If user was on a role-restricted page (post_job, admin), navigate home
-                if (page === "post_job" && newRole !== "employer") navigate("home");
-                if (page === "admin" && newRole !== "admin") navigate("home");
-              }}
-            />
+            <div className="jc-role-desktop-slot">
+              <RoleSwitcher
+                activeRole={gs.user.active_role}
+                onSwitched={(newRole, newRoles) => {
+                  updateGs({ user: { ...gs.user, active_role: newRole, role: newRole, roles: newRoles } });
+                  if (page === "post_job" && newRole !== "employer") navigate("home");
+                  if (page === "admin" && newRole !== "admin") navigate("home");
+                }}
+              />
+            </div>
           )}
           {/* Selector de limba */}
           <LanguageSwitcher/>

@@ -2,6 +2,11 @@
   text-align: center;
 }
 
+/* Default (desktop) navbar slot visibility — overridden below on mobile */
+.jc-role-mobile-slot { display: none; }
+.jc-role-desktop-slot { display: block; }
+.jc-navbar-center { /* desktop: center slot is decorative — only contains page title */ }
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -209,10 +214,8 @@
   }
 
   /* ── Mobile navbar compaction ────────────────────────────────
-     The desktop navbar shows: logo + bell + avatar + name + role-switcher
-     + lang-switcher + logout. On mobile (<480px) all 7 don't fit in 360-390px.
-     Strategy: reduce padding, hide user name + role label text + lang label,
-     keeping only icons/flags. The full-text variants remain on tablet+. */
+     On mobile (<480px): hide user name, hide page title, show role switcher
+     in center slot to use the free space between logo and bell. */
   .jc-top-navbar {
     padding: 0 10px !important;
     gap: 4px !important;
@@ -223,22 +226,30 @@
   .jc-user-name {
     display: none !important;
   }
-  .jc-role-label,
-  .jc-role-arrow {
-    display: none !important;
-  }
-  .jc-role-switcher {
-    padding: 4px !important;
-    width: 32px !important;
-    height: 32px !important;
-    justify-content: center !important;
-  }
   .jc-lang-label,
   .jc-lang-arrow {
     display: none !important;
   }
   .jc-lang-switcher button {
     padding: 6px 8px !important;
+  }
+  /* Role switcher placement: hide page title, show role in center on mobile */
+  .jc-page-title {
+    display: none !important;
+  }
+  .jc-role-desktop-slot {
+    display: none !important;
+  }
+  .jc-role-mobile-slot {
+    display: block !important;
+  }
+  /* Make role switcher slightly smaller on mobile to fit */
+  .jc-role-mobile-slot .jc-role-switcher {
+    padding: 3px 8px 3px 3px !important;
+    height: 28px !important;
+  }
+  .jc-role-mobile-slot .jc-role-label {
+    font-size: 10px !important;
   }
 }
 
