@@ -8,11 +8,16 @@ const PaymentTransaction = require("../models/PaymentTransaction");
 const router = express.Router();
 
 // Plan definitions — prices in RON
+// Commission rates per plan (Standard tier — users #301+):
+//   free → 7%, pro → 5%, premium → 3%
+// Founders (#1-100) pay 0% regardless of plan.
+// Early Adopters (#101-300) pay 3% flat regardless of plan.
 const PLANS = {
   free: {
     name: "Free",
     price: 0,
     interval: null,
+    commission_pct: 7,
     feature_keys: ["plan_feat_3apps", "plan_feat_chat_basic", "plan_feat_profile_simple", "plan_feat_view_jobs"],
     limits: { daily_applications: 3, chat_moderation: true, promoted_jobs: 0 },
   },
@@ -20,6 +25,7 @@ const PLANS = {
     name: "Pro",
     price: 49.99,
     interval: "month",
+    commission_pct: 5,
     feature_keys: ["plan_feat_unlimited_apps", "plan_feat_chat_translate", "plan_feat_profile_highlight", "plan_feat_stats", "plan_feat_chat_relaxed"],
     limits: { daily_applications: -1, chat_moderation: false, promoted_jobs: 3 },
   },
@@ -27,6 +33,7 @@ const PLANS = {
     name: "Premium",
     price: 99.99,
     interval: "month",
+    commission_pct: 3,
     feature_keys: ["plan_feat_all_pro", "plan_feat_promoted", "plan_feat_priority", "plan_feat_badge", "plan_feat_no_moderation", "plan_feat_zero_commission"],
     limits: { daily_applications: -1, chat_moderation: false, promoted_jobs: 10 },
   },
@@ -50,6 +57,7 @@ router.get("/plans", (req, res) => {
     name: plan.name,
     price: plan.price,
     interval: plan.interval,
+    commission_pct: plan.commission_pct,
     feature_keys: plan.feature_keys,
     limits: plan.limits,
     stripe_configured: !!stripe,

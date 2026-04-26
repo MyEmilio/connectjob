@@ -7,9 +7,10 @@ const {
   sendPaymentDisputedEmail,
 } = require("../utils/emailService");
 const { validate, createPaymentSchema, releasePaymentSchema } = require("../utils/validation");
+const { getCommissionRate, getTier } = require("../utils/tier");
 
 const router = express.Router();
-const COMMISSION = 0.03;
+// COMMISSION is now dynamic — see getCommissionRate(payer) in tier.js
 
 let stripe;
 try {
@@ -28,7 +29,14 @@ router.post("/create-intent", auth, validate(createPaymentSchema), async (req, r
   try {
     const { job_id, payee_id, amount } = req.validated;
 
-    const commission = parseFloat((amount * COMMISSION).toFixed(2));
+    // ── Dynamic commission based on payer's tier (founder/early_adopter/standard) ──
+    const User = require("../models/User");
+    const payer = await User.findById(req.user.id)
+      .select("signup_order subscription_plan")
+      .lean();
+    const commissionRate = getCommissionRate(payer);
+    const payerTier = getTier(payer);
+    const commission = parseFloat((amount * commissionRate).toFixed(2));
     const total = parseFloat((amount + commission).toFixed(2));
 
     if (!stripe) {
@@ -42,19 +50,24 @@ router.post("/create-intent", auth, validate(createPaymentSchema), async (req, r
         stripe_pi_id: `sim_${Date.now()}`,
         method: req.body.method || "card",
       });
-      logger.info("Simulated payment created", { paymentId: payment.id });
+      logger.info("Simulated payment created", {
+        paymentId: payment.id,
+        payerTier,
+        commissionRate,
+      });
       return res.json({
         payment_id: payment.id,
         client_secret: null,
         simulated: true,
         total,
         commission,
+        commission_rate: commissionRate,
+        tier: payerTier,
         message: "Mod demonstratie — configureaza Stripe pentru plati reale",
       });
     }
 
     // Check if payee has Stripe Connect account for direct payouts
-    const User = require("../models/User");
     const payee = await User.findById(payee_id).lean();
     const connectAccountId = payee?.stripe_connect_account_id;
     const hasConnect = connectAccountId && payee?.connect_onboarding_complete;

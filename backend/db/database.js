@@ -11,6 +11,17 @@ const OtpCode      = require("../models/OtpCode");
 const db = {
   // ── Users ─────────────────────────────────────────────────
   async createUser(data) {
+    // Auto-assign signup_order: count existing users with order set, +1.
+    // This atomic-ish approach is enough for normal signup volumes.
+    // For high concurrency we could use a counters collection, but at <1000
+    // signups/day this is sufficient.
+    if (data.signup_order === undefined || data.signup_order === null) {
+      const last = await User.findOne({ signup_order: { $ne: null } })
+        .sort({ signup_order: -1 })
+        .select("signup_order")
+        .lean();
+      data.signup_order = (last?.signup_order || 0) + 1;
+    }
     const user = await User.create(data);
     return user.toJSON();
   },

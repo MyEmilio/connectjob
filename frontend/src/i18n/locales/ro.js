@@ -526,6 +526,16 @@ const ro = {
   // Escrow mandatory banner
   escrow_required_title: "Plată Escrow obligatorie",
   escrow_required_msg:   "Primele 3 lucrări trebuie plătite prin Escrow ConnectJob. Mai ai {{remaining}} de finalizat înainte de a putea folosi plăți directe.",
+  // Founder tier
+  founder_banner_title: "Locuri Founder gratuit",
+  founder_banner_you: "Tu ești Founder #{{n}} — comision 0% pe toate plățile",
+  founder_banner_hurry: "Primii 100 useri = comision 0%. Apoi 3% timp de 200 useri, apoi tarif standard.",
+  founder_limit_title: "Limită Founder",
+  founder_limit_msg: "Founders pot publica maxim 3 anunțuri gratis. Treci pe Pro pentru anunțuri nelimitate.",
+  tier_founder: "Founder",
+  tier_early_adopter: "Early Adopter",
+  tier_standard: "Standard",
+  pricing_commission_label: "Comision",
 };
 
 export default ro;

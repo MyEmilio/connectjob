@@ -8,8 +8,60 @@ const Conversation = require("../models/Conversation");
 const Payment = require("../models/Payment");
 const Contract = require("../models/Contract");
 const Review = require("../models/Review");
+const User = require("../models/User");
+const {
+  FOUNDER_LIMIT,
+  EARLY_ADOPTER_LIMIT,
+  FOUNDER_MAX_POSTS,
+  getTierInfo,
+} = require("../utils/tier");
 
 const router = express.Router();
+
+// GET /api/stats/founders-count — public endpoint for the FOMO banner
+// Returns how many Founder spots are still available.
+router.get("/founders-count", async (_req, res) => {
+  try {
+    const taken = await User.countDocuments({
+      signup_order: { $gte: 1, $lte: FOUNDER_LIMIT },
+    });
+    const totalUsers = await User.countDocuments({});
+    res.json({
+      founder_limit: FOUNDER_LIMIT,
+      founders_taken: taken,
+      founders_available: Math.max(0, FOUNDER_LIMIT - taken),
+      early_adopter_limit: EARLY_ADOPTER_LIMIT,
+      total_users: totalUsers,
+    });
+  } catch (err) {
+    logger.error("founders-count error", { error: err.message });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/stats/my-tier — current user's tier + commission rate
+router.get("/my-tier", auth, async (req, res) => {
+  try {
+    const me = await User.findById(req.user.id)
+      .select("signup_order subscription_plan")
+      .lean();
+    const info = getTierInfo(me);
+    let postsUsed = 0;
+    if (info.is_founder) {
+      postsUsed = await Job.countDocuments({ employer_id: req.user.id });
+    }
+    res.json({
+      ...info,
+      signup_order: me?.signup_order || null,
+      subscription_plan: me?.subscription_plan || "free",
+      founder_posts_used: info.is_founder ? postsUsed : null,
+      founder_posts_remaining: info.is_founder ? Math.max(0, FOUNDER_MAX_POSTS - postsUsed) : null,
+    });
+  } catch (err) {
+    logger.error("my-tier error", { userId: req.user.id, error: err.message });
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // GET /api/stats/dashboard
 // Get dashboard statistics for current user

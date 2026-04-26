@@ -203,6 +203,14 @@ export default function PageHome({ gs, update, navigate }) {
     api.get("/payments/escrow-status").then(r => setEscrowInfo(r.data)).catch(() => {});
   }, []);
   const dismissEscrow = (e) => { e.stopPropagation(); setEscrowDismissed(true); localStorage.setItem("jc_escrow_dismissed", "1"); };
+
+  // Founder FOMO counter — public endpoint, refreshed on mount
+  const [foundersInfo, setFoundersInfo] = useState(null);
+  const [tierInfo, setTierInfo] = useState(null);
+  useEffect(() => {
+    api.get("/stats/founders-count").then(r => setFoundersInfo(r.data)).catch(() => {});
+    api.get("/stats/my-tier").then(r => setTierInfo(r.data)).catch(() => {});
+  }, []);
   const getCatCount = (cat) => allJobs.filter(j => { const jc = (j.category||"").toLowerCase(); return jc === cat.key || jc.includes(cat.key); }).length;
   const handleNotificationToggle = async () => { if (isSubscribed) { await unsubscribe(); } else { const success = await subscribe(); if (success) setShowNotifPrefs(true); } };
 
@@ -212,6 +220,45 @@ export default function PageHome({ gs, update, navigate }) {
       {showNotifPrefs && <NotificationPreferencesModal onClose={()=>setShowNotifPrefs(false)}/>}
       {showDashboard && <DashboardStats onClose={()=>setShowDashboard(false)}/>}
       {showAdvancedSearch && <AdvancedSearch filters={searchFilters} onFilterChange={setSearchFilters} onClose={()=>setShowAdvancedSearch(false)}/>}
+
+      {/* ── Founder FOMO banner — visible while founder spots remain ── */}
+      {foundersInfo && foundersInfo.founders_available > 0 && (
+        <div data-testid="founder-fomo-banner" style={{
+          background: "linear-gradient(135deg,#064e3b,#065f46)",
+          border: "1.5px solid #10b981",
+          borderRadius: 12,
+          padding: "10px 14px",
+          marginBottom: 14,
+          display: "flex", alignItems: "center", gap: 12,
+          boxShadow: "0 4px 14px rgba(16,185,129,0.20)",
+          cursor: "pointer",
+        }}
+        onClick={() => navigate("pricing")}
+        >
+          <div style={{
+            background:"#10b981", color:"#fff", borderRadius:8, padding:"4px 9px",
+            fontSize:11, fontWeight:800, letterSpacing:"0.05em", textTransform:"uppercase",
+          }}>FOUNDER</div>
+          <div style={{flex:1, minWidth:0}}>
+            <div style={{ fontSize:13, fontWeight:700, color:"#ecfdf5", lineHeight:1.3 }}>
+              {t("founder_banner_title","Locuri Founder gratuit")}
+              <span style={{
+                marginLeft:8, color:"#fff", background:"#059669",
+                borderRadius:6, padding:"1px 7px", fontSize:11, fontWeight:800,
+              }}>
+                {foundersInfo.founders_available}/{foundersInfo.founder_limit}
+              </span>
+            </div>
+            <div style={{ fontSize:11, color:"#a7f3d0", marginTop:2 }}>
+              {tierInfo?.is_founder
+                ? t("founder_banner_you","Tu ești Founder #{{n}} — comision 0% pe toate plățile",{n:tierInfo.signup_order})
+                : t("founder_banner_hurry","Primii 100 useri = comision 0% pentru totdeauna. Apoi 3% timp de 200 useri, apoi tarif standard.")
+              }
+            </div>
+          </div>
+          <span style={{ color:"#a7f3d0", fontSize:13, flexShrink:0 }}>›</span>
+        </div>
+      )}
 
       {/* Escrow mandatory banner — compact + dismissible (hides after 3 completed escrow jobs + rating>=4.5 OR premium) */}
       {escrowInfo?.mandatory && !escrowDismissed && (

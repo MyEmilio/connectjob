@@ -52,6 +52,13 @@ ConnectJob is a full-stack job marketplace connecting workers with employers in 
 | **Removed mock "Activity recent" widget** (fake "Profilul vizualizat de 12 ori") | Done 2026-02 | REAL |
 | **Cleaned 167 emoji-prefixed translation keys** across 11 locales | Done 2026-02 | REAL |
 | Inline SVG icon component (`/components/Icon.js`) replacing emojis in critical UI | Done 2026-02 | REAL |
+| **Tier system (Founder/Early Adopter/Standard)** + signup_order auto-increment | Done 2026-02 | REAL |
+| **Dynamic commission rate** (0% Founder / 3% EA / 3-5-7% Standard by plan) | Done 2026-02 | REAL |
+| **Founder 3-post limit** enforced on POST /api/jobs | Done 2026-02 | REAL |
+| `/api/stats/founders-count` (public FOMO) + `/api/stats/my-tier` (auth) | Done 2026-02 | REAL |
+| Founder FOMO banner on Home (verde, click → Pricing) | Done 2026-02 | REAL |
+| Pricing page commission badge (Comisión: 7%/5%/3%) | Done 2026-02 | REAL |
+| Backfill migration: signup_order set for 27 existing users | Done 2026-02 | REAL |
 
 ### External Keys Needed
 | Feature | Status | What's Needed |

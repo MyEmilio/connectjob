@@ -859,6 +859,16 @@ const es = {
   // Escrow mandatory
   escrow_required_title: "Pago en Escrow obligatorio",
   escrow_required_msg:   "Tus primeros 3 trabajos deben pagarse a través de Escrow ConnectJob. Te quedan {{remaining}} por completar antes de poder usar pagos directos.",
+  // Founder tier
+  founder_banner_title: "Plazas Founder gratis",
+  founder_banner_you: "Eres Founder #{{n}} — comisión 0% en todos los pagos",
+  founder_banner_hurry: "Los primeros 100 usuarios = 0% comisión. Luego 3% durante 200 usuarios, luego tarifa estándar.",
+  founder_limit_title: "Límite Founder",
+  founder_limit_msg: "Founders pueden publicar máximo 3 anuncios gratis. Pasa a Pro para anuncios ilimitados.",
+  tier_founder: "Founder",
+  tier_early_adopter: "Early Adopter",
+  tier_standard: "Estándar",
+  pricing_commission_label: "Comisión",
   // Chat additions
   chat_transcribing:    "Transcribiendo audio...",
 };

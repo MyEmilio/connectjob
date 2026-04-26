@@ -376,6 +376,15 @@ const en = {
   home_my_location_btn: "My location",
   escrow_required_title: "Mandatory Escrow Payment",
   escrow_required_msg:   "Your first 3 jobs must be paid through ConnectJob Escrow. You have {{remaining}} left before you can use direct payments.",
+  founder_banner_title: "Free Founder spots",
+  founder_banner_you: "You are Founder #{{n}} — 0% commission on all payments",
+  founder_banner_hurry: "First 100 users = 0% commission. Then 3% for 200 users, then standard tier.",
+  founder_limit_title: "Founder limit",
+  founder_limit_msg: "Founders can post up to 3 ads for free. Upgrade to Pro for unlimited posts.",
+  tier_founder: "Founder",
+  tier_early_adopter: "Early Adopter",
+  tier_standard: "Standard",
+  pricing_commission_label: "Commission",
 };
 
 export default en;

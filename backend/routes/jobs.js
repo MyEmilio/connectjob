@@ -98,6 +98,23 @@ router.get("/:id", mongoIdValidator(), async (req, res) => {
 // POST /api/jobs
 router.post("/", auth, createJobValidator, async (req, res) => {
   try {
+    // ── Founder limit: first 100 users have FREE access but max 3 posts each ──
+    const User = require("../models/User");
+    const { getTier, FOUNDER_MAX_POSTS } = require("../utils/tier");
+    const me = await User.findById(req.user.id).select("signup_order subscription_plan").lean();
+    if (getTier(me) === "founder") {
+      const Job = require("../models/Job");
+      const myPostCount = await Job.countDocuments({ employer_id: req.user.id });
+      if (myPostCount >= FOUNDER_MAX_POSTS) {
+        return res.status(403).json({
+          error: "founder_limit_reached",
+          message: `Founders pot publica maxim ${FOUNDER_MAX_POSTS} anunțuri gratis. Treci pe Pro pentru anunțuri nelimitate.`,
+          founder_max_posts: FOUNDER_MAX_POSTS,
+          current_posts: myPostCount,
+        });
+      }
+    }
+
     const {
       title,
       description,

@@ -106,6 +106,13 @@ const userSchema = new mongoose.Schema(
     notify_applications: { type: Boolean, default: true },
     // Online presence — touched by auth middleware (throttled ~60s)
     last_seen: { type: Date, default: null },
+
+    // ── Tier system (Founders / Early Adopters / Standard) ──
+    // Auto-incremented at signup. Determines commission rate:
+    //   1-100   → "founder"        (0% commission, max 3 job posts)
+    //   101-300 → "early_adopter"  (3% flat)
+    //   301+    → "standard"       (3% premium / 5% pro / 7% free)
+    signup_order: { type: Number, default: null, index: true },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );

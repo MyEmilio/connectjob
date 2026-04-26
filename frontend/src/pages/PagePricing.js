@@ -172,6 +172,11 @@ export default function PagePricing({ gs, update, navigate }) {
                   <span style={{ fontFamily: "Outfit,sans-serif", fontWeight: 900, fontSize: 32, color: colors.accent }}>{plan.price === 0 ? t("pricing_free_label") : `${plan.price}`}</span>
                   {plan.price > 0 && <span style={{ fontSize: 13, color: T.text3, fontWeight: 600 }}>{t("pricing_per_month")}</span>}
                 </div>
+                {typeof plan.commission_pct === "number" && (
+                  <div data-testid={`plan-commission-${plan.id}`} style={{ marginTop:8, display:"inline-block", padding:"3px 10px", background:`${colors.accent}12`, color:colors.accent, borderRadius:999, fontSize:11, fontWeight:700, fontFamily:"Outfit,sans-serif" }}>
+                    {t("pricing_commission_label","Comisión")}: {plan.commission_pct}%
+                  </div>
+                )}
               </div>
               <div style={{ marginBottom: 20 }}>
                 {(plan.feature_keys || []).map((key, i) => (
