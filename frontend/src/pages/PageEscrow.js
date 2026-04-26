@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { T } from "../constants/theme";
 import { Card, Btn } from "../components/shared";
+import TrustBadges from "../components/TrustBadges";
 import api from "../services/api";
 
 // Minimalist escrow flow — Feb 2026 redesign.
@@ -118,6 +119,8 @@ export default function PageEscrow({ gs, update, navigate }) {
             </div>
           </div>
 
+          <TrustBadges compact />
+
           <Btn data-testid="escrow-continue-btn" onClick={() => setStep(1)} color={T.primary} style={{ width:"100%", justifyContent:"center" }} size="lg">
             {t("escrow_continue_pay","Continuă plata")}
           </Btn>
@@ -188,6 +191,8 @@ export default function PageEscrow({ gs, update, navigate }) {
               <div style={{ fontSize:14, fontWeight:600, color:T.text }}>{t("escrow_paypal_redirect","Vei fi redirecționat către PayPal")}</div>
             </div>
           )}
+
+          <TrustBadges compact />
 
           <Btn data-testid="escrow-pay-btn" onClick={async () => {
             setLoading(true); setApiMsg("");
