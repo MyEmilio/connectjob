@@ -121,6 +121,38 @@ export default function PageEscrow({ gs, update, navigate }) {
 
           <TrustBadges compact />
 
+          {/* 5 motive sober — conversion booster (Baymard study) */}
+          <div data-testid="escrow-reasons" style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: T.text2, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+              {t("escrow_reasons_title", "De ce să plătești prin Escrow")}
+            </div>
+            <ol style={{ margin: 0, padding: 0, listStyle: "none" }}>
+              {[
+                t("escrow_reason_1", "Banii blocați în siguranță până confirmi finalizarea"),
+                t("escrow_reason_2", "Dispute mediată în maxim 24h, neutră de către platformă"),
+                t("escrow_reason_3", "Refund instant dacă lucrarea nu este finalizată"),
+                t("escrow_reason_4", "Procesare Stripe certificată PCI-DSS Level 1"),
+                t("escrow_reason_5", "Date stocate conform GDPR în UE"),
+              ].map((reason, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "5px 0", fontSize: 13, color: T.text2, lineHeight: 1.5 }}>
+                  <span style={{
+                    flexShrink: 0,
+                    width: 18, height: 18,
+                    borderRadius: "50%",
+                    background: T.primary,
+                    color: "#fff",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: "Inter,sans-serif",
+                    marginTop: 1,
+                  }}>{i + 1}</span>
+                  <span>{reason}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
           <Btn data-testid="escrow-continue-btn" onClick={() => setStep(1)} color={T.primary} style={{ width:"100%", justifyContent:"center" }} size="lg">
             {t("escrow_continue_pay","Continuă plata")}
           </Btn>
