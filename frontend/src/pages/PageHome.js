@@ -221,42 +221,58 @@ export default function PageHome({ gs, update, navigate }) {
       {showDashboard && <DashboardStats onClose={()=>setShowDashboard(false)}/>}
       {showAdvancedSearch && <AdvancedSearch filters={searchFilters} onFilterChange={setSearchFilters} onClose={()=>setShowAdvancedSearch(false)}/>}
 
-      {/* ── Founder FOMO banner — visible while founder spots remain ── */}
-      {foundersInfo && foundersInfo.founders_available > 0 && (
+      {/* ── Founder FOMO banner — visible while founder OR early-adopter spots remain ── */}
+      {foundersInfo && (foundersInfo.founders_available > 0 || foundersInfo.total_users < foundersInfo.early_adopter_limit) && (
         <div data-testid="founder-fomo-banner" style={{
-          background: "linear-gradient(135deg,#064e3b,#065f46)",
-          border: "1.5px solid #10b981",
+          background: foundersInfo.founders_available > 0
+            ? "linear-gradient(135deg,#064e3b,#065f46)"
+            : "linear-gradient(135deg,#1e3a8a,#1e40af)",
+          border: foundersInfo.founders_available > 0 ? "1.5px solid #10b981" : "1.5px solid #3b82f6",
           borderRadius: 12,
           padding: "10px 14px",
           marginBottom: 14,
           display: "flex", alignItems: "center", gap: 12,
-          boxShadow: "0 4px 14px rgba(16,185,129,0.20)",
+          boxShadow: "0 4px 14px rgba(16,185,129,0.18)",
           cursor: "pointer",
         }}
         onClick={() => navigate("pricing")}
         >
           <div style={{
-            background:"#10b981", color:"#fff", borderRadius:8, padding:"4px 9px",
+            background: foundersInfo.founders_available > 0 ? "#10b981" : "#3b82f6",
+            color:"#fff", borderRadius:8, padding:"4px 9px",
             fontSize:11, fontWeight:800, letterSpacing:"0.05em", textTransform:"uppercase",
-          }}>FOUNDER</div>
+          }}>{foundersInfo.founders_available > 0 ? "FOUNDER" : "EARLY ADOPTER"}</div>
           <div style={{flex:1, minWidth:0}}>
-            <div style={{ fontSize:13, fontWeight:700, color:"#ecfdf5", lineHeight:1.3 }}>
-              {t("founder_banner_title","Locuri Founder gratuit")}
-              <span style={{
-                marginLeft:8, color:"#fff", background:"#059669",
-                borderRadius:6, padding:"1px 7px", fontSize:11, fontWeight:800,
-              }}>
-                {foundersInfo.founders_available}/{foundersInfo.founder_limit}
-              </span>
+            <div style={{ fontSize:13, fontWeight:700, color:"#ecfdf5", lineHeight:1.3, display:"flex", flexWrap:"wrap", gap:6, alignItems:"center" }}>
+              {foundersInfo.founders_available > 0 ? (
+                <>
+                  <span>{t("founder_banner_title","Locuri Founder gratuit")}</span>
+                  <span style={{ color:"#fff", background:"#059669", borderRadius:6, padding:"1px 7px", fontSize:11, fontWeight:800 }}>
+                    {foundersInfo.founders_available}/{foundersInfo.founder_limit}
+                  </span>
+                  <span style={{ color:"#a7f3d0", fontSize:11, fontWeight:500 }}>
+                    {t("founder_banner_then_ea","apoi {{n}} locuri Early Adopter (3%)", { n: foundersInfo.early_adopter_limit - foundersInfo.founder_limit })}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span>{t("ea_banner_title","Locuri Early Adopter (3% comision)")}</span>
+                  <span style={{ color:"#fff", background:"#1d4ed8", borderRadius:6, padding:"1px 7px", fontSize:11, fontWeight:800 }}>
+                    {Math.max(0, foundersInfo.early_adopter_limit - foundersInfo.total_users)}/{foundersInfo.early_adopter_limit - foundersInfo.founder_limit}
+                  </span>
+                </>
+              )}
             </div>
-            <div style={{ fontSize:11, color:"#a7f3d0", marginTop:2 }}>
+            <div style={{ fontSize:11, color: foundersInfo.founders_available > 0 ? "#a7f3d0" : "#bfdbfe", marginTop:3 }}>
               {tierInfo?.is_founder
                 ? t("founder_banner_you","Tu ești Founder #{{n}} — comision 0% pe toate plățile",{n:tierInfo.signup_order})
-                : t("founder_banner_hurry","Primii 100 useri = comision 0% pentru totdeauna. Apoi 3% timp de 200 useri, apoi tarif standard.")
+                : tierInfo?.is_early_adopter
+                  ? t("ea_banner_you","Tu ești Early Adopter #{{n}} — comision 3% fix",{n:tierInfo.signup_order})
+                  : t("founder_banner_hurry","Primii 100 useri = 0% comision. Apoi 3% timp de 200 useri, apoi tarif standard.")
               }
             </div>
           </div>
-          <span style={{ color:"#a7f3d0", fontSize:13, flexShrink:0 }}>›</span>
+          <span style={{ color: foundersInfo.founders_available > 0 ? "#a7f3d0" : "#bfdbfe", fontSize:13, flexShrink:0 }}>›</span>
         </div>
       )}
 
@@ -315,33 +331,121 @@ export default function PageHome({ gs, update, navigate }) {
         </div>
       )}
 
-      {/* Compact hero */}
-      <div className="jc-hero" style={{ background:`linear-gradient(135deg,${T.dark} 0%,${T.dark2} 60%,#0d3d26 100%)`, borderRadius:18, padding:"22px 26px", marginBottom:24, position:"relative", overflow:"hidden" }}>
-        <div style={{ position:"absolute",top:-40,right:-40,width:180,height:180,borderRadius:"50%",background:"rgba(5,150,105,0.08)" }}/>
-        <div style={{ position:"relative",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12 }}>
-          <div>
-            <div style={{ fontSize:12,color:"#64748b",marginBottom:4 }}>{new Date().toLocaleDateString(i18n.language,{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
-            <h1 className="jc-hero-title" style={{ fontFamily:"Outfit,sans-serif",fontSize:24,fontWeight:800,color:"#f1f5f9",margin:"0 0 6px" }}>{t("home_greeting")}, {gs.user.name.split(" ")[0]}! 👋</h1>
-            <p style={{ color:"#94a3b8",fontSize:13,margin:0 }}>
-              {allJobs.length > 0 ? <><strong style={{color:T.greenLight}}>{allJobs.length} {t("jobs_ads_label")}</strong> {t("home_jobs_available")}</> : t("home_no_jobs_hero")}
-            </p>
+      {/* Hero — minimalist, 2 big CTAs (Phase 4 redesign) */}
+      <div className="jc-hero" style={{
+        background: T.bg,
+        border: `1.5px solid ${T.border}`,
+        borderRadius: 16,
+        padding: "28px 28px",
+        marginBottom: 20,
+        position: "relative",
+      }}>
+        <div style={{ marginBottom: 6 }}>
+          <div style={{ fontSize: 12, color: T.text3, marginBottom: 4 }}>
+            {new Date().toLocaleDateString(i18n.language,{weekday:"long",day:"numeric",month:"long"})}
           </div>
-          <div className="jc-hero-btns" style={{ display:"flex",gap:8,flexWrap:"wrap",alignItems:"center" }}>
-            {isSupported && (
-              <Btn onClick={handleNotificationToggle} color={isSubscribed?"#059669":"#6366f1"} size="sm" style={{opacity:notifLoading?0.6:1}}>
-                {isSubscribed?t("home_notif_on"):t("home_notif_off")}
-              </Btn>
-            )}
-            {!gs.user.verified && <Btn onClick={()=>navigate("verify")} variant="outline" size="sm" style={{borderColor:"#334155",color:"#94a3b8",background:"transparent"}}>{t("home_verify_btn")}</Btn>}
-            {gs.user.active_role === "worker" && (
-              <Btn data-testid="home-my-location-btn" onClick={() => setShowLocationModal(true)} color="#3b82f6" size="sm">
-                {t("home_my_location_btn","Mi ubicación")}
-              </Btn>
-            )}
-            <button onClick={()=>setShowHowItWorks(true)} style={{ padding:"7px 13px",borderRadius:10,border:"1.5px solid rgba(52,211,153,0.35)",background:"rgba(52,211,153,0.08)",color:T.greenLight,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontFamily:"DM Sans,sans-serif",transition:"all 0.2s" }}>
-              {t("home_hiw_btn")}
+          <h1 className="jc-hero-title" style={{
+            fontFamily: "Inter,sans-serif", fontSize: 24, fontWeight: 800,
+            color: T.text, margin: "0 0 4px", letterSpacing: "-0.02em",
+          }}>
+            {t("home_greeting","Bună ziua")}, {gs.user.name.split(" ")[0]}
+          </h1>
+          <p style={{ color: T.text2, fontSize: 14, margin: 0 }}>
+            {allJobs.length > 0
+              ? <><strong style={{color:T.text}}>{allJobs.length}</strong> {t("home_jobs_available","disponibile în zona ta")}</>
+              : t("home_no_jobs_hero","Niciun job în zona ta momentan")}
+          </p>
+        </div>
+
+        {/* 2 big primary CTAs */}
+        <div className="jc-hero-cta-row" style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
+          <button
+            data-testid="home-cta-find-job"
+            onClick={() => navigate("jobs")}
+            style={{
+              flex: "1 1 220px", minHeight: 56, padding: "14px 22px",
+              borderRadius: 12, border: "none", cursor: "pointer",
+              background: T.primary, color: "#fff",
+              fontSize: 15, fontWeight: 700, fontFamily: "Inter,sans-serif",
+              boxShadow: "var(--shadow-md, 0 2px 6px rgba(15,23,42,0.06))",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = T.primaryDark}
+            onMouseLeave={e => e.currentTarget.style.background = T.primary}
+          >
+            {t("home_cta_find_job","Caut job")}
+          </button>
+          {gs.user.active_role === "employer" && (
+            <button
+              data-testid="home-cta-post-job"
+              onClick={() => navigate("post_job")}
+              style={{
+                flex: "1 1 220px", minHeight: 56, padding: "14px 22px",
+                borderRadius: 12, border: `1.5px solid ${T.border}`, cursor: "pointer",
+                background: "#fff", color: T.text,
+                fontSize: 15, fontWeight: 700, fontFamily: "Inter,sans-serif",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = T.primary; e.currentTarget.style.color = T.primary; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.color = T.text; }}
+            >
+              {t("home_cta_post_job","Postez job")}
             </button>
-          </div>
+          )}
+        </div>
+
+        {/* Compact secondary actions */}
+        <div className="jc-hero-secondary" style={{ display: "flex", gap: 14, marginTop: 14, flexWrap: "wrap", alignItems: "center" }}>
+          {!gs.user.verified && (
+            <button
+              onClick={() => navigate("verify")}
+              style={{
+                background: "transparent", border: "none", cursor: "pointer",
+                color: T.text3, fontSize: 12, fontWeight: 600, padding: 0,
+                textDecoration: "underline", textUnderlineOffset: 3,
+              }}
+            >
+              {t("home_verify_btn","Verifică-te")}
+            </button>
+          )}
+          {gs.user.active_role === "worker" && (
+            <button
+              data-testid="home-my-location-btn"
+              onClick={() => setShowLocationModal(true)}
+              style={{
+                background: "transparent", border: "none", cursor: "pointer",
+                color: T.text3, fontSize: 12, fontWeight: 600, padding: 0,
+                textDecoration: "underline", textUnderlineOffset: 3,
+              }}
+            >
+              {t("home_my_location_btn","Locația mea")}
+            </button>
+          )}
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            style={{
+              background: "transparent", border: "none", cursor: "pointer",
+              color: T.text3, fontSize: 12, fontWeight: 600, padding: 0,
+              textDecoration: "underline", textUnderlineOffset: 3,
+            }}
+          >
+            {t("home_hiw_btn","Cum funcționează?")}
+          </button>
+          {isSupported && (
+            <button
+              onClick={handleNotificationToggle}
+              style={{
+                background: "transparent", border: "none", cursor: "pointer",
+                color: isSubscribed ? T.primary : T.text3,
+                fontSize: 12, fontWeight: 600, padding: 0,
+                marginLeft: "auto",
+                textDecoration: "underline", textUnderlineOffset: 3,
+                opacity: notifLoading ? 0.6 : 1,
+              }}
+            >
+              {isSubscribed ? t("home_notif_on","Notificări activate") : t("home_notif_off","Activează notificările")}
+            </button>
+          )}
         </div>
       </div>
 

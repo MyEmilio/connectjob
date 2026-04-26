@@ -187,7 +187,7 @@ export default function AdvancedSearch({ filters, onFilterChange, onClose }) {
           {/* Salary Range */}
           <div style={{ marginBottom: 24 }}>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: T.text2, marginBottom: 10 }}>
-              Salariu (RON)
+              Salariu (EUR)
             </label>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <input

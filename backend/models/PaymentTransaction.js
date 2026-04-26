@@ -15,7 +15,7 @@ const paymentTransactionSchema = new mongoose.Schema(
       required: true,
     },
     amount: { type: Number, required: true, min: 0 },
-    currency: { type: String, default: "ron" },
+    currency: { type: String, default: "eur" },
     payment_status: {
       type: String,
       enum: ["initiated", "pending", "paid", "failed", "expired", "refunded"],

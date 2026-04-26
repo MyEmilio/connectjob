@@ -59,6 +59,11 @@ ConnectJob is a full-stack job marketplace connecting workers with employers in 
 | Founder FOMO banner on Home (verde, click → Pricing) | Done 2026-02 | REAL |
 | Pricing page commission badge (Comisión: 7%/5%/3%) | Done 2026-02 | REAL |
 | Backfill migration: signup_order set for 27 existing users | Done 2026-02 | REAL |
+| **Currency RON → EUR** (Stripe code + UI labels + i18n + email/push) | Done 2026-02 | REAL |
+| **FOMO banner v2**: shows founders + EA spots, switches color when founders full | Done 2026-02 | REAL |
+| **Phase 3 — Design Refresh**: CSS variables, Inter font, slate palette, lighter shadows | Done 2026-02 | REAL |
+| **Phase 4 — Home Hero redesign**: 2 big CTAs (Caut job / Postez job) + secondary as text-links | Done 2026-02 | REAL |
+| **Phase 5 — Categories reordered**: Digital/IT first, then quick local jobs; "gradina" hidden (recurring service bleed) | Done 2026-02 | REAL |
 
 ### External Keys Needed
 | Feature | Status | What's Needed |

@@ -210,9 +210,9 @@ function ConnectJobApp() {
   }
 
   return (
-    <div style={{ fontFamily:"DM Sans,sans-serif", background:T.bg, minHeight:"100vh" }}>
+    <div style={{ fontFamily:"Inter,DM Sans,sans-serif", background:T.bg, minHeight:"100vh" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
         @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeInBg{from{opacity:0}to{opacity:1}}
@@ -373,7 +373,7 @@ function ConnectJobApp() {
                 <span style={{fontSize:16}}>{gs.selectedJob.icon}</span>
                 <div style={{minWidth:0}}>
                   <div style={{fontSize:11,fontWeight:700,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{gs.selectedJob.title}</div>
-                  <div style={{fontSize:10,color:gs.selectedJob.color,fontWeight:600}}>{gs.selectedJob.salary} RON</div>
+                  <div style={{fontSize:10,color:gs.selectedJob.color,fontWeight:600}}>{gs.selectedJob.salary} €</div>
                 </div>
               </div>
               <div style={{display:"flex",gap:5,marginTop:7}}>

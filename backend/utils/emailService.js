@@ -168,26 +168,26 @@ const templates = {
 
   // Payment released (notify worker)
   paymentReleased: ({ workerName, amount, jobTitle }) => ({
-    subject: `[ConnectJob] Ai primit ${amount} RON!`,
+    subject: `[ConnectJob] Ai primit ${amount} €!`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;">
         <div style="background:linear-gradient(135deg,#059669,#047857);padding:28px 24px;border-radius:12px 12px 0 0;text-align:center;">
           <div style="font-size:48px;margin-bottom:8px;">💰</div>
-          <h1 style="color:#fff;font-size:20px;margin:0;">${amount} RON Primiți!</h1>
+          <h1 style="color:#fff;font-size:20px;margin:0;">${amount} € Primiți!</h1>
         </div>
         <div style="background:#fff;padding:24px;border:1px solid #e7e5e4;">
           <p style="color:#1c1917;font-size:15px;">Bună <strong>${workerName}</strong>,</p>
-          <p style="color:#1c1917;font-size:14px;line-height:1.6;">Plata de <strong style="color:#059669;font-size:18px;">${amount} RON</strong> pentru jobul <strong>${jobTitle}</strong> a fost eliberată din escrow.</p>
+          <p style="color:#1c1917;font-size:14px;line-height:1.6;">Plata de <strong style="color:#059669;font-size:18px;">${amount} €</strong> pentru jobul <strong>${jobTitle}</strong> a fost eliberată din escrow.</p>
           <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
             <div style="font-size:12px;color:#57534e;margin-bottom:4px;">Sumă transferată</div>
-            <div style="font-size:24px;font-weight:800;color:#059669;">${amount} RON</div>
+            <div style="font-size:24px;font-weight:800;color:#059669;">${amount} €</div>
           </div>
           <p style="font-size:12px;color:#a8a29e;text-align:center;">Fondurile vor fi transferate în contul tău bancar în 2-3 zile lucrătoare.</p>
         </div>
         <div style="padding:12px;text-align:center;"><p style="font-size:11px;color:#a8a29e;margin:0;">ConnectJob — Platformă de joburi România</p></div>
       </div>
     `,
-    text: `Bună ${workerName},\n\nAi primit plata de ${amount} RON pentru jobul ${jobTitle}.\nFondurile vor fi transferate în curând.\n\nEchipa ConnectJob`,
+    text: `Bună ${workerName},\n\nAi primit plata de ${amount} € pentru jobul ${jobTitle}.\nFondurile vor fi transferate în curând.\n\nEchipa ConnectJob`,
   }),
 
   // Payment disputed (notify both parties)
@@ -197,13 +197,13 @@ const templates = {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #dc2626;">Disputa deschisa</h2>
         <p>Buna ${userName},</p>
-        <p>A fost deschisa o disputa pentru plata de <strong>${amount} RON</strong> asociata jobului <strong>${jobTitle}</strong>.</p>
+        <p>A fost deschisa o disputa pentru plata de <strong>${amount} €</strong> asociata jobului <strong>${jobTitle}</strong>.</p>
         <p>Echipa noastra va analiza situatia si va reveni cu o decizie in maxim 24 ore.</p>
         <hr style="border: 1px solid #eee; margin: 20px 0;">
         <p style="color: #666; font-size: 12px;">Echipa ConnectJob</p>
       </div>
     `,
-    text: `Buna ${userName},\n\nA fost deschisa o disputa pentru plata de ${amount} RON asociata jobului ${jobTitle}.\n\nEchipa va analiza situatia in maxim 24 ore.\n\nEchipa ConnectJob`,
+    text: `Buna ${userName},\n\nA fost deschisa o disputa pentru plata de ${amount} € asociata jobului ${jobTitle}.\n\nEchipa va analiza situatia in maxim 24 ore.\n\nEchipa ConnectJob`,
   }),
 };
 

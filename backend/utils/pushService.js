@@ -179,7 +179,7 @@ const notifications = {
   // Payment released
   paymentReleased: (amount, jobTitle) => ({
     title: "💰 Plată primită!",
-    body: `Ai primit ${amount} RON pentru "${jobTitle}"`,
+    body: `Ai primit ${amount} € pentru "${jobTitle}"`,
     icon: "/logo192.png",
     tag: "payment-released",
     url: "/escrow",
@@ -189,7 +189,7 @@ const notifications = {
   // New job in favorite category
   newJobInCategory: (jobTitle, category, salary) => ({
     title: "🆕 Job nou în categoria ta!",
-    body: `"${jobTitle}" - ${salary} RON${category ? ` în ${category}` : ""}`,
+    body: `"${jobTitle}" - ${salary} €${category ? ` în ${category}` : ""}`,
     icon: "/logo192.png",
     tag: "new-job-category",
     url: "/jobs",

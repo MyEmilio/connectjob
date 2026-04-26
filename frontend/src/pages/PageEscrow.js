@@ -62,7 +62,7 @@ export default function PageEscrow({ gs, update, navigate }) {
               <span style={{fontSize:26}}>{job.icon}</span>
               <div><div style={{fontWeight:700,fontSize:14,color:T.text}}>{job.title}</div><div style={{fontSize:12,color:"#057a55"}}>👤 {job.employer}</div></div>
             </div>
-            {[{l:t("escrow_salary"),v:`${job.salary} RON`},{l:t("escrow_commission"),v:`${fee} RON`},{l:t("escrow_total"),v:`${total} RON`,bold:true,color:T.green}].map(r=>(
+            {[{l:t("escrow_salary"),v:`${job.salary} €`},{l:t("escrow_commission"),v:`${fee} €`},{l:t("escrow_total"),v:`${total} €`,bold:true,color:T.green}].map(r=>(
               <div key={r.l} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:13}}>
                 <span style={{color:T.text2}}>{r.l}</span>
                 <span style={{fontWeight:r.bold?800:600,color:r.color||T.text,fontSize:r.bold?15:13}}>{r.v}</span>
@@ -108,7 +108,7 @@ export default function PageEscrow({ gs, update, navigate }) {
           )}
           {method==="bank"&&(
             <div style={{background:"#fafaf9",borderRadius:12,padding:"14px",marginBottom:18,border:`1px solid ${T.border}`}}>
-              {[{l:"IBAN",v:"ES91 2100 0418 4502 0005 1332"},{l:t("escrow_beneficiary"),v:"ConnectJob SL"},{l:t("escrow_reference"),v:"ESC-2026-001234"},{l:t("escrow_amount"),v:`${total} RON`}].map(r=>(
+              {[{l:"IBAN",v:"ES91 2100 0418 4502 0005 1332"},{l:t("escrow_beneficiary"),v:"ConnectJob SL"},{l:t("escrow_reference"),v:"ESC-2026-001234"},{l:t("escrow_amount"),v:`${total} €`}].map(r=>(
                 <div key={r.l} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:`1px solid ${T.border}`,fontSize:13}}>
                   <span style={{color:T.text3}}>{r.l}</span><span style={{fontWeight:600,color:T.text}}>{r.v}</span>
                 </div>
@@ -147,7 +147,7 @@ export default function PageEscrow({ gs, update, navigate }) {
           <div style={{background:"#f0fdf4",borderRadius:12,padding:"14px",marginBottom:16,border:"1px solid #bbf7d0"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
               <span style={{fontWeight:700,color:"#065f46",fontSize:13}}>💰 {t("escrow_locked_funds")}</span>
-              <span style={{fontSize:20,fontWeight:800,color:T.green,fontFamily:"Outfit,sans-serif"}}>{total} RON</span>
+              <span style={{fontSize:20,fontWeight:800,color:T.green,fontFamily:"Outfit,sans-serif"}}>{total} €</span>
             </div>
             <div style={{height:6,borderRadius:999,background:"#bbf7d0",overflow:"hidden"}}>
               <div style={{height:"100%",background:T.green,borderRadius:999,width:`${Math.min((timer/3600)*100,100)}%`,transition:"width 1s"}}/>

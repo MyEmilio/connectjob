@@ -74,7 +74,7 @@ router.post("/create-intent", auth, validate(createPaymentSchema), async (req, r
 
     const piParams = {
       amount: Math.round(total * 100),
-      currency: "ron",
+      currency: "eur",
       capture_method: "manual",
       metadata: {
         job_id: String(job_id),

@@ -41,7 +41,7 @@ export default function PageContract({ gs, update, navigate }) {
           </div>
           <div style={{padding:"22px 26px",maxHeight:380,overflowY:"auto"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
-              {[{l:t("contract_employer_lbl"),v:job.employer},{l:t("contract_provider_lbl"),v:"Alexandru Ionescu"},{l:t("contract_service_lbl"),v:job.title},{l:t("contract_category_lbl"),v:job.category},{l:t("contract_remuneration_lbl"),v:`${job.salary} RON`},{l:t("contract_payment_lbl"),v:t("contract_payment_method")}].map(r=>(
+              {[{l:t("contract_employer_lbl"),v:job.employer},{l:t("contract_provider_lbl"),v:"Alexandru Ionescu"},{l:t("contract_service_lbl"),v:job.title},{l:t("contract_category_lbl"),v:job.category},{l:t("contract_remuneration_lbl"),v:`${job.salary} €`},{l:t("contract_payment_lbl"),v:t("contract_payment_method")}].map(r=>(
                 <div key={r.l} style={{background:"#fafaf9",borderRadius:9,padding:"9px 11px",border:`1px solid ${T.border}`}}>
                   <div style={{fontSize:9,color:T.text3,fontWeight:700,textTransform:"uppercase",marginBottom:2}}>{r.l}</div>
                   <div style={{fontSize:13,fontWeight:600,color:T.text}}>{r.v}</div>

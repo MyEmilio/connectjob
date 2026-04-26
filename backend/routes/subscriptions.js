@@ -7,7 +7,7 @@ const PaymentTransaction = require("../models/PaymentTransaction");
 
 const router = express.Router();
 
-// Plan definitions — prices in RON
+// Plan definitions — prices in EUR
 // Commission rates per plan (Standard tier — users #301+):
 //   free → 7%, pro → 5%, premium → 3%
 // Founders (#1-100) pay 0% regardless of plan.
@@ -226,7 +226,7 @@ router.post("/checkout", auth, async (req, res) => {
         user_id: req.user.id,
         type: "subscription",
         amount: planData.price,
-        currency: "ron",
+        currency: "eur",
         payment_status: "paid",
         plan,
         metadata: { simulated: true },
@@ -253,7 +253,7 @@ router.post("/checkout", auth, async (req, res) => {
       line_items: [
         {
           price_data: {
-            currency: "ron",
+            currency: "eur",
             product_data: {
               name: `ConnectJob ${planData.name}`,
               description: planData.features.join(", "),
@@ -277,7 +277,7 @@ router.post("/checkout", auth, async (req, res) => {
       user_id: req.user.id,
       type: "subscription",
       amount: planData.price,
-      currency: "ron",
+      currency: "eur",
       payment_status: "initiated",
       plan,
       metadata: { stripe_session_id: session.id },

@@ -1,10 +1,52 @@
+/* ─────────────────────────────────────────────────────────────
+   ConnectJob — Design System (Feb 2026 redesign)
+   Sober, money-trustworthy palette. Less gradients, more clarity.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --bg:           #f8fafc;
+  --bg-card:      #ffffff;
+  --bg-soft:      #f1f5f9;
+  --border:       #e2e8f0;
+  --border-soft:  #f1f5f9;
+
+  /* Text */
+  --text:         #0f172a;
+  --text-2:       #475569;
+  --text-3:       #64748b;
+  --text-muted:   #94a3b8;
+
+  /* Brand (kept ConnectJob green, slightly more neutral) */
+  --primary:       #16a34a;
+  --primary-dark:  #15803d;
+  --primary-light: #22c55e;
+  --primary-bg:    #f0fdf4;
+
+  /* Semantic */
+  --danger: #ef4444;
+  --warn:   #f59e0b;
+  --info:   #3b82f6;
+  --ok:     #10b981;
+
+  /* Shadows — kept VERY light for "money-app" trust feel */
+  --shadow-sm: 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md: 0 2px 6px rgba(15,23,42,0.06);
+  --shadow-lg: 0 6px 20px rgba(15,23,42,0.08);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #fafaf9;
+  background: var(--bg);
+  color: var(--text);
 }
 
 /* ── Scrollbar ───────────────────────────────── */
