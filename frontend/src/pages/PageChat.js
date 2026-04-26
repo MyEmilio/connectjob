@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { T } from "../constants/theme";
 import { Avatar, Btn } from "../components/shared";
+import Icon from "../components/Icon";
 import api from "../services/api";
 import { getSocket } from "../services/socket";
 
@@ -429,7 +430,7 @@ export default function PageChat({ gs, update, navigate }) {
         </div>
         {/* Language selector */}
         <div style={{ padding: "10px 12px", borderTop: "1px solid #1e293b" }}>
-          <div style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>🌐 {t("chat_lang_label")}</div>
+          <div style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", marginBottom: 6 }}>{t("chat_lang_label")}</div>
           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
             {LANGS.map(l => (
               <button key={l.code} onClick={() => setMyLang(l.code)} data-testid={`chat-lang-${l.code}`}
@@ -466,7 +467,7 @@ export default function PageChat({ gs, update, navigate }) {
             </>
           ) : (
             <div style={{ flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontWeight: 700, color: T.text, fontSize: 14 }}>💬 {t("chat_messages_title")}</span>
+              <span style={{ fontWeight: 700, color: T.text, fontSize: 14 }}>{t("chat_messages_title")}</span>
               <button data-testid="chat-resize-btn-empty" onClick={() => setExpanded(!expanded)} style={{ width: 34, height: 34, borderRadius: 8, border: `1px solid ${T.border}`, cursor: "pointer", fontSize: 14, background: "#f5f5f4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {expanded ? "⊖" : "⊕"}
               </button>
@@ -490,9 +491,8 @@ export default function PageChat({ gs, update, navigate }) {
             </div>
           )}
 
-          <div style={{ margin: "6px 12px 0", background: `linear-gradient(135deg,${T.green}08,${T.blue}08)`, borderRadius: 10, padding: "6px 14px", display: "flex", alignItems: "center", gap: 8, border: `1px solid ${T.green}22` }}>
-            <span style={{ fontSize: 14 }}>🌐</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: T.green }}>{t("chat_auto_translate_active")}</span>
+          <div style={{ margin: "6px 12px 0", background: T.bg, borderRadius: 8, padding: "6px 12px", display: "flex", alignItems: "center", gap: 8, border: `1px solid ${T.border}` }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: T.primary }}>{t("chat_auto_translate_active")}</span>
             <span style={{ fontSize: 10, color: T.text3 }}>— {t("chat_translating_to")} {myLangObj.name}</span>
             {translating && <span style={{ fontSize: 10, color: T.amber, marginLeft: "auto", fontWeight: 700 }}>{t("loading")}...</span>}
           </div>
@@ -525,7 +525,7 @@ export default function PageChat({ gs, update, navigate }) {
                 <div key={msg.id} style={{ display: "flex", flexDirection: isMe ? "row-reverse" : "row", alignItems: "flex-end", gap: 6, animation: "fadeIn 0.2s ease" }}>
                   {!isMe && <Avatar initials={msg.sender_initials || "??"} color={T.green} size={24} />}
                   <div style={{ maxWidth: "65%" }}>
-                    <div style={{ background: isMe ? `linear-gradient(135deg,${T.green},${T.greenDark})` : T.white, color: isMe ? "#fff" : T.text, borderRadius: isMe ? "16px 16px 4px 16px" : "16px 16px 16px 4px", padding: "8px 12px", fontSize: 13, lineHeight: 1.5, boxShadow: isMe ? `0 2px 8px ${T.green}33` : "0 1px 4px rgba(0,0,0,0.06)", border: isMe ? "none" : `1.5px solid ${T.border}` }}>
+                    <div style={{ background: isMe ? T.primary : T.white, color: isMe ? "#fff" : T.text, borderRadius: isMe ? "14px 14px 4px 14px" : "14px 14px 14px 4px", padding: "8px 12px", fontSize: 13, lineHeight: 1.5, border: isMe ? "none" : `1px solid ${T.border}` }}>
                       {/* Attachment display */}
                       {msg.attachment?.url && (
                         <div style={{ marginBottom: msg.text ? 6 : 0 }}>
@@ -549,10 +549,10 @@ export default function PageChat({ gs, update, navigate }) {
                     {/* Translation badge */}
                     {tr && (
                       <div style={{ fontSize: 9, marginTop: 2, color: T.blue, fontWeight: 600, display: "flex", alignItems: "center", gap: 3, paddingLeft: 4 }}>
-                        🌐 {t("chat_translated_from","Traducido de")} {LANGS.find(l => l.code === tr.from)?.flag || ""} {LANGS.find(l => l.code === tr.from)?.name || tr.from}
+                        {t("chat_translated_from","Tradus din")} {LANGS.find(l => l.code === tr.from)?.flag || ""} {LANGS.find(l => l.code === tr.from)?.name || tr.from}
                         <button onClick={() => { const newTr = { ...translations }; delete newTr[`${msg.id}_${myLang}`]; setTranslations(newTr); }}
-                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 9, color: T.text3, padding: "0 2px" }} title={t("chat_see_original","Ver original")}>
-                          👁
+                          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 9, color: T.text3, padding: "0 2px", textDecoration: "underline" }} title={t("chat_see_original","Vezi original")}>
+                          {t("chat_original","original")}
                         </button>
                       </div>
                     )}
@@ -645,14 +645,18 @@ export default function PageChat({ gs, update, navigate }) {
               {/* Hidden file input */}
               <input ref={fileInputRef} type="file" accept="image/*,.pdf" onChange={handleFileSelect} style={{ display: "none" }} />
               {/* Upload button */}
-              <button data-testid="chat-attach-btn" onClick={() => fileInputRef.current?.click()} disabled={uploadingFile} style={{ width: 38, height: 38, borderRadius: 10, border: `1.5px solid ${T.border}`, cursor: uploadingFile ? "wait" : "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", background: uploadingFile ? "#f5f5f4" : T.white, flexShrink: 0, opacity: uploadingFile ? 0.6 : 1 }}>
-                {uploadingFile ? "⏳" : "📎"}
+              <button data-testid="chat-attach-btn" onClick={() => fileInputRef.current?.click()} disabled={uploadingFile} style={{ width: 38, height: 38, borderRadius: 10, border: `1.5px solid ${T.border}`, cursor: uploadingFile ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", background: uploadingFile ? "#f5f5f4" : T.white, flexShrink: 0, opacity: uploadingFile ? 0.6 : 1, color: T.text2 }}>
+                <Icon name="paperclip" size={17}/>
               </button>
-              <div style={{ flex: 1, background: "#f5f5f4", borderRadius: 12, border: isListening ? `1.5px solid #ef4444` : `1.5px solid ${T.border}`, padding: "8px 12px" }}>
-                <textarea data-testid="chat-input" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={isListening ? t("chat_speaking") : t("chat_placeholder")} rows={1} style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontSize: 13, fontFamily: "DM Sans,sans-serif", color: T.text, resize: "none", lineHeight: 1.5, maxHeight: 72 }} />
+              <div style={{ flex: 1, background: "#fff", borderRadius: 10, border: isListening ? `1.5px solid #ef4444` : `1.5px solid ${T.border}`, padding: "8px 12px" }}>
+                <textarea data-testid="chat-input" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder={isListening ? t("chat_speaking") : t("chat_placeholder")} rows={1} style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontSize: 13, fontFamily: "Inter,sans-serif", color: T.text, resize: "none", lineHeight: 1.5, maxHeight: 72 }} />
               </div>
-              <button data-testid="chat-voice-btn" onClick={isListening ? stopVoice : startVoice} style={{ width: 38, height: 38, borderRadius: 10, border: "none", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", background: isListening ? "linear-gradient(135deg,#ef4444,#dc2626)" : `linear-gradient(135deg,${T.dark},${T.dark3})`, boxShadow: isListening ? "0 0 0 3px rgba(239,68,68,0.3)" : "none" }}>{isListening ? "⏹" : "🎤"}</button>
-              <button data-testid="chat-send-btn" onClick={send} disabled={!input.trim() && !interim.trim() && !pendingFile} style={{ width: 38, height: 38, borderRadius: 10, border: "none", cursor: (input.trim() || interim.trim() || pendingFile) ? "pointer" : "not-allowed", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", background: (input.trim() || interim.trim() || pendingFile) ? `linear-gradient(135deg,${T.green},${T.greenDark})` : "#e7e5e4", boxShadow: (input.trim() || interim.trim() || pendingFile) ? `0 4px 12px ${T.green}44` : "none" }}>➤</button>
+              <button data-testid="chat-voice-btn" onClick={isListening ? stopVoice : startVoice} style={{ width: 38, height: 38, borderRadius: 10, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", background: isListening ? "#ef4444" : T.text, color: "#fff" }}>
+                <Icon name={isListening ? "stop" : "mic"} size={17} color="#fff"/>
+              </button>
+              <button data-testid="chat-send-btn" onClick={send} disabled={!input.trim() && !interim.trim() && !pendingFile} style={{ width: 38, height: 38, borderRadius: 10, border: "none", cursor: (input.trim() || interim.trim() || pendingFile) ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", background: (input.trim() || interim.trim() || pendingFile) ? T.primary : "#e2e8f0", color: "#fff" }}>
+                <Icon name="send" size={17} color="#fff"/>
+              </button>
             </div>
           </div>
         </>)}

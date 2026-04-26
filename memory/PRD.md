@@ -64,6 +64,9 @@ ConnectJob is a full-stack job marketplace connecting workers with employers in 
 | **Phase 3 — Design Refresh**: CSS variables, Inter font, slate palette, lighter shadows | Done 2026-02 | REAL |
 | **Phase 4 — Home Hero redesign**: 2 big CTAs (Caut job / Postez job) + secondary as text-links | Done 2026-02 | REAL |
 | **Phase 5 — Categories reordered**: Digital/IT first, then quick local jobs; "gradina" hidden (recurring service bleed) | Done 2026-02 | REAL |
+| **Phase 4 bonus — Escrow page redesign**: minimalist, zero emojis, dynamic commission rate (founder 0% / EA 3% / standard 3-5-7%) | Done 2026-02 | REAL |
+| **Phase 4 bonus — Chat redesign**: sober bubbles, SVG icons (paperclip/mic/send), no emoji clutter, white inputs | Done 2026-02 | REAL |
+| Added paperclip/mic/stop/send/flag/alert SVG icons to Icon component | Done 2026-02 | REAL |
 
 ### External Keys Needed
 | Feature | Status | What's Needed |

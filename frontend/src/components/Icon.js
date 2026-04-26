@@ -22,6 +22,11 @@ const PATHS = {
   map:     "M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14",
   briefcase:"M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Zm6-4h6v4H9V3Z",
   home:    "M3 12L12 3l9 9M5 10v10h14V10",
+  paperclip:"M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48",
+  mic:     "M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v4M8 22h8",
+  stop:    "M5 5h14v14H5z",
+  flag:    "M4 22V4M4 4h14l-2 4 2 4H4",
+  alert:   "M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z",
 };
 
 export default function Icon({ name, size = 18, color = "currentColor", strokeWidth = 1.8, style = {}, className = "" }) {
