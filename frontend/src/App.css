@@ -5,6 +5,8 @@
 /* Default (desktop) navbar slot visibility — overridden below on mobile */
 .jc-role-mobile-slot { display: none; }
 .jc-role-desktop-slot { display: block; }
+.jc-lang-desktop-slot { display: block; }
+.jc-navbar-row2 { display: none !important; }
 .jc-navbar-center { /* desktop: center slot is decorative — only contains page title */ }
 
 .App-logo {
@@ -213,43 +215,32 @@
     grid-template-columns: 1fr !important;
   }
 
-  /* ── Mobile navbar compaction ────────────────────────────────
-     On mobile (<480px): hide user name, hide page title, show role switcher
-     in center slot to use the free space between logo and bell. */
+  /* ── Mobile navbar 2-row layout ──────────────────────────────
+     Row 1: logo | bell | avatar | logout (essentials, fits 360px easily)
+     Row 2: language | role switcher (centered, breathing room) — separate sticky bar */
   .jc-top-navbar {
     padding: 0 10px !important;
-    gap: 4px !important;
   }
-  .jc-top-navbar > div:last-child {
+  .jc-navbar-row1-right {
     gap: 6px !important;
+    margin-left: auto;
   }
   .jc-user-name {
     display: none !important;
   }
-  .jc-lang-label,
-  .jc-lang-arrow {
-    display: none !important;
-  }
-  .jc-lang-switcher button {
-    padding: 6px 8px !important;
-  }
-  /* Role switcher placement: hide page title, show role in center on mobile */
+  /* Page title hidden on mobile — center area becomes pure spacer */
   .jc-page-title {
     display: none !important;
   }
+  /* Hide desktop slots, show row 2 instead */
   .jc-role-desktop-slot {
     display: none !important;
   }
-  .jc-role-mobile-slot {
-    display: block !important;
+  .jc-lang-desktop-slot {
+    display: none !important;
   }
-  /* Make role switcher slightly smaller on mobile to fit */
-  .jc-role-mobile-slot .jc-role-switcher {
-    padding: 3px 8px 3px 3px !important;
-    height: 28px !important;
-  }
-  .jc-role-mobile-slot .jc-role-label {
-    font-size: 10px !important;
+  .jc-navbar-row2 {
+    display: flex !important;
   }
 }
 

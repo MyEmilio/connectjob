@@ -255,34 +255,22 @@ function ConnectJobApp() {
       )}
 
       {/* Top navbar */}
-      <nav data-testid="top-navbar" className="jc-top-navbar" style={{ background:"rgba(255,255,255,0.97)",backdropFilter:"blur(14px)",borderBottom:`1.5px solid ${T.border}`,height:58,padding:"0 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:80,boxShadow:"0 1px 20px rgba(0,0,0,0.05)" }}>
-        <div style={{display:"flex",alignItems:"center",gap:9}}>
+      <nav data-testid="top-navbar" className="jc-top-navbar" style={{ background:"rgba(255,255,255,0.97)",backdropFilter:"blur(14px)",borderBottom:`1.5px solid ${T.border}`,height:58,padding:"0 20px",display:"flex",alignItems:"center",position:"sticky",top:0,zIndex:80,boxShadow:"0 1px 20px rgba(0,0,0,0.05)" }}>
+        {/* Row 1 left — logo */}
+        <div className="jc-navbar-row1-left" style={{display:"flex",alignItems:"center",gap:9,height:58}}>
           <div style={{width:32,height:32,borderRadius:10,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:`0 3px 10px ${T.green}44`}}>⚡</div>
           <span style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:18,color:T.text,letterSpacing:"-0.02em"}}>Connect<span style={{color:T.green}}>Job</span></span>
         </div>
 
-        {/* Center area — page title on desktop, role switcher on mobile (uses free space) */}
-        <div className="jc-navbar-center" style={{ display:"flex", alignItems:"center", gap:10, flex:1, justifyContent:"center", minWidth:0 }}>
+        {/* Row 1 center — page title (hidden on mobile, visible on desktop) */}
+        <div className="jc-navbar-center" style={{ display:"flex", alignItems:"center", gap:10, flex:1, justifyContent:"center", minWidth:0, height:58 }}>
           <div className="jc-page-title" style={{ fontFamily:"Outfit,sans-serif", fontWeight:700, fontSize:15, color:T.text2 }}>
             {PAGE_TITLES[page]}
           </div>
-          {/* Role Switcher placed in center on mobile — visible everywhere */}
-          {gs.user.active_role !== "admin" && (
-            <div className="jc-role-mobile-slot">
-              <RoleSwitcher
-                activeRole={gs.user.active_role}
-                onSwitched={(newRole, newRoles) => {
-                  updateGs({ user: { ...gs.user, active_role: newRole, role: newRole, roles: newRoles } });
-                  if (page === "post_job" && newRole !== "employer") navigate("home");
-                  if (page === "admin" && newRole !== "admin") navigate("home");
-                }}
-              />
-            </div>
-          )}
         </div>
 
-        {/* User area */}
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
+        {/* Row 1 right — bell + avatar + (desktop) role+lang + logout */}
+        <div className="jc-navbar-row1-right" style={{display:"flex",alignItems:"center",gap:10,height:58}}>
           {/* Notifications */}
           <div style={{position:"relative"}}>
             <button data-testid="notifications-btn" style={{width:34,height:34,borderRadius:9,background:"#f5f5f4",border:`1.5px solid ${T.border}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:T.text2}}>
@@ -301,7 +289,7 @@ function ConnectJobApp() {
               )}
             </div>
           </div>
-          {/* Role Switcher (Desktop only — mobile shows it in center slot above) */}
+          {/* Role Switcher (Desktop only — mobile shows it on row 2) */}
           {gs.user.active_role !== "admin" && (
             <div className="jc-role-desktop-slot">
               <RoleSwitcher
@@ -314,14 +302,44 @@ function ConnectJobApp() {
               />
             </div>
           )}
-          {/* Selector de limba */}
-          <LanguageSwitcher/>
+          {/* Language Switcher (Desktop only — mobile shows it on row 2) */}
+          <div className="jc-lang-desktop-slot">
+            <LanguageSwitcher/>
+          </div>
           {/* Logout */}
           <button data-testid="logout-btn" onClick={logout} title={t("btn_logout")} style={{width:32,height:32,borderRadius:9,background:"#fef2f2",border:"1.5px solid #fecaca",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#dc2626"}}>
             <Icon name="logout" size={15}/>
           </button>
         </div>
       </nav>
+
+      {/* Mobile-only secondary bar (Row 2) — language + role switcher with breathing room */}
+      <div className="jc-navbar-row2" data-testid="navbar-row2" style={{
+        display: "none",
+        position: "sticky",
+        top: 58,
+        zIndex: 79,
+        background: "rgba(255,255,255,0.97)",
+        backdropFilter: "blur(14px)",
+        borderBottom: `1.5px solid ${T.border}`,
+        padding: "8px 12px",
+        gap: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
+      }}>
+        <LanguageSwitcher/>
+        {gs.user.active_role !== "admin" && (
+          <RoleSwitcher
+            activeRole={gs.user.active_role}
+            onSwitched={(newRole, newRoles) => {
+              updateGs({ user: { ...gs.user, active_role: newRole, role: newRole, roles: newRoles } });
+              if (page === "post_job" && newRole !== "employer") navigate("home");
+              if (page === "admin" && newRole !== "admin") navigate("home");
+            }}
+          />
+        )}
+      </div>
 
       {/* Main layout */}
       <div style={{display:"flex",minHeight:"calc(100vh - 58px)"}}>

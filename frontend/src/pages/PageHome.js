@@ -207,10 +207,16 @@ export default function PageHome({ gs, update, navigate }) {
   // Founder FOMO counter — public endpoint, refreshed on mount
   const [foundersInfo, setFoundersInfo] = useState(null);
   const [tierInfo, setTierInfo] = useState(null);
+  const [founderBannerDismissed, setFounderBannerDismissed] = useState(localStorage.getItem("jc_founder_banner_dismissed") === "1");
   useEffect(() => {
     api.get("/stats/founders-count").then(r => setFoundersInfo(r.data)).catch(() => {});
     api.get("/stats/my-tier").then(r => setTierInfo(r.data)).catch(() => {});
   }, []);
+  const dismissFounderBanner = (e) => {
+    e.stopPropagation();
+    setFounderBannerDismissed(true);
+    localStorage.setItem("jc_founder_banner_dismissed", "1");
+  };
   const getCatCount = (cat) => allJobs.filter(j => { const jc = (j.category||"").toLowerCase(); return jc === cat.key || jc.includes(cat.key); }).length;
   const handleNotificationToggle = async () => { if (isSubscribed) { await unsubscribe(); } else { const success = await subscribe(); if (success) setShowNotifPrefs(true); } };
 
@@ -221,8 +227,8 @@ export default function PageHome({ gs, update, navigate }) {
       {showDashboard && <DashboardStats onClose={()=>setShowDashboard(false)}/>}
       {showAdvancedSearch && <AdvancedSearch filters={searchFilters} onFilterChange={setSearchFilters} onClose={()=>setShowAdvancedSearch(false)}/>}
 
-      {/* ── Founder FOMO banner — visible while founder OR early-adopter spots remain ── */}
-      {foundersInfo && (foundersInfo.founders_available > 0 || foundersInfo.total_users < foundersInfo.early_adopter_limit) && (
+      {/* ── Founder FOMO banner — dismissible after read ── */}
+      {!founderBannerDismissed && foundersInfo && (foundersInfo.founders_available > 0 || foundersInfo.total_users < foundersInfo.early_adopter_limit) && (
         <div data-testid="founder-fomo-banner" style={{
           background: foundersInfo.founders_available > 0
             ? "linear-gradient(135deg,#064e3b,#065f46)"
@@ -273,6 +279,18 @@ export default function PageHome({ gs, update, navigate }) {
             </div>
           </div>
           <span style={{ color: foundersInfo.founders_available > 0 ? "#a7f3d0" : "#bfdbfe", fontSize:13, flexShrink:0 }}>›</span>
+          <button
+            data-testid="founder-banner-dismiss"
+            onClick={dismissFounderBanner}
+            aria-label="Dismiss"
+            style={{
+              background: "rgba(255,255,255,0.1)", border: "none", cursor: "pointer",
+              fontSize: 14, color: "#fff", padding: 4, flexShrink: 0,
+              borderRadius: 6, marginLeft: 4,
+              width: 24, height: 24,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >✕</button>
         </div>
       )}
 
@@ -487,15 +505,6 @@ export default function PageHome({ gs, update, navigate }) {
               color:T.text3, fontSize:15, padding:"0 4px",
             }}>✕</button>
           )}
-          <button
-            data-testid="home-search-go"
-            onClick={() => doSearch(searchText)}
-            style={{
-              border:"none", background:T.green, color:"#fff",
-              padding:"7px 14px", borderRadius:8, fontSize:12, fontWeight:700,
-              cursor:"pointer", whiteSpace:"nowrap",
-            }}
-          >{t("home_search_btn","Buscar")}</button>
         </div>
 
         {/* Categories popover trigger */}
