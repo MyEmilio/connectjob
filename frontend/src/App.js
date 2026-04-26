@@ -255,7 +255,7 @@ function ConnectJobApp() {
       )}
 
       {/* Top navbar */}
-      <nav data-testid="top-navbar" style={{ background:"rgba(255,255,255,0.97)",backdropFilter:"blur(14px)",borderBottom:`1.5px solid ${T.border}`,height:58,padding:"0 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:80,boxShadow:"0 1px 20px rgba(0,0,0,0.05)" }}>
+      <nav data-testid="top-navbar" className="jc-top-navbar" style={{ background:"rgba(255,255,255,0.97)",backdropFilter:"blur(14px)",borderBottom:`1.5px solid ${T.border}`,height:58,padding:"0 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:80,boxShadow:"0 1px 20px rgba(0,0,0,0.05)" }}>
         <div style={{display:"flex",alignItems:"center",gap:9}}>
           <div style={{width:32,height:32,borderRadius:10,background:`linear-gradient(135deg,${T.green},${T.greenLight})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,boxShadow:`0 3px 10px ${T.green}44`}}>⚡</div>
           <span style={{fontFamily:"Outfit,sans-serif",fontWeight:900,fontSize:18,color:T.text,letterSpacing:"-0.02em"}}>Connect<span style={{color:T.green}}>Job</span></span>
@@ -278,7 +278,7 @@ function ConnectJobApp() {
           {/* Avatar */}
           <div style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}} onClick={()=>navigate("verify")} data-testid="user-avatar-btn">
             <Avatar initials={gs.user.initials} color={T.green} size={32}/>
-            <div style={{display:"flex",flexDirection:"column"}}>
+            <div className="jc-user-name" style={{display:"flex",flexDirection:"column"}}>
               <span style={{fontSize:12,fontWeight:700,color:T.text,lineHeight:1}}>{gs.user.name.split(" ")[0]}</span>
               {gs.user.verified&&<span style={{fontSize:9,color:T.green,fontWeight:600}}>{t("nav_verified_badge","✓ Verificado")}</span>}
               {gs.user.subscription_plan && gs.user.subscription_plan !== "free" && (

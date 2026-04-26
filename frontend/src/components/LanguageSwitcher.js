@@ -36,16 +36,16 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div style={{ position:"relative" }}>
-      <button ref={btnRef} onClick={handleOpen} style={{
+    <div style={{ position:"relative" }} className="jc-lang-switcher">
+      <button ref={btnRef} onClick={handleOpen} data-testid="lang-switcher-btn" style={{
         display:"flex", alignItems:"center", gap:6, padding:"6px 12px",
         borderRadius:10, border:`1.5px solid ${T.border}`, background:"#fff",
         cursor:"pointer", fontSize:13, fontWeight:600, color:T.text,
         transition:"all 0.15s",
       }}>
         <span style={{ fontSize:16 }}>{current.flag}</span>
-        <span style={{ maxWidth:60, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{current.label}</span>
-        <span style={{ fontSize:10, color:T.text2, marginLeft:2 }}>{open ? "▲" : "▼"}</span>
+        <span className="jc-lang-label" style={{ maxWidth:60, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{current.label}</span>
+        <span className="jc-lang-arrow" style={{ fontSize:10, color:T.text2, marginLeft:2 }}>{open ? "▲" : "▼"}</span>
       </button>
 
       {/* Dropdown — position:fixed ca sa nu fie taiat de harta Leaflet */}

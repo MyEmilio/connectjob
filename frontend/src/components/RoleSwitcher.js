@@ -35,6 +35,7 @@ export default function RoleSwitcher({ activeRole, onSwitched }) {
   return (
     <button
       data-testid="role-switcher-btn"
+      className="jc-role-switcher"
       onClick={switchRole}
       disabled={busy}
       title={t("role_switch_hint", { other: other === "worker" ? t("role_worker","Prestador") : t("role_employer","Cliente") })}
@@ -44,7 +45,7 @@ export default function RoleSwitcher({ activeRole, onSwitched }) {
         border:`1.5px solid ${color}33`,
         background: `${color}10`,
         cursor: busy ? "wait" : "pointer",
-        height:32, minWidth:88,
+        height:32,
         transition:"all 0.2s",
       }}
     >
@@ -56,14 +57,14 @@ export default function RoleSwitcher({ activeRole, onSwitched }) {
       }}>
         {isWorker ? "👷" : "🧑‍💼"}
       </span>
-      <span style={{
+      <span className="jc-role-label" style={{
         fontSize:11, fontWeight:800, color,
         textTransform:"uppercase", letterSpacing:"0.03em",
         whiteSpace:"nowrap",
       }}>
         {isWorker ? t("role_worker","Prestador") : t("role_employer","Cliente")}
       </span>
-      <span style={{ fontSize:10, color: T.text2, marginLeft:-2 }}>⇄</span>
+      <span className="jc-role-arrow" style={{ fontSize:10, color: T.text2, marginLeft:-2 }}>⇄</span>
     </button>
   );
 }

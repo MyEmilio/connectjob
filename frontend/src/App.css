@@ -207,6 +207,39 @@
   div[style*="gridTemplateColumns"][style*="170px"] {
     grid-template-columns: 1fr !important;
   }
+
+  /* ── Mobile navbar compaction ────────────────────────────────
+     The desktop navbar shows: logo + bell + avatar + name + role-switcher
+     + lang-switcher + logout. On mobile (<480px) all 7 don't fit in 360-390px.
+     Strategy: reduce padding, hide user name + role label text + lang label,
+     keeping only icons/flags. The full-text variants remain on tablet+. */
+  .jc-top-navbar {
+    padding: 0 10px !important;
+    gap: 4px !important;
+  }
+  .jc-top-navbar > div:last-child {
+    gap: 6px !important;
+  }
+  .jc-user-name {
+    display: none !important;
+  }
+  .jc-role-label,
+  .jc-role-arrow {
+    display: none !important;
+  }
+  .jc-role-switcher {
+    padding: 4px !important;
+    width: 32px !important;
+    height: 32px !important;
+    justify-content: center !important;
+  }
+  .jc-lang-label,
+  .jc-lang-arrow {
+    display: none !important;
+  }
+  .jc-lang-switcher button {
+    padding: 6px 8px !important;
+  }
 }
 
 /* Tablet: 768px - 1024px */
